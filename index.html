@@ -1,0 +1,3373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Mobile Care - POS System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #e8edf2;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .logo-img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        .logo-img-sm {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            border-radius: 6px;
+        }
+        .logo-img-lg {
+            width: 46px;
+            height: 46px;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+        #loginOverlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); 
+            display: flex; justify-content: center; align-items: center; 
+            z-index: 2000; overflow: hidden; 
+        }
+        #loginOverlay.hidden { display: none; }
+        .login-brand-grid { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); 
+            gap: 15px 20px; padding: 30px; opacity: 0.20; pointer-events: none; 
+            z-index: 0; align-content: center; justify-items: center; 
+        }
+        .login-brand-item { 
+            display: flex; flex-direction: column; align-items: center; gap: 4px; 
+            color: rgba(255,255,255,0.8); font-size: 0.55rem; font-weight: 600; 
+            text-transform: uppercase; letter-spacing: 0.5px; 
+            background: rgba(255,255,255,0.05);
+            padding: 8px 6px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        .login-brand-item:hover {
+            background: rgba(255,255,255,0.12);
+            transform: scale(1.05);
+        }
+        .login-brand-item .brand-logo {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.08);
+            padding: 6px;
+            transition: all 0.3s ease;
+            filter: brightness(0.9) contrast(1.1);
+        }
+        .login-brand-item .brand-logo:hover {
+            filter: brightness(1) contrast(1.2);
+            transform: scale(1.08);
+        }
+        .login-brand-item .brand-name {
+            font-size: 0.5rem;
+            letter-spacing: 0.5px;
+            color: rgba(255,255,255,0.6);
+            font-weight: 500;
+            margin-top: 2px;
+        }
+        .login-glow { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; }
+        .login-glow.g1 { width: 400px; height: 400px; background: rgba(255,71,87,0.12); top: -100px; right: -100px; }
+        .login-glow.g2 { width: 500px; height: 500px; background: rgba(46,213,115,0.15); bottom: -150px; left: -150px; }
+        .login-glow.g3 { width: 300px; height: 300px; background: rgba(108,92,231,0.10); top: 40%; left: 50%; transform: translateX(-50%); }
+        .login-box { 
+            position: relative; z-index: 1; background: rgba(255,255,255,0.96); 
+            padding: 40px 38px 38px; border-radius: 24px; width: 400px; max-width: 94%; 
+            box-shadow: 0 40px 100px rgba(0,0,0,0.5); text-align: center; animation: fadeIn 0.6s ease; 
+        }
+        .login-box::before { 
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; 
+            background: linear-gradient(90deg, #FF4757, #FF6348, #FFD93D, #2ED573, #1E90FF, #6C5CE7); 
+            border-radius: 24px 24px 0 0; 
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(30px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .login-box .brand-header { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 4px; }
+        .login-box .brand-header .logo-icon { 
+            width: 46px; 
+            height: 46px; 
+            border-radius: 12px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            box-shadow: 0 4px 16px rgba(255,71,87,0.35); 
+            flex-shrink: 0; 
+            background: #fff;
+            padding: 4px;
+        }
+        .login-box .brand-header .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        .login-box h2 { color: #1a3a5c; font-size: 1.6rem; font-weight: 700; }
+        .login-box .subtitle { color: #888; margin-bottom: 20px; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; }
+        .login-box .role-selector { display: flex; gap: 10px; margin-bottom: 16px; justify-content: center; flex-wrap: wrap; }
+        .login-box .role-btn { padding: 6px 22px; border: 2px solid #e0e7ef; border-radius: 30px; background: #fff; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.3s ease; color: #555; -webkit-tap-highlight-color: transparent; }
+        .login-box .role-btn.active { border-color: #FF4757; background: #FF4757; color: #fff; }
+        .login-box .role-btn:hover { transform: translateY(-2px); border-color: #FF4757; }
+        .login-box input[type="email"], .login-box input[type="password"] { 
+            width: 100%; padding: 12px 16px; margin-bottom: 10px; 
+            border: 2px solid #e0e7ef; border-radius: 12px; font-size: 0.95rem; 
+            background: #f8faff; transition: all 0.3s ease; color: #1a3a5c; 
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .login-box input[type="email"]:focus, .login-box input[type="password"]:focus { 
+            border-color: #FF4757; outline: none; box-shadow: 0 0 0 4px rgba(255,71,87,0.10); background: #fff; 
+        }
+        .login-box .password-wrapper { position: relative; width: 100%; }
+        .login-box .password-wrapper input { padding-right: 46px; }
+        .login-box .toggle-password { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.1rem; cursor: pointer; color: #999; padding: 5px; z-index: 2; -webkit-tap-highlight-color: transparent; }
+        .login-btn { width: 100%; padding: 13px; background: linear-gradient(135deg, #FF4757, #FF6348); color: #fff; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(255,71,87,0.30); margin-top: 4px; -webkit-tap-highlight-color: transparent; }
+        .login-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 30px rgba(255,71,87,0.40); }
+        .login-error { color: #e74c3c; margin-top: 12px; font-weight: 600; display: none; font-size: 0.85rem; background: rgba(231,76,60,0.08); padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(231,76,60,0.12); }
+        .login-box .footer-note { margin-top: 16px; font-size: 0.65rem; color: #bbb; letter-spacing: 1px; }
+        .login-box .footer-note span { color: #FF4757; font-weight: 600; }
+        .app-wrapper { display: flex; min-height: 100vh; background: #e8edf2; }
+        .sidebar {
+            width: 260px;
+            background: #1a2332;
+            padding: 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        .sidebar-brand {
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .sidebar-brand .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .sidebar-brand .logo-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: #fff;
+            padding: 3px;
+        }
+        .sidebar-brand .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 6px;
+        }
+        .sidebar-brand h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .sidebar-brand .sub {
+            font-size: 0.6rem;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .sidebar-menu {
+            padding: 12px 16px;
+            flex: 1;
+        }
+        .sidebar-menu .menu-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.25);
+            padding: 10px 8px 4px;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        .sidebar-menu .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: rgba(255,255,255,0.6);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 1px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .sidebar-menu .menu-item:hover {
+            background: rgba(255,255,255,0.06);
+            color: #fff;
+        }
+        .sidebar-menu .menu-item.active {
+            background: rgba(255,71,87,0.15);
+            color: #FF6B81;
+        }
+        .sidebar-menu .menu-item .icon { font-size: 1.1rem; width: 24px; text-align: center; }
+        .sidebar-menu .menu-item .badge {
+            margin-left: auto;
+            background: #FF4757;
+            color: #fff;
+            font-size: 0.55rem;
+            padding: 1px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .sidebar-menu .menu-item .badge.green { background: #2ED573; }
+        .sidebar-menu .menu-item .badge.orange { background: #FF9F43; }
+        .sidebar-menu .menu-item .badge.blue { background: #1E90FF; }
+        .sidebar-menu .menu-item.admin-only {
+            display: none;
+        }
+        .sidebar-footer {
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        .sidebar-footer .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sidebar-footer .user-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF4757, #FF6348);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+        .sidebar-footer .user-name {
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        .sidebar-footer .user-role {
+            color: rgba(255,255,255,0.35);
+            font-size: 0.65rem;
+        }
+        .sidebar-footer .logout-btn {
+            margin-top: 10px;
+            padding: 6px 14px;
+            background: rgba(255,71,87,0.12);
+            color: #FF6B81;
+            border: 1px solid rgba(255,71,87,0.15);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.75rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .sidebar-footer .logout-btn:hover {
+            background: #FF4757;
+            color: #fff;
+        }
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            padding: 20px 24px 30px;
+            min-height: 100vh;
+        }
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .top-header .page-title h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1a2a3a;
+        }
+        .top-header .page-title p {
+            color: #6c7a8a;
+            font-size: 0.8rem;
+        }
+        .top-header .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .top-header .header-actions .date-display {
+            background: #fff;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #1a3a5c;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            border: 1px solid #eef3f9;
+        }
+        .top-header .header-actions .today-sales-badge {
+            background: #2ED573;
+            padding: 6px 18px;
+            border-radius: 20px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.8rem;
+            box-shadow: 0 2px 10px rgba(46,213,115,0.25);
+        }
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: #1a3a5c;
+            padding: 4px 8px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            border: 1px solid #e8edf2;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+        }
+        .stat-card .stat-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .stat-card .stat-label {
+            font-size: 0.7rem;
+            color: #8a9aa8;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .stat-card .stat-icon { font-size: 1.4rem; }
+        .stat-card .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a3a5c;
+            margin-top: 2px;
+        }
+        .stat-card .stat-number.green { color: #2ED573; }
+        .stat-card .stat-number.blue { color: #1E90FF; }
+        .stat-card .stat-number.orange { color: #FF9F43; }
+        .stat-card .stat-number.red { color: #FF4757; }
+        .stat-card .stat-change {
+            font-size: 0.65rem;
+            color: #2ED573;
+            font-weight: 600;
+        }
+        .stat-card .stat-change.down { color: #FF4757; }
+        .low-stock-alert {
+            background: #fff5f5;
+            border-left: 4px solid #FF4757;
+            padding: 14px 18px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            display: none;
+            animation: slideDown 0.5s ease;
+            box-shadow: 0 2px 12px rgba(255,71,87,0.10);
+        }
+        .low-stock-alert.show { display: block; }
+        .low-stock-alert .alert-title {
+            font-weight: 700;
+            color: #FF4757;
+            font-size: 0.95rem;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .low-stock-alert .alert-title .close-alert {
+            margin-left: auto;
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            color: #999;
+            padding: 0 4px;
+            transition: color 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .low-stock-alert .alert-title .close-alert:hover { color: #FF4757; }
+        .low-stock-alert .alert-list {
+            font-size: 0.85rem;
+            color: #555;
+        }
+        .low-stock-alert .alert-list .item {
+            padding: 4px 0;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dotted #f0e0e0;
+        }
+        .low-stock-alert .alert-list .item:last-child { border-bottom: none; }
+        .low-stock-alert .alert-list .item .stock-count {
+            font-weight: 600;
+            color: #FF4757;
+        }
+        .low-stock-alert .alert-list .item .stock-count.zero {
+            color: #e74c3c;
+            font-weight: 700;
+        }
+        .message {
+            padding: 10px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            display: none;
+            animation: slideDown 0.3s ease;
+            font-size: 0.9rem;
+        }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        .message.success { background: #d5f4e6; color: #1a7a4a; display: block; }
+        .message.error { background: #fadbd8; color: #922b21; display: block; }
+        .message.warning { background: #fef3c7; color: #a67c00; display: block; }
+        .tab-content { 
+            display: none !important; 
+        }
+        .tab-content.active { 
+            display: block !important; 
+        }
+        .pos-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .pos-panel {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            border: 1px solid #e8edf2;
+        }
+        .pos-panel .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f4fa;
+        }
+        .pos-panel .panel-header h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1a3a5c;
+        }
+        .pos-panel .panel-header .badge-count {
+            background: #FF4757;
+            color: #fff;
+            padding: 1px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .scanner-input {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .scanner-input input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 2px solid #e0e7ef;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: #f8faff;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .scanner-input input:focus {
+            border-color: #FF4757;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(255,71,87,0.08);
+        }
+        .btn-add {
+            padding: 10px 20px;
+            background: #FF4757;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn-add:hover { background: #e74c3c; }
+        .btn-add:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .search-results {
+            max-height: 200px;
+            overflow-y: auto;
+            background: #fff;
+            border: 2px solid #e0e7ef;
+            border-radius: 8px;
+            margin-top: -8px;
+            margin-bottom: 10px;
+            display: none;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+        .search-results.show {
+            display: block;
+        }
+        .search-results .result-item {
+            padding: 8px 14px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f0f4fa;
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .search-results .result-item:hover {
+            background: #f8faff;
+        }
+        .search-results .result-item .result-name {
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: #1a3a5c;
+        }
+        .search-results .result-item .result-price {
+            font-weight: 600;
+            color: #2ED573;
+            font-size: 0.8rem;
+        }
+        .search-results .result-item .result-stock {
+            font-size: 0.65rem;
+            color: #888;
+        }
+        .search-results .result-item .result-stock.out {
+            color: #FF4757;
+            font-weight: 700;
+        }
+        .search-results .result-item .result-stock.low {
+            color: #FF9F43;
+            font-weight: 600;
+        }
+        .search-results .no-results {
+            padding: 16px;
+            text-align: center;
+            color: #888;
+            font-size: 0.85rem;
+        }
+        .quick-products-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .quick-product-item {
+            background: #f8faff;
+            border: 1px solid #eef3f9;
+            border-radius: 8px;
+            padding: 10px 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            min-height: 100px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .quick-product-item:hover {
+            border-color: #FF4757;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+        .quick-product-item .qp-icon {
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
+            margin: 0 auto 4px auto;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.03);
+            padding: 4px;
+            transition: all 0.3s ease;
+            display: block;
+        }
+        .quick-product-item .qp-icon:hover {
+            transform: scale(1.05);
+        }
+        .quick-product-item .qp-name { 
+            font-size: 0.6rem; 
+            font-weight: 600; 
+            color: #1a3a5c; 
+            margin-top: 2px; 
+        }
+        .quick-product-item .qp-price { 
+            font-size: 0.6rem; 
+            color: #2ED573; 
+            font-weight: 600; 
+        }
+        .quick-product-item .qp-stock {
+            font-size: 0.5rem;
+            color: #888;
+            margin-top: 2px;
+        }
+        .quick-product-item .qp-stock.out {
+            color: #FF4757;
+            font-weight: 700;
+        }
+        .quick-product-item .qp-stock.low {
+            color: #FF9F43;
+            font-weight: 600;
+        }
+        .quick-product-item .no-stock-overlay {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: #FF4757;
+            color: #fff;
+            font-size: 0.4rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+        }
+        .quick-product-item .low-stock-overlay {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: #FF9F43;
+            color: #fff;
+            font-size: 0.4rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+        }
+        .quick-product-item.no-stock {
+            opacity: 0.6;
+            cursor: not-allowed;
+            border-color: #FF4757;
+            background: #fff5f5;
+        }
+        .quick-product-item.low-stock {
+            border-color: #FF9F43;
+            background: #fffbf0;
+        }
+        .cart-items-list {
+            max-height: 260px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .cart-items-list::-webkit-scrollbar { width: 4px; }
+        .cart-items-list::-webkit-scrollbar-thumb { background: #dce4ec; border-radius: 10px; }
+        .cart-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            border-bottom: 1px solid #f0f4fa;
+            transition: background 0.2s ease;
+        }
+        .cart-item-row:hover { background: #f8faff; }
+        .cart-item-row .item-info { flex: 1; }
+        .cart-item-row .item-name { font-weight: 500; color: #1a3a5c; font-size: 0.85rem; }
+        .cart-item-row .item-price { color: #2ED573; font-weight: 600; font-size: 0.8rem; }
+        .cart-item-row .item-qty {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .cart-item-row .item-qty button {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            font-size: 0.8rem;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .cart-item-row .item-qty .qty-btn {
+            background: #FF4757;
+            color: #fff;
+        }
+        .cart-item-row .item-qty .qty-btn:hover { transform: scale(1.1); }
+        .cart-item-row .item-qty .qty-num { font-weight: 600; min-width: 20px; text-align: center; font-size: 0.85rem; }
+        .cart-item-row .item-remove {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .cart-item-row .item-remove:hover { background: #fadbd8; }
+        .cart-empty {
+            text-align: center;
+            color: #aaa;
+            padding: 30px 20px;
+            font-size: 0.9rem;
+        }
+        .cart-total-section {
+            padding: 12px 14px;
+            background: #f8faff;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .cart-total-section .total-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1a3a5c;
+        }
+        .cart-total-section .total-amount {
+            color: #FF4757;
+        }
+        .payment-methods-row {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin: 8px 0;
+        }
+        .payment-method-btn {
+            padding: 4px 14px;
+            background: #f0f4fa;
+            border: 2px solid transparent;
+            border-radius: 16px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.75rem;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .payment-method-btn:hover { border-color: #FF4757; }
+        .payment-method-btn.active {
+            border-color: #2ED573;
+            background: #d5f4e6;
+        }
+        .payment-input-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            align-items: center;
+        }
+        .payment-input-row input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid #e0e7ef;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            min-width: 80px;
+            background: #f8faff;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .payment-input-row input:focus {
+            border-color: #FF4757;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(255,71,87,0.08);
+        }
+        .btn-pay {
+            padding: 8px 22px;
+            background: #2ED573;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn-pay:hover { background: #26de81; }
+        .btn-pay:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .qr-container {
+            background: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 8px 0;
+            display: none;
+            text-align: center;
+            border: 2px dashed #1a3a5c;
+        }
+        .qr-container.show { display: block; }
+        .qr-container #gcashQRCode img { width: 100px; height: 100px; }
+        .list-container {
+            max-height: 450px;
+            overflow-y: auto;
+        }
+        .list-container::-webkit-scrollbar { width: 4px; }
+        .list-container::-webkit-scrollbar-thumb { background: #dce4ec; border-radius: 10px; }
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-bottom: 1px solid #f0f4fa;
+        }
+        .list-item:hover { background: #f8faff; }
+        .list-item .item-left { flex: 1; }
+        .list-item .item-title { font-weight: 500; color: #1a3a5c; font-size: 0.85rem; }
+        .list-item .item-sub { font-size: 0.7rem; color: #8a9aa8; }
+        .list-item .item-right { font-weight: 600; color: #2ED573; font-size: 0.9rem; }
+        .list-item .item-right.orange { color: #FF9F43; }
+        .list-item .item-right.red { color: #FF4757; }
+        .list-item .item-right.blue { color: #1E90FF; }
+        .empty-state {
+            text-align: center;
+            color: #aaa;
+            padding: 40px 20px;
+            font-size: 0.9rem;
+        }
+        .add-product-form {
+            background: #f8faff;
+            border-radius: 10px;
+            padding: 16px 18px;
+            margin-bottom: 16px;
+            border: 1px solid #eef3f9;
+        }
+        .add-product-form h4 {
+            color: #1a3a5c;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .add-product-form .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr auto;
+            gap: 10px;
+        }
+        .add-product-form .form-row input {
+            padding: 8px 12px;
+            border: 2px solid #e0e7ef;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            background: #fff;
+            transition: all 0.3s ease;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .add-product-form .form-row input:focus {
+            border-color: #FF4757;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(255,71,87,0.08);
+        }
+        .btn-add-product {
+            padding: 8px 20px;
+            background: #2ED573;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn-add-product:hover { background: #26de81; }
+        .category-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 14px;
+            padding: 8px 4px;
+        }
+        .category-filter .cat-btn {
+            padding: 4px 14px;
+            border: 2px solid #e0e7ef;
+            border-radius: 20px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #555;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .category-filter .cat-btn:hover {
+            border-color: #FF4757;
+            color: #FF4757;
+        }
+        .category-filter .cat-btn.active {
+            background: #FF4757;
+            color: #fff;
+            border-color: #FF4757;
+        }
+        .category-filter .cat-btn .cat-count {
+            font-weight: 400;
+            font-size: 0.6rem;
+            color: #999;
+            margin-left: 2px;
+        }
+        .category-filter .cat-btn.active .cat-count {
+            color: rgba(255,255,255,0.7);
+        }
+        .brand-list-section {
+            margin-top: 12px;
+            border-top: 1px solid #eef3f9;
+            padding-top: 12px;
+        }
+        .brand-list-section .brand-section-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #1a3a5c;
+            margin-bottom: 6px;
+        }
+        .brand-tag {
+            display: inline-block;
+            padding: 2px 10px;
+            background: #f0f4fa;
+            border-radius: 12px;
+            font-size: 0.6rem;
+            color: #555;
+            margin: 2px 3px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .brand-tag:hover {
+            border-color: #FF4757;
+            color: #FF4757;
+        }
+        .brand-tag.active {
+            background: #FF4757;
+            color: #fff;
+        }
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .settings-card {
+            background: #f8faff;
+            border-radius: 10px;
+            padding: 16px 18px;
+            border: 1px solid #eef3f9;
+        }
+        .settings-card h4 {
+            color: #1a3a5c;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .settings-card .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid #eef3f9;
+            font-size: 0.8rem;
+        }
+        .settings-card .setting-row:last-child { border-bottom: none; }
+        .settings-card .setting-row .label { color: #6c7a8a; }
+        .settings-card .setting-row .value { font-weight: 600; color: #1a3a5c; }
+        .settings-card .setting-row .toggle {
+            width: 40px;
+            height: 22px;
+            background: #dce4ec;
+            border-radius: 20px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .settings-card .setting-row .toggle.active {
+            background: #2ED573;
+        }
+        .settings-card .setting-row .toggle::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s ease;
+        }
+        .settings-card .setting-row .toggle.active::after {
+            left: 20px;
+        }
+        .btn-setting {
+            padding: 6px 16px;
+            background: #1E90FF;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn-setting:hover { background: #0077d6; }
+        .btn-setting.green { background: #2ED573; }
+        .btn-setting.green:hover { background: #26de81; }
+        .btn-setting.orange { background: #FF9F43; }
+        .btn-setting.orange:hover { background: #e88a2e; }
+        .btn-setting.danger { background: #FF4757; }
+        .btn-setting.danger:hover { background: #e74c3c; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal.show { display: flex; animation: fadeIn 0.25s ease; }
+
+        .receipt-wrapper {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 28px 32px 24px;
+            width: 560px;
+            max-width: 92vw;
+            max-height: 92vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+            position: relative;
+        }
+        .receipt-wrapper::-webkit-scrollbar { width: 4px; }
+        .receipt-wrapper::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+
+        .receipt-content {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #1a1a1a;
+            max-width: 100%;
+        }
+        .receipt-content .receipt-header {
+            text-align: center;
+            border-bottom: 2px dashed #333;
+            padding-bottom: 10px;
+            margin-bottom: 8px;
+        }
+        .receipt-content .receipt-header .receipt-logo {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto 4px auto;
+        }
+        .receipt-content .receipt-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #1a2332;
+            margin: 0;
+        }
+        .receipt-content .receipt-header .store-tagline {
+            font-size: 10px;
+            color: #777;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .receipt-content .receipt-header .store-tagline.sub {
+            font-size: 9px;
+            color: #aaa;
+            letter-spacing: 0.5px;
+        }
+        .receipt-content .receipt-divider {
+            border-top: 1px dashed #ccc;
+            margin: 6px 0;
+        }
+        .receipt-content .receipt-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #555;
+            padding: 2px 0;
+        }
+        .receipt-content .receipt-info .receipt-no {
+            font-weight: 600;
+            color: #1a2332;
+        }
+        .receipt-content .receipt-items {
+            margin: 6px 0;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+        .receipt-content .receipt-items::-webkit-scrollbar { width: 3px; }
+        .receipt-content .receipt-items::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
+        .receipt-content .receipt-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px dotted #eee;
+            font-size: 11px;
+        }
+        .receipt-content .receipt-item .item-name {
+            flex: 1;
+            font-weight: 500;
+        }
+        .receipt-content .receipt-item .item-qty {
+            margin: 0 8px;
+            color: #666;
+            font-weight: 600;
+        }
+        .receipt-content .receipt-item .item-price {
+            text-align: right;
+            font-weight: 600;
+            min-width: 80px;
+        }
+        .receipt-content .receipt-total {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 700;
+            font-size: 18px;
+            padding: 10px 0 8px;
+            border-top: 2px solid #1a2332;
+            border-bottom: 2px solid #1a2332;
+            margin: 4px 0;
+        }
+        .receipt-content .receipt-total .total-label {
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .receipt-content .receipt-total .total-amount {
+            color: #FF4757;
+            font-size: 20px;
+        }
+        .receipt-content .receipt-payment {
+            padding: 6px 0;
+            font-size: 11px;
+        }
+        .receipt-content .receipt-payment .pay-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 0;
+        }
+        .receipt-content .receipt-payment .pay-row .label {
+            color: #666;
+        }
+        .receipt-content .receipt-payment .pay-row .value {
+            font-weight: 600;
+        }
+        .receipt-content .receipt-payment .pay-row .value.green {
+            color: #1a7a4a;
+        }
+        .receipt-content .receipt-payment .pay-row .method-label {
+            font-weight: 700;
+            color: #1a2332;
+            font-size: 12px;
+        }
+        .receipt-content .receipt-payment .pay-row .method-value {
+            font-weight: 700;
+            color: #1a2332;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        .receipt-content .receipt-cashier {
+            padding: 6px 0;
+            border-top: 1px dashed #ddd;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+        .receipt-content .receipt-cashier .cashier-label {
+            color: #666;
+        }
+        .receipt-content .receipt-cashier .cashier-name {
+            font-weight: 600;
+            color: #1a2332;
+        }
+        .receipt-content .receipt-footer {
+            text-align: center;
+            padding: 8px 0 4px;
+        }
+        .receipt-content .receipt-footer .thanks {
+            font-weight: 700;
+            font-size: 14px;
+            color: #2ED573;
+        }
+        .receipt-content .receipt-footer .come-again {
+            font-size: 11px;
+            color: #888;
+            font-style: italic;
+        }
+        .receipt-content .receipt-footer .status {
+            display: flex;
+            justify-content: space-between;
+            font-size: 8px;
+            color: #aaa;
+            border-top: 1px dashed #ddd;
+            padding-top: 6px;
+            margin-top: 6px;
+        }
+        .receipt-content .receipt-footer .status .power {
+            font-weight: 600;
+            color: #666;
+        }
+        .receipt-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+            justify-content: center;
+            padding-top: 12px;
+            border-top: 1px solid #eef3f9;
+        }
+        .receipt-buttons button {
+            padding: 10px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            font-family: 'Segoe UI', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn-print {
+            background: #6C5CE7;
+            color: #fff;
+        }
+        .btn-print:hover { background: #5a4bd1; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(108,92,231,0.35); }
+        .btn-close {
+            background: #95a5a6;
+            color: #fff;
+        }
+        .btn-close:hover { background: #7f8c8d; transform: translateY(-2px); }
+
+        .print-receipt-container {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 10px;
+            line-height: 1.3;
+            color: #1a1a1a;
+            width: 80mm;
+            max-width: 80mm;
+            margin: 0 auto;
+            padding: 4px 6px;
+            background: #fff;
+        }
+        .print-receipt-container .pr-header {
+            text-align: center;
+            border-bottom: 2px dashed #333;
+            padding-bottom: 6px;
+            margin-bottom: 4px;
+        }
+        .print-receipt-container .pr-header .pr-logo {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto 2px auto;
+        }
+        .print-receipt-container .pr-header .pr-store {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #1a2332;
+        }
+        .print-receipt-container .pr-header .pr-tagline {
+            font-size: 8px;
+            color: #777;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .print-receipt-container .pr-header .pr-tagline.sub {
+            font-size: 7px;
+            color: #999;
+        }
+        .print-receipt-container .pr-divider {
+            border-top: 1px dashed #ccc;
+            margin: 3px 0;
+        }
+        .print-receipt-container .pr-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            color: #555;
+            padding: 2px 0;
+        }
+        .print-receipt-container .pr-info .pr-no {
+            font-weight: 600;
+            color: #1a2332;
+        }
+        .print-receipt-container .pr-items {
+            margin: 3px 0;
+        }
+        .print-receipt-container .pr-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 0;
+            border-bottom: 1px dotted #eee;
+            font-size: 9px;
+        }
+        .print-receipt-container .pr-item .pi-name {
+            flex: 1;
+            font-weight: 500;
+        }
+        .print-receipt-container .pr-item .pi-qty {
+            margin: 0 4px;
+            color: #666;
+            font-weight: 600;
+        }
+        .print-receipt-container .pr-item .pi-price {
+            text-align: right;
+            font-weight: 600;
+            min-width: 55px;
+        }
+        .print-receipt-container .pr-total {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 700;
+            font-size: 15px;
+            padding: 6px 0 5px;
+            border-top: 2px solid #1a2332;
+            border-bottom: 2px solid #1a2332;
+            margin: 3px 0;
+        }
+        .print-receipt-container .pr-total .pt-label {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .print-receipt-container .pr-total .pt-amount {
+            color: #FF4757;
+            font-size: 16px;
+        }
+        .print-receipt-container .pr-payment {
+            padding: 3px 0;
+            font-size: 9px;
+        }
+        .print-receipt-container .pr-payment .pp-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 1px 0;
+        }
+        .print-receipt-container .pr-payment .pp-row .pp-label {
+            color: #666;
+        }
+        .print-receipt-container .pr-payment .pp-row .pp-value {
+            font-weight: 600;
+        }
+        .print-receipt-container .pr-payment .pp-row .pp-value.green {
+            color: #1a7a4a;
+        }
+        .print-receipt-container .pr-payment .pp-row .pp-method-label {
+            font-weight: 700;
+            color: #1a2332;
+            font-size: 10px;
+        }
+        .print-receipt-container .pr-payment .pp-row .pp-method-value {
+            font-weight: 700;
+            color: #1a2332;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+        .print-receipt-container .pr-cashier {
+            padding: 3px 0;
+            border-top: 1px dashed #ddd;
+            margin-top: 3px;
+            font-size: 9px;
+        }
+        .print-receipt-container .pr-cashier .pc-label {
+            color: #666;
+        }
+        .print-receipt-container .pr-cashier .pc-name {
+            font-weight: 600;
+            color: #1a2332;
+        }
+        .print-receipt-container .pr-footer {
+            text-align: center;
+            padding: 4px 0 2px;
+        }
+        .print-receipt-container .pr-footer .pf-thanks {
+            font-weight: 700;
+            font-size: 12px;
+            color: #2ED573;
+        }
+        .print-receipt-container .pr-footer .pf-come {
+            font-size: 9px;
+            color: #888;
+            font-style: italic;
+        }
+        .print-receipt-container .pr-footer .pf-status {
+            display: flex;
+            justify-content: space-between;
+            font-size: 7px;
+            color: #aaa;
+            border-top: 1px dashed #ddd;
+            padding-top: 3px;
+            margin-top: 3px;
+        }
+        .print-receipt-container .pr-footer .pf-status .pf-power {
+            font-weight: 600;
+            color: #666;
+        }
+
+        @page {
+            size: 80mm auto;
+            margin: 0;
+        }
+
+        #logoutModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
+        }
+        #logoutModal.show {
+            display: flex;
+        }
+        .logout-modal-box {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 32px 40px 28px;
+            width: 420px;
+            max-width: 94%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s ease;
+        }
+        .logout-modal-box .logout-icon {
+            font-size: 3rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .logout-modal-box h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1a2332;
+            margin-bottom: 8px;
+        }
+        .logout-modal-box p {
+            font-size: 0.9rem;
+            color: #6c7a8a;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+        .logout-modal-box .logout-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .logout-modal-box .logout-actions button {
+            padding: 10px 32px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .logout-modal-box .logout-actions .btn-cancel {
+            background: #f0f4fa;
+            color: #1a2332;
+        }
+        .logout-modal-box .logout-actions .btn-cancel:hover {
+            background: #e4e9f0;
+        }
+        .logout-modal-box .logout-actions .btn-logout {
+            background: #FF4757;
+            color: #fff;
+        }
+        .logout-modal-box .logout-actions .btn-logout:hover {
+            background: #e74c3c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255,71,87,0.35);
+        }
+        @media (max-width: 1024px) {
+            .stats-row { grid-template-columns: 1fr 1fr; }
+            .pos-grid { grid-template-columns: 1fr; }
+            .quick-products-grid { grid-template-columns: repeat(4, 1fr); }
+            .add-product-form .form-row { grid-template-columns: 1fr 1fr; }
+            .settings-grid { grid-template-columns: 1fr; }
+            .login-brand-grid { 
+                grid-template-columns: repeat(auto-fill, minmax(90px,1fr));
+                gap: 10px 15px;
+                padding: 20px;
+            }
+            .login-brand-item .brand-logo { width: 55px; height: 55px; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 16px; }
+            .stats-row { grid-template-columns: 1fr 1fr; }
+            .quick-products-grid { grid-template-columns: repeat(3, 1fr); }
+            .top-header { flex-direction: column; align-items: flex-start; }
+            .mobile-toggle { display: block !important; }
+            .add-product-form .form-row { grid-template-columns: 1fr; }
+            .settings-grid { grid-template-columns: 1fr; }
+            .receipt-wrapper { padding: 16px 14px 18px; max-width: 98vw; max-height: 95vh; border-radius: 8px; }
+            .receipt-content { font-size: 10px; }
+            .receipt-content .receipt-header h2 { font-size: 15px; }
+            .receipt-content .receipt-total { font-size: 15px; padding: 8px 0 6px; }
+            .receipt-content .receipt-total .total-amount { font-size: 17px; }
+            .receipt-content .receipt-item { font-size: 9px; padding: 3px 0; }
+            .receipt-content .receipt-item .item-price { min-width: 60px; }
+            .receipt-content .receipt-info { font-size: 9px; }
+            .receipt-content .receipt-payment { font-size: 9px; }
+            .receipt-content .receipt-cashier { font-size: 9px; }
+            .receipt-buttons button { padding: 8px 18px; font-size: 11px; }
+            .logout-modal-box { padding: 24px 20px 20px; }
+            .logout-modal-box .logout-actions { flex-direction: column; }
+            .logout-modal-box .logout-actions button { width: 100%; }
+            .login-brand-grid { 
+                grid-template-columns: repeat(auto-fill, minmax(70px,1fr));
+                gap: 8px 10px;
+                padding: 15px;
+            }
+            .login-brand-item .brand-logo { width: 45px; height: 45px; }
+            .login-brand-item .brand-name { font-size: 0.4rem; }
+            .quick-product-item .qp-icon { width: 35px; height: 35px; }
+        }
+        @media (max-width: 480px) {
+            .stats-row { grid-template-columns: 1fr; }
+            .quick-products-grid { grid-template-columns: repeat(2, 1fr); }
+            .pos-panel { padding: 14px; }
+            .receipt-wrapper { padding: 10px 8px 12px; max-width: 100vw; max-height: 98vh; border-radius: 4px; }
+            .receipt-content { font-size: 8.5px; }
+            .receipt-content .receipt-header h2 { font-size: 13px; }
+            .receipt-content .receipt-total { font-size: 12px; padding: 6px 0 4px; }
+            .receipt-content .receipt-total .total-amount { font-size: 14px; }
+            .receipt-content .receipt-item { font-size: 8px; padding: 2px 0; }
+            .receipt-content .receipt-item .item-price { min-width: 50px; }
+            .receipt-content .receipt-info { font-size: 8px; }
+            .receipt-content .receipt-payment { font-size: 8px; }
+            .receipt-content .receipt-cashier { font-size: 8px; }
+            .receipt-buttons { gap: 6px; margin-top: 10px; padding-top: 8px; }
+            .receipt-buttons button { padding: 6px 14px; font-size: 10px; }
+            .receipt-content .receipt-footer .thanks { font-size: 11px; }
+            .login-brand-grid { 
+                grid-template-columns: repeat(auto-fill, minmax(60px,1fr));
+                gap: 5px 8px;
+                padding: 10px;
+            }
+            .login-brand-item .brand-logo { width: 38px; height: 38px; }
+            .login-brand-item .brand-name { font-size: 0.35rem; }
+            .quick-product-item .qp-icon { width: 30px; height: 30px; }
+            .category-filter .cat-btn { font-size: 0.6rem; padding: 2px 10px; }
+        }
+    </style>
+</head>
+<body>
+<div id="loginOverlay">
+    <div class="login-glow g1"></div>
+    <div class="login-glow g2"></div>
+    <div class="login-glow g3"></div>
+    <div class="login-brand-grid" id="loginBrandGrid"></div>
+    <div class="login-box">
+        <div class="brand-header">
+            <div class="logo-icon">
+                <img src="logo.png" alt="Mobile Care Logo" onerror="this.style.display='none';this.parentElement.innerHTML='📱'">
+            </div>
+            <h2>Mobile Care</h2>
+        </div>
+        <p class="subtitle">Cellphones &amp; Laptop Repair Shop</p>
+        <div class="role-selector">
+            <button class="role-btn active" data-role="cashier" onclick="selectLoginRole('cashier')">🛒 Cashier</button>
+            <button class="role-btn" data-role="admin" onclick="selectLoginRole('admin')">👑 Admin</button>
+        </div>
+        <input type="email" id="loginUser" placeholder="Email" />
+        <div class="password-wrapper">
+            <input type="password" id="loginPass" placeholder="Password" />
+            <button type="button" class="toggle-password" onclick="toggleLoginPass()">👁️</button>
+        </div>
+        <button class="login-btn" onclick="handleLogin()">🔓 Sign In</button>
+        <div id="loginError" class="login-error">Invalid email or password</div>
+        <div class="footer-note">🔐 Secure access · <span>Mobile Care</span> v2.0</div>
+    </div>
+</div>
+<div id="logoutModal">
+    <div class="logout-modal-box">
+        <span class="logout-icon">🚪</span>
+        <h3>Log out</h3>
+        <p>Are you sure you want to log out of your account?<br>You will need to log in again to access your account.</p>
+        <div class="logout-actions">
+            <button class="btn-cancel" onclick="closeLogoutModal()">Cancel</button>
+            <button class="btn-logout" onclick="confirmLogout()">Yes, log out</button>
+        </div>
+    </div>
+</div>
+<div id="app" style="display:none;">
+    <div class="app-wrapper">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <img src="logo.png" alt="Mobile Care Logo" onerror="this.style.display='none';this.parentElement.innerHTML='📱'">
+                    </div>
+                    <div>
+                        <h1>Mobile Care</h1>
+                        <div class="sub" id="storeSub">CASHIER POS</div>
+                    </div>
+                </div>
+            </div>
+            <nav class="sidebar-menu">
+                <div class="menu-label">Dashboard</div>
+                <div class="menu-item active" onclick="showTab('pos')">
+                    <span class="icon">🛒</span> Sales (POS)
+                    <span class="badge" id="sidebarCartCount">0</span>
+                </div>
+                <div class="menu-item" onclick="showTab('dashboard')">
+                    <span class="icon">🏠</span> Dashboard
+                </div>
+                <div class="menu-item" onclick="showTab('products')">
+                    <span class="icon">📦</span> Products
+                    <span class="badge orange" id="sidebarProductCount">0</span>
+                </div>
+                <div class="menu-item" onclick="showTab('customers')">
+                    <span class="icon">👤</span> Customers
+                    <span class="badge green" id="sidebarCustomers">523</span>
+                </div>
+                <div class="menu-item" onclick="showTab('transactions')">
+                    <span class="icon">🧾</span> Recent Transactions
+                    <span class="badge blue" id="sidebarTransCount">0</span>
+                </div>
+                <div class="menu-label admin-only">Management</div>
+                <div class="menu-item admin-only" onclick="showTab('inventory')">
+                    <span class="icon">📋</span> Inventory
+                    <span class="badge blue" id="sidebarInventoryCount">0</span>
+                </div>
+                <div class="menu-item admin-only" onclick="showTab('categories')">
+                    <span class="icon">🏷️</span> Categories
+                </div>
+                <div class="menu-item admin-only" onclick="showTab('lowstock')">
+                    <span class="icon">⚠️</span> Low Stock
+                    <span class="badge" id="sidebarLowStock">0</span>
+                </div>
+                <div class="menu-item admin-only" onclick="showTab('suppliers')">
+                    <span class="icon">🏢</span> Suppliers
+                    <span class="badge blue" id="sidebarSuppliers">8</span>
+                </div>
+                <div class="menu-item admin-only" onclick="showTab('reports')">
+                    <span class="icon">📊</span> Reports
+                </div>
+                <div class="menu-item admin-only" onclick="showTab('expenses')">
+                    <span class="icon">💰</span> Expenses
+                </div>
+                <div class="menu-label admin-only">Users</div>
+                <div class="menu-item admin-only" onclick="showTab('settings')">
+                    <span class="icon">⚙️</span> Settings
+                </div>
+                <div class="menu-item admin-only" onclick="showTab('backup')">
+                    <span class="icon">💾</span> Backup / Restore
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">R</div>
+                    <div>
+                        <div class="user-name" id="sidebarUserName">Roland Maru</div>
+                        <div class="user-role" id="sidebarUserRole">Cashier</div>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="openLogoutModal()">🚪 Logout</button>
+            </div>
+        </aside>
+        <main class="main-content">
+            <div class="top-header">
+                <div class="page-title">
+                    <h2 id="pageTitle">🛒 Current Sale (POS)</h2>
+                    <p id="pageSubtitle">Search product by name or brand...</p>
+                </div>
+                <div class="header-actions">
+                    <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+                    <span class="date-display" id="headerDate"></span>
+                    <span class="today-sales-badge">Today: ₱<span id="headerTodaySales">0.00</span></span>
+                </div>
+            </div>
+            <div class="stats-row" id="statsRow">
+                <div class="stat-card" onclick="showTab('transactions')">
+                    <div class="stat-top">
+                        <span class="stat-label">Today's Sales</span>
+                        <span class="stat-icon">💰</span>
+                    </div>
+                    <div class="stat-number green">₱<span id="statTodaySales">0.00</span></div>
+                    <span class="stat-change">↑ 12% vs yesterday</span>
+                </div>
+                <div class="stat-card" onclick="showTab('transactions')">
+                    <div class="stat-top">
+                        <span class="stat-label">Transactions</span>
+                        <span class="stat-icon">📋</span>
+                    </div>
+                    <div class="stat-number blue"><span id="statTotalTransactions">0</span></div>
+                    <span class="stat-change">↑ 8% vs yesterday</span>
+                </div>
+                <div class="stat-card" onclick="showTab('products')">
+                    <div class="stat-top">
+                        <span class="stat-label">Products</span>
+                        <span class="stat-icon">📦</span>
+                    </div>
+                    <div class="stat-number orange"><span id="statTotalProducts">0</span></div>
+                    <span class="stat-change">Active products</span>
+                </div>
+                <div class="stat-card" onclick="showTab('lowstock')">
+                    <div class="stat-top">
+                        <span class="stat-label">Low Stock Items</span>
+                        <span class="stat-icon">⚠️</span>
+                    </div>
+                    <div class="stat-number red"><span id="statLowStock">0</span></div>
+                    <span class="stat-change down">⬇️ Need restocking</span>
+                </div>
+            </div>
+            <div id="lowStockAlert" class="low-stock-alert">
+                <div class="alert-title">
+                    ⚠️ <span>LOW STOCK ALERT!</span>
+                    <button class="close-alert" onclick="closeLowStockAlert()">✕</button>
+                </div>
+                <div class="alert-list" id="lowStockAlertList"></div>
+            </div>
+            <div id="message" class="message"></div>
+            <div id="tab-pos" class="tab-content active">
+                <div class="pos-grid">
+                    <div class="pos-panel">
+                        <div class="panel-header">
+                            <h3>🔍 Scan / Search Product</h3>
+                            <button onclick="toggleCamera()" style="background:none;border:none;cursor:pointer;font-size:1.1rem;-webkit-tap-highlight-color:transparent;">📷</button>
+                        </div>
+                        <video id="cameraPreview" autoplay playsinline style="width:100%;max-height:160px;background:#000;border-radius:8px;display:none;margin-bottom:10px;"></video>
+                        <div class="scanner-input">
+                            <input type="text" id="barcode" placeholder="Search product name, brand, or barcode..." autofocus oninput="searchProducts(this.value)" />
+                            <button onclick="scanProduct()" class="btn-add" id="scanBtn">➕ Add</button>
+                        </div>
+                        <div class="search-results" id="searchResults"></div>
+                        <div class="category-filter" id="categoryFilter">
+                            <button class="cat-btn active" data-category="all" onclick="filterByCategory('all')">📱 All <span class="cat-count" id="catCountAll">0</span></button>
+                            <button class="cat-btn" data-category="phones" onclick="filterByCategory('phones')">📱 Phones <span class="cat-count" id="catCountPhones">0</span></button>
+                            <button class="cat-btn" data-category="chargers" onclick="filterByCategory('chargers')">🔌 Chargers <span class="cat-count" id="catCountChargers">0</span></button>
+                            <button class="cat-btn" data-category="cables" onclick="filterByCategory('cables')">🔗 Cables <span class="cat-count" id="catCountCables">0</span></button>
+                            <button class="cat-btn" data-category="cases" onclick="filterByCategory('cases')">📱 Cases <span class="cat-count" id="catCountCases">0</span></button>
+                            <button class="cat-btn" data-category="earphones" onclick="filterByCategory('earphones')">🎧 Earphones <span class="cat-count" id="catCountEarphones">0</span></button>
+                            <button class="cat-btn" data-category="powerbanks" onclick="filterByCategory('powerbanks')">🔋 Power Banks <span class="cat-count" id="catCountPowerbanks">0</span></button>
+                            <button class="cat-btn" data-category="screenprotectors" onclick="filterByCategory('screenprotectors')">🛡️ Screen Protectors <span class="cat-count" id="catCountScreenprotectors">0</span></button>
+                            <button class="cat-btn" data-category="others" onclick="filterByCategory('others')">📌 Others <span class="cat-count" id="catCountOthers">0</span></button>
+                        </div>
+                        <div style="margin-top:4px;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                                <span style="font-weight:600;font-size:0.8rem;color:#1a3a5c;" id="quickProductsTitle">⚡ Quick Select</span>
+                                <span style="font-size:0.6rem;color:#888;" id="quickProductsSub">All Categories</span>
+                            </div>
+                            <div class="quick-products-grid" id="quickProducts"></div>
+                        </div>
+                        <div class="brand-list-section" id="brandListSection">
+                            <div class="brand-section-title">🏷️ Brands</div>
+                            <div id="brandTagsContainer"></div>
+                        </div>
+                    </div>
+                    <div class="pos-panel">
+                        <div class="panel-header">
+                            <h3>🛍️ Cart</h3>
+                            <span class="badge-count" id="cartCount">0</span>
+                        </div>
+                        <div class="cart-items-list" id="cartItems">
+                            <div class="cart-empty">🛒 Cart is empty</div>
+                        </div>
+                        <div class="cart-total-section">
+                            <div class="total-row">
+                                <span>Total</span>
+                                <span class="total-amount">₱<span id="cartTotal">0.00</span></span>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="font-size:0.75rem;font-weight:600;color:#1a3a5c;margin-bottom:4px;">Payment Method</div>
+                            <div class="payment-methods-row">
+                                <button class="payment-method-btn active" data-method="Cash" onclick="selectPayment('Cash')">💵 Cash</button>
+                                <button class="payment-method-btn" data-method="GCash" onclick="selectPayment('GCash')">📱 GCash</button>
+                                <button class="payment-method-btn" data-method="Card" onclick="selectPayment('Card')">💳 Card</button>
+                                <button class="payment-method-btn" data-method="Bank Transfer" onclick="selectPayment('Bank Transfer')">🏛️ Bank</button>
+                                <button class="payment-method-btn" data-method="Other" onclick="selectPayment('Other')">📌 Other</button>
+                            </div>
+                            <div class="qr-container" id="qrContainer">
+                                <div id="gcashQRCode"></div>
+                                <div style="font-size:0.65rem;color:#888;margin-top:4px;">GCash: <strong>0985 770 4017</strong></div>
+                            </div>
+                            <div style="font-size:0.75rem;font-weight:600;color:#1a3a5c;margin-top:6px;">Amount Received</div>
+                            <div class="payment-input-row">
+                                <input type="number" id="cashTendered" placeholder="Enter amount" step="0.01" min="0" value="0" oninput="validateAmount(this)" />
+                                <button onclick="processPayment()" class="btn-pay" id="payBtn">✅ Pay</button>
+                            </div>
+                            <div id="paymentResult" style="margin-top:6px;padding:6px 10px;border-radius:6px;font-weight:600;display:none;font-size:0.8rem;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="tab-dashboard" class="tab-content">
+                <div class="pos-panel">
+                    <div class="panel-header">
+                        <h3>🏠 Dashboard</h3>
+                        <span class="badge-count" id="dashboardDate"></span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                        <div style="background:#f8faff;padding:14px;border-radius:8px;text-align:center;">
+                            <div style="font-size:0.7rem;color:#888;">Total Sales Today</div>
+                            <div style="font-size:1.4rem;font-weight:700;color:#2ED573;">₱<span id="dashTodaySales">0.00</span></div>
+                        </div>
+                        <div style="background:#f8faff;padding:14px;border-radius:8px;text-align:center;">
+                            <div style="font-size:0.7rem;color:#888;">Transactions</div>
+                            <div style="font-size:1.4rem;font-weight:700;color:#1E90FF;"><span id="dashTodayTrans">0</span></div>
+                        </div>
+                        <div style="background:#f8faff;padding:14px;border-radius:8px;text-align:center;">
+                            <div style="font-size:0.7rem;color:#888;">Items Sold</div>
+                            <div style="font-size:1.4rem;font-weight:700;color:#FF9F43;"><span id="dashItemsSold">0</span></div>
+                        </div>
+                        <div style="background:#f8faff;padding:14px;border-radius:8px;text-align:center;">
+                            <div style="font-size:0.7rem;color:#888;">Payment Methods</div>
+                            <div style="font-size:1.4rem;font-weight:700;color:#FF4757;"><span id="dashPayMethods">Cash</span></div>
+                        </div>
+                    </div>
+                    <div style="border-top:1px solid #eef3f9;padding-top:12px;">
+                        <div style="font-weight:600;color:#1a3a5c;margin-bottom:8px;font-size:0.85rem;">💳 Payment Method Breakdown</div>
+                        <div id="dashPaymentBreakdown">
+                            <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.8rem;"><span>Cash</span><span id="dashCashCount">0</span></div>
+                            <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.8rem;"><span>GCash</span><span id="dashGCashCount">0</span></div>
+                            <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.8rem;"><span>Card</span><span id="dashCardCount">0</span></div>
+                            <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.8rem;"><span>Bank Transfer</span><span id="dashBankCount">0</span></div>
+                            <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.8rem;"><span>Other</span><span id="dashOtherCount">0</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="tab-products" class="tab-content">
+                <div class="pos-panel">
+                    <div class="panel-header">
+                        <h3>📦 All Products</h3>
+                        <span class="badge-count" id="productTotalCount">0</span>
+                    </div>
+                    <div id="addProductSection" class="add-product-form" style="display:none;">
+                        <h4>➕ Add New Product</h4>
+                        <div class="form-row">
+                            <input type="text" id="newBarcode" placeholder="Barcode" />
+                            <input type="text" id="newName" placeholder="Product Name" />
+                            <input type="number" id="newPrice" placeholder="Price" step="0.01" min="0" />
+                            <input type="number" id="newStock" placeholder="Stock" min="0" />
+                            <button onclick="addNewProduct()" class="btn-add-product">Add Product</button>
+                        </div>
+                    </div>
+                    <div class="list-container" id="productsList"></div>
+                </div>
+            </div>
+            <div id="tab-customers" class="tab-content">
+                <div class="pos-panel">
+                    <div class="panel-header">
+                        <h3>👤 Customers</h3>
+                        <span class="badge-count">523 Registered</span>
+                    </div>
+                    <div id="customersList">
+                        <div class="list-item"><div class="item-left"><div class="item-title">Juan Dela Cruz</div><div class="item-sub">📞 0917-123-4567 · 15 purchases</div></div><div class="item-right green">₱12,450.00</div></div>
+                        <div class="list-item"><div class="item-left"><div class="item-title">Maria Santos</div><div class="item-sub">📞 0918-765-4321 · 8 purchases</div></div><div class="item-right green">₱8,230.00</div></div>
+                        <div class="list-item"><div class="item-left"><div class="item-title">Jose Reyes</div><div class="item-sub">📞 0922-888-9999 · 23 purchases</div></div><div class="item-right green">₱25,670.00</div></div>
+                        <div class="list-item"><div class="item-left"><div class="item-title">Anna Lopez</div><div class="item-sub">📞 0919-555-1212 · 5 purchases</div></div><div class="item-right green">₱3,890.00</div></div>
+                        <div class="list-item"><div class="item-left"><div class="item-title">Carlos Mendoza</div><div class="item-sub">📞 0927-444-3333 · 12 purchases</div></div><div class="item-right green">₱18,750.00</div></div>
+                    </div>
+                </div>
+            </div>
+            <div id="tab-transactions" class="tab-content">
+                <div class="pos-panel">
+                    <div class="panel-header">
+                        <h3>🧾 Recent Transactions</h3>
+                        <span class="badge-count" id="transTotalCount">0</span>
+                    </div>
+                    <div class="list-container" id="transactionsList"></div>
+                </div>
+            </div>
+            <div id="tab-inventory" class="tab-content admin-tab">
+                <div class="pos-panel">
+                    <div class="panel-header">
+                        <h3>📋 Inventory Management</h3>
+                        <span class="badge-count" id="inventoryCount">0</span>
+                    </div>
+                    <div style="margin-bottom:12px;padding:12px;background:#f8faff;border-radius:8px;border:1px solid #eef3f9;">
+                        <div style="display:flex;gap:16px;flex-wrap:wrap;">
+                            <div><span style="color:#888;">Total Products:</span> <strong id="invTotalProducts">0</strong></div>
+                            <div><span style="color:#888;">In Stock:</span> <strong id="invInStock">0</strong></div>
+                            <div><span style="color:#888;">Low Stock:</span> <strong id="invLowStock" style="color:#FF9F43;">0</strong></div>
+                            <div><span style="color:#888;">Out of Stock:</span> <strong id="invOutStock" style="color:#FF4757;">0</strong></div>
+                        </div>
+                    </div>
+                    <div class="list-container" id="inventoryList"></div>
+                </div>
+            </div>
+            <div id="tab-categories" class="tab-content admin-tab">
+                <div class="pos-panel">
+                    <div class="panel-header">
+                        <h3>🏷️ Categories</h3>
+                        <span class="badge-count">6 Categories</span>
+                    </div>
+                    <div id="categoriesList">
+                        <div class="list-item"><div class="item-left"><div class="item-title">📱 Phones</div><div class="item-sub">12 products · Best seller</div></div><div class="item-right orange">₱66,990.00</div></div>
+                        <div class="list-item"><div class="item-left"><div class="item-title">🔌 Chargers</div><div class="item-sub">8 products · Fast moving</div></div><div class="item-right orange">₱1,290.00</div></div>
+                        <div class="list-item"><div class="item-left"><div class="item-title">📱 Cases</div><div class="item-sub">15 products · Popular</div></div><div class="item-right orange">₱23,999.00</div></div>
+                        <div class="list-item"><div class="item-left"><div class="item-title">🎧 Earphones</div><div class="item-sub">6 products · Trending</div></div><div class="item-right orange">₱1,890.00</div></div>
+                        <div class="list-item"><div class="item-left"><div class="item-title">🔋 Power Banks</div><div class="item-sub">4 products · Essential</div></div><div class="item-right orange">₱1,499.00</div></div>
+                        <div class="list-item"><div class="item-left"><div class="item-title">🛡️ Screen Protectors</div><div class="item-sub">32 products · Best seller</div></div><div class="item-right orange">₱499.00</div></div>
+                    </div>
+                </div>
+            </div>
+            <div id="tab-lowstock" class="tab-content admin-tab">
+                <div class="pos-panel">
+                    <div class="panel-header">
+                        <h3>⚠️ Low Stock Items</h3>
+                        <span class="badge-count" id="lowStockCount">0</span>
+                    </div>
+                    <div class="list-container" id="lowStockList"></div>
+                </div>
+            </div>
+            <div id="tab-suppliers" class="tab-content admin-tab">
+                <div class="pos-panel">
+                    <div class="panel-header">
+                        <h3>🏢 Suppliers</h3>
+                        <span class="badge-count">8 Active</span>
+                    </div>
+                    <div id="suppliersList">
+                        <div class="list-item"><div class="item-left"><div class="item-title">🏭 TechMart Inc.</div><div class="item-sub">📞 0988-123-4567 · ⭐ 4.8</div></div><div class="item-right blue">45 products</div></div>
+                        <div class="list-item"><div class="item-left"><div class="item-title">📱 GadgetHub PH</div><div class="item-sub">📞 0917-765-4321 · ⭐ 4.6</div></div><div class="item-right blue">32 products</div></div>
+                        <div class="list-item"><div class="item-left"><div class="item-title">🔧 MobileParts Co.</div><div class="item-sub">📞 0922-888-9999 · ⭐ 4.9</div></div><div class="item-right blue">28 products</div></div>
+                        <div class="list-item"><div class="item-left"><div class="item-title">📦 Accessory World</div><div class="item-sub">📞 0915-666-7777 · ⭐ 4.5</div></div><div class="item-right blue">19 products</div></div>
+                        <div class="list-item"><div class="item-left"><div class="item-title">🔋 Battery Experts</div><div class="item-sub">📞 0920-333-4444 · ⭐ 4.7</div></div><div class="item-right blue">15 products</div></div>
+                    </div>
+                </div>
+            </div>
+            <div id="tab-reports" class="tab-content admin-tab">
+                <div class="pos-panel">
+                    <div class="panel-header">
+                        <h3>📊 Reports</h3>
+                        <span class="badge-count">Live Data</span>
+                    </div>
+                    <div id="reportsContent">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+                            <div style="background:#f8faff;padding:14px;border-radius:8px;">
+                                <div style="font-size:0.7rem;color:#888;">Daily Sales Average</div>
+                                <div style="font-size:1.2rem;font-weight:700;color:#2ED573;">₱5,430.00</div>
+                                <div style="font-size:0.65rem;color:#888;">Last 30 days</div>
+                            </div>
+                            <div style="background:#f8faff;padding:14px;border-radius:8px;">
+                                <div style="font-size:0.7rem;color:#888;">Monthly Revenue</div>
+                                <div style="font-size:1.2rem;font-weight:700;color:#1E90FF;">₱162,900.00</div>
+                                <div style="font-size:0.65rem;color:#888;">This month</div>
+                            </div>
+                            <div style="background:#f8faff;padding:14px;border-radius:8px;">
+                                <div style="font-size:0.7rem;color:#888;">Best Selling Category</div>
+                                <div style="font-size:1.2rem;font-weight:700;color:#FF9F43;">Phones</div>
+                                <div style="font-size:0.65rem;color:#888;">₱66,990.00</div>
+                            </div>
+                            <div style="background:#f8faff;padding:14px;border-radius:8px;">
+                                <div style="font-size:0.7rem;color:#888;">Total Profit</div>
+                                <div style="font-size:1.2rem;font-weight:700;color:#FF4757;">₱45,670.00</div>
+                                <div style="font-size:0.65rem;color:#888;">↑ 15% vs last month</div>
+                            </div>
+                        </div>
+                        <div style="border-top:1px solid #eef3f9;padding-top:12px;">
+                            <div style="font-weight:600;color:#1a3a5c;margin-bottom:8px;">📈 Top Selling Products</div>
+                            <div class="list-item"><span>Samsung Galaxy S24 Ultra 256GB</span><span class="item-right">45 sold</span></div>
+                            <div class="list-item"><span>iPhone 15 Silicone Case</span><span class="item-right">38 sold</span></div>
+                            <div class="list-item"><span>20W USB-C Power Adapter</span><span class="item-right">32 sold</span></div>
+                            <div class="list-item"><span>Baseus Fast Charging Cable</span><span class="item-right">28 sold</span></div>
+                            <div class="list-item"><span>JBL Tune 510BT Headphone</span><span class="item-right">22 sold</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="tab-expenses" class="tab-content admin-tab">
+                <div class="pos-panel">
+                    <div class="panel-header">
+                        <h3>💰 Expenses</h3>
+                        <span class="badge-count">This Month</span>
+                    </div>
+                    <div id="expensesContent">
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
+                            <div style="background:#f8faff;padding:14px;border-radius:8px;text-align:center;">
+                                <div style="font-size:0.7rem;color:#888;">Total Expenses</div>
+                                <div style="font-size:1.3rem;font-weight:700;color:#FF4757;">₱23,450.00</div>
+                            </div>
+                            <div style="background:#f8faff;padding:14px;border-radius:8px;text-align:center;">
+                                <div style="font-size:0.7rem;color:#888;">Operational</div>
+                                <div style="font-size:1.3rem;font-weight:700;color:#FF9F43;">₱12,300.00</div>
+                            </div>
+                            <div style="background:#f8faff;padding:14px;border-radius:8px;text-align:center;">
+                                <div style="font-size:0.7rem;color:#888;">Supplies</div>
+                                <div style="font-size:1.3rem;font-weight:700;color:#1E90FF;">₱11,150.00</div>
+                            </div>
+                        </div>
+                        <div style="border-top:1px solid #eef3f9;padding-top:12px;">
+                            <div class="list-item"><span>📦 Inventory Replenishment</span><span class="item-right red">₱8,500.00</span></div>
+                            <div class="list-item"><span>🔧 Repair Equipment</span><span class="item-right red">₱3,800.00</span></div>
+                            <div class="list-item"><span>📱 Accessories Purchase</span><span class="item-right red">₱5,650.00</span></div>
+                            <div class="list-item"><span>🏢 Store Rent</span><span class="item-right red">₱15,000.00</span></div>
+                            <div class="list-item"><span>⚡ Utilities</span><span class="item-right red">₱2,300.00</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="tab-settings" class="tab-content admin-tab">
+                <div class="pos-panel">
+                    <div class="panel-header">
+                        <h3>⚙️ Settings</h3>
+                        <span class="badge-count">Configure</span>
+                    </div>
+                    <div class="settings-grid">
+                        <div class="settings-card">
+                            <h4>🏪 Store Information</h4>
+                            <div class="setting-row"><span class="label">Store Name</span><span class="value">Mobile Care</span></div>
+                            <div class="setting-row"><span class="label">Address</span><span class="value">123 Main St, Manila</span></div>
+                            <div class="setting-row"><span class="label">Contact</span><span class="value">(02) 8123-4567</span></div>
+                            <div class="setting-row"><span class="label">Email</span><span class="value">info@mobilecare.ph</span></div>
+                            <div class="setting-row"><span class="label">Store Hours</span><span class="value">Mon-Sat 9AM-8PM</span></div>
+                            <button class="btn-setting" onclick="showMessage('✏️ Edit store info feature coming soon!', 'warning')">✏️ Edit Store Info</button>
+                        </div>
+                        <div class="settings-card">
+                            <h4>🔐 Security Settings</h4>
+                            <div class="setting-row"><span class="label">Two-Factor Auth</span><div class="toggle active" onclick="this.classList.toggle('active')"></div></div>
+                            <div class="setting-row"><span class="label">Session Timeout</span><span class="value">30 minutes</span></div>
+                            <div class="setting-row"><span class="label">Login Attempts</span><span class="value">5 attempts</span></div>
+                            <div class="setting-row"><span class="label">Last Login</span><span class="value" id="settingsLastLogin">Today, 2:30 PM</span></div>
+                            <button class="btn-setting" onclick="showMessage('🔑 Change password feature coming soon!', 'warning')">🔑 Change Password</button>
+                        </div>
+                        <div class="settings-card">
+                            <h4>💰 Tax & Invoice</h4>
+                            <div class="setting-row"><span class="label">Tax Rate</span><span class="value">0%</span></div>
+                            <div class="setting-row"><span class="label">Currency</span><span class="value">PHP (₱)</span></div>
+                            <div class="setting-row"><span class="label">Receipt Footer</span><span class="value">Thank you!</span></div>
+                            <div class="setting-row"><span class="label">Invoice Prefix</span><span class="value">INV-</span></div>
+                            <button class="btn-setting" onclick="showMessage('📄 Edit receipt template feature coming soon!', 'warning')">📄 Edit Template</button>
+                        </div>
+                        <div class="settings-card">
+                            <h4>🔔 Notifications</h4>
+                            <div class="setting-row"><span class="label">Low Stock Alerts</span><div class="toggle active" onclick="this.classList.toggle('active')"></div></div>
+                            <div class="setting-row"><span class="label">Daily Sales Report</span><div class="toggle active" onclick="this.classList.toggle('active')"></div></div>
+                            <div class="setting-row"><span class="label">System Updates</span><div class="toggle" onclick="this.classList.toggle('active')"></div></div>
+                            <div class="setting-row"><span class="label">Email Reports</span><div class="toggle" onclick="this.classList.toggle('active')"></div></div>
+                            <button class="btn-setting" onclick="showMessage('📧 Email settings feature coming soon!', 'warning')">📧 Email Settings</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="tab-backup" class="tab-content admin-tab">
+                <div class="pos-panel">
+                    <div class="panel-header">
+                        <h3>💾 Backup / Restore</h3>
+                        <span class="badge-count">v2.0</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                        <div style="background:#f8faff;padding:20px;border-radius:10px;text-align:center;border:2px dashed #dce4ec;">
+                            <div style="font-size:3rem;">💾</div>
+                            <div style="font-weight:600;color:#1a3a5c;margin:8px 0;">Backup Data</div>
+                            <div style="font-size:0.8rem;color:#888;margin-bottom:12px;">Create a full backup of all your data including products, sales, and settings.</div>
+                            <button class="btn-setting green" onclick="showMessage('📦 Backup created successfully!', 'success')">📥 Create Backup</button>
+                            <div style="font-size:0.7rem;color:#888;margin-top:8px;">Last backup: Today, 2:30 PM</div>
+                        </div>
+                        <div style="background:#f8faff;padding:20px;border-radius:10px;text-align:center;border:2px dashed #dce4ec;">
+                            <div style="font-size:3rem;">🔄</div>
+                            <div style="font-weight:600;color:#1a3a5c;margin:8px 0;">Restore Data</div>
+                            <div style="font-size:0.8rem;color:#888;margin-bottom:12px;">Restore your data from a previous backup file.</div>
+                            <button class="btn-setting orange" onclick="showMessage('⚠️ Restore requires confirmation!', 'error')">📤 Restore Backup</button>
+                            <div style="font-size:0.7rem;color:#888;margin-top:8px;">Available backups: 3</div>
+                        </div>
+                    </div>
+                    <div style="margin-top:16px;padding-top:16px;border-top:1px solid #eef3f9;">
+                        <div style="font-weight:600;color:#1a3a5c;margin-bottom:8px;">📋 Backup History</div>
+                        <div class="list-item"><span>📄 backup_2026-08-26.zip</span><span class="item-right blue">2.4 MB</span></div>
+                        <div class="list-item"><span>📄 backup_2026-08-25.zip</span><span class="item-right blue">2.3 MB</span></div>
+                        <div class="list-item"><span>📄 backup_2026-08-24.zip</span><span class="item-right blue">2.1 MB</span></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="receiptModal" class="modal">
+        <div class="receipt-wrapper">
+            <div class="receipt-content" id="receiptContent">
+                <div class="receipt-header">
+                    <img src="logo.png" alt="Mobile Care Logo" class="receipt-logo" onerror="this.style.display='none'">
+                    <h2>MOBILE CARE</h2>
+                    <div class="store-tagline">ACCESSORIES</div>
+                    <div class="store-tagline sub">Cellphones • Chargers • Cases</div>
+                </div>
+                <div class="receipt-divider"></div>
+                <div class="receipt-info">
+                    <span class="receipt-no" id="receiptNumber">#000125</span>
+                    <span id="receiptDate">May 26, 2024</span>
+                </div>
+                <div class="receipt-info" style="justify-content:flex-end;">
+                    <span>Time: <span id="receiptTime">10:28 AM</span></span>
+                </div>
+                <div class="receipt-divider"></div>
+                <div class="receipt-items" id="receiptItems"></div>
+                <div class="receipt-divider"></div>
+                <div class="receipt-total">
+                    <span class="total-label">TOTAL</span>
+                    <span class="total-amount" id="receiptTotal">₱67,480.00</span>
+                </div>
+                <div class="receipt-divider"></div>
+                <div class="receipt-payment" id="receiptPaymentDetails">
+                    <div class="pay-row">
+                        <span class="label">Payment Method:</span>
+                        <span class="value method-value" id="receiptMethod">Cash</span>
+                    </div>
+                    <div class="pay-row" id="receiptCashRow">
+                        <span class="label">Cash Tendered:</span>
+                        <span class="value" id="receiptCashTendered">₱68,000.00</span>
+                    </div>
+                    <div class="pay-row" id="receiptChangeRow">
+                        <span class="label">Change:</span>
+                        <span class="value green" id="receiptChange">₱520.00</span>
+                    </div>
+                </div>
+                <div class="receipt-divider"></div>
+                <div class="receipt-cashier">
+                    <span class="cashier-label">Cashier: </span>
+                    <span class="cashier-name" id="receiptCashier">Roland Maru</span>
+                </div>
+                <div class="receipt-footer">
+                    <div class="thanks">Thank you for your purchase!</div>
+                    <div class="come-again">Come Again!</div>
+                    <div class="status">
+                        <span class="power">POWER &nbsp;&nbsp; STATUS</span>
+                        <span>80mm</span>
+                    </div>
+                </div>
+            </div>
+            <div class="receipt-buttons">
+                <button onclick="printReceipt()" class="btn-print">🖨️ Print</button>
+                <button onclick="closeReceipt()" class="btn-close">✕ Close</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+var allProductsData = [
+    { barcode: 'ASU001', name: 'ASUS ROG Phone 8', price: 45990.00, stock: 30, image: 'asus.png', category: 'phones' },
+    { barcode: 'ASU002', name: 'ASUS ROG Phone 8 Pro', price: 52990.00, stock: 20, image: 'asus.png', category: 'phones' },
+    { barcode: 'ASU003', name: 'ASUS ROG Phone 7', price: 39990.00, stock: 25, image: 'asus.png', category: 'phones' },
+    { barcode: 'ASU004', name: 'ASUS ROG Phone 7 Ultimate', price: 46990.00, stock: 15, image: 'asus.png', category: 'phones' },
+    { barcode: 'ASU005', name: 'ASUS Zenfone 11 Ultra', price: 38990.00, stock: 18, image: 'asus.png', category: 'phones' },
+    { barcode: 'ASU006', name: 'ASUS Zenfone 10', price: 29990.00, stock: 22, image: 'asus.png', category: 'phones' },
+    { barcode: 'ASU007', name: 'ASUS Zenfone 9', price: 24990.00, stock: 28, image: 'asus.png', category: 'phones' },
+    { barcode: 'HUA001', name: 'Huawei Pura 70', price: 49990.00, stock: 12, image: 'huawei.jfif', category: 'phones' },
+    { barcode: 'HUA002', name: 'Huawei Pura 70 Pro', price: 55990.00, stock: 10, image: 'huawei.jfif', category: 'phones' },
+    { barcode: 'HUA003', name: 'Huawei Pura 70 Ultra', price: 65990.00, stock: 8, image: 'huawei.jfif', category: 'phones' },
+    { barcode: 'HUA004', name: 'Huawei Mate 60', price: 49990.00, stock: 15, image: 'huawei.jfif', category: 'phones' },
+    { barcode: 'HUA005', name: 'Huawei Mate 60 Pro', price: 54990.00, stock: 25, image: 'huawei.jfif', category: 'phones' },
+    { barcode: 'HUA006', name: 'Huawei Mate 50 Pro', price: 42990.00, stock: 20, image: 'huawei.jfif', category: 'phones' },
+    { barcode: 'HUA007', name: 'Huawei Nova 12', price: 23990.00, stock: 30, image: 'huawei.jfif', category: 'phones' },
+    { barcode: 'HUA008', name: 'Huawei Nova 12 Pro', price: 28990.00, stock: 25, image: 'huawei.jfif', category: 'phones' },
+    { barcode: 'HUA009', name: 'Huawei Nova 11', price: 19990.00, stock: 35, image: 'huawei.jfif', category: 'phones' },
+    { barcode: 'HUA010', name: 'Huawei Nova 11 Pro', price: 24990.00, stock: 30, image: 'huawei.jfif', category: 'phones' },
+    { barcode: 'INF001', name: 'Infinix Note 40', price: 11999.00, stock: 18, image: 'infinix.jfif', category: 'phones' },
+    { barcode: 'INF002', name: 'Infinix Note 40 Pro', price: 13999.00, stock: 12, image: 'infinix.jfif', category: 'phones' },
+    { barcode: 'INF003', name: 'Infinix Note 40 Pro+', price: 15999.00, stock: 10, image: 'infinix.jfif', category: 'phones' },
+    { barcode: 'INF004', name: 'Infinix Note 30', price: 9999.00, stock: 25, image: 'infinix.jfif', category: 'phones' },
+    { barcode: 'INF005', name: 'Infinix Note 30 Pro', price: 11999.00, stock: 20, image: 'infinix.jfif', category: 'phones' },
+    { barcode: 'INF006', name: 'Infinix Hot 40', price: 7999.00, stock: 40, image: 'infinix.jfif', category: 'phones' },
+    { barcode: 'INF007', name: 'Infinix Hot 40 Pro', price: 8999.00, stock: 35, image: 'infinix.jfif', category: 'phones' },
+    { barcode: 'INF008', name: 'Infinix Hot 30', price: 6999.00, stock: 45, image: 'infinix.jfif', category: 'phones' },
+    { barcode: 'INF009', name: 'Infinix Zero 30', price: 12999.00, stock: 15, image: 'infinix.jfif', category: 'phones' },
+    { barcode: 'INF010', name: 'Infinix Zero 30 5G', price: 14999.00, stock: 12, image: 'infinix.jfif', category: 'phones' },
+    { barcode: 'APP001', name: 'iPhone 15 Pro Max', price: 79990.00, stock: 5, image: 'iphone.jfif', category: 'phones' },
+    { barcode: 'APP002', name: 'iPhone 15 Pro', price: 69990.00, stock: 8, image: 'iphone.jfif', category: 'phones' },
+    { barcode: 'APP003', name: 'iPhone 15 Plus', price: 59990.00, stock: 12, image: 'iphone.jfif', category: 'phones' },
+    { barcode: 'APP004', name: 'iPhone 15', price: 49990.00, stock: 15, image: 'iphone.jfif', category: 'phones' },
+    { barcode: 'APP005', name: 'iPhone 14 Pro Max', price: 69990.00, stock: 10, image: 'iphone.jfif', category: 'phones' },
+    { barcode: 'APP006', name: 'iPhone 14 Pro', price: 59990.00, stock: 12, image: 'iphone.jfif', category: 'phones' },
+    { barcode: 'APP007', name: 'iPhone 14 Plus', price: 49990.00, stock: 18, image: 'iphone.jfif', category: 'phones' },
+    { barcode: 'APP008', name: 'iPhone 14', price: 42990.00, stock: 20, image: 'iphone.jfif', category: 'phones' },
+    { barcode: 'APP009', name: 'iPhone 13 Pro Max', price: 59990.00, stock: 15, image: 'iphone.jfif', category: 'phones' },
+    { barcode: 'APP010', name: 'iPhone 13 Pro', price: 49990.00, stock: 18, image: 'iphone.jfif', category: 'phones' },
+    { barcode: 'APP011', name: 'iPhone 13', price: 39990.00, stock: 22, image: 'iphone.jfif', category: 'phones' },
+    { barcode: 'APP012', name: 'iPhone 12 Pro Max', price: 49990.00, stock: 20, image: 'iphone.jfif', category: 'phones' },
+    { barcode: 'APP013', name: 'iPhone 12 Pro', price: 42990.00, stock: 22, image: 'iphone.jfif', category: 'phones' },
+    { barcode: 'APP014', name: 'iPhone 12', price: 35990.00, stock: 25, image: 'iphone.jfif', category: 'phones' },
+    { barcode: 'APP015', name: 'iPhone 11 Pro Max', price: 39990.00, stock: 30, image: 'iphone.jfif', category: 'phones' },
+    { barcode: 'APP016', name: 'iPhone 11 Pro', price: 34990.00, stock: 32, image: 'iphone.jfif', category: 'phones' },
+    { barcode: 'APP017', name: 'iPhone 11', price: 29990.00, stock: 35, image: 'iphone.jfif', category: 'phones' },
+    { barcode: 'LEN001', name: 'Lenovo Legion Phone Duel', price: 42990.00, stock: 15, image: 'lenovo.jfif', category: 'phones' },
+    { barcode: 'LEN002', name: 'Lenovo Legion Phone Duel 2', price: 46990.00, stock: 12, image: 'lenovo.jfif', category: 'phones' },
+    { barcode: 'LEN003', name: 'Lenovo Legion Y70', price: 35990.00, stock: 18, image: 'lenovo.jfif', category: 'phones' },
+    { barcode: 'LEN004', name: 'Lenovo Legion Y90', price: 39990.00, stock: 14, image: 'lenovo.jfif', category: 'phones' },
+    { barcode: 'LEN005', name: 'Lenovo K13', price: 8999.00, stock: 40, image: 'lenovo.jfif', category: 'phones' },
+    { barcode: 'LEN006', name: 'Lenovo K12', price: 7999.00, stock: 45, image: 'lenovo.jfif', category: 'phones' },
+    { barcode: 'LEN007', name: 'Lenovo K10', price: 6999.00, stock: 50, image: 'lenovo.jfif', category: 'phones' },
+    { barcode: 'LEN008', name: 'Lenovo K9', price: 5999.00, stock: 55, image: 'lenovo.jfif', category: 'phones' },
+    { barcode: 'NOK001', name: 'Nokia G42', price: 10999.00, stock: 25, image: 'nokia.jfif', category: 'phones' },
+    { barcode: 'NOK002', name: 'Nokia G60', price: 15990.00, stock: 10, image: 'nokia.jfif', category: 'phones' },
+    { barcode: 'NOK003', name: 'Nokia G50', price: 12990.00, stock: 18, image: 'nokia.jfif', category: 'phones' },
+    { barcode: 'NOK004', name: 'Nokia X30', price: 19990.00, stock: 12, image: 'nokia.jfif', category: 'phones' },
+    { barcode: 'NOK005', name: 'Nokia X20', price: 17990.00, stock: 15, image: 'nokia.jfif', category: 'phones' },
+    { barcode: 'NOK006', name: 'Nokia X10', price: 14990.00, stock: 18, image: 'nokia.jfif', category: 'phones' },
+    { barcode: 'NOK007', name: 'Nokia C32', price: 6999.00, stock: 40, image: 'nokia.jfif', category: 'phones' },
+    { barcode: 'NOK008', name: 'Nokia C31', price: 5999.00, stock: 45, image: 'nokia.jfif', category: 'phones' },
+    { barcode: 'NOK009', name: 'Nokia C22', price: 5499.00, stock: 50, image: 'nokia.jfif', category: 'phones' },
+    { barcode: 'NOK010', name: 'Nokia C21', price: 4999.00, stock: 55, image: 'nokia.jfif', category: 'phones' },
+    { barcode: 'NOK011', name: 'Nokia 5.4', price: 8999.00, stock: 35, image: 'nokia.jfif', category: 'phones' },
+    { barcode: 'NOK012', name: 'Nokia 3.4', price: 7999.00, stock: 38, image: 'nokia.jfif', category: 'phones' },
+    { barcode: 'OPP001', name: 'OPPO Reno 12', price: 25999.00, stock: 8, image: 'oppo.jfif', category: 'phones' },
+    { barcode: 'OPP002', name: 'OPPO Reno 12 Pro', price: 29999.00, stock: 6, image: 'oppo.jfif', category: 'phones' },
+    { barcode: 'OPP003', name: 'OPPO Reno 11', price: 23999.00, stock: 4, image: 'oppo.jfif', category: 'phones' },
+    { barcode: 'OPP004', name: 'OPPO Reno 11 Pro', price: 26999.00, stock: 3, image: 'oppo.jfif', category: 'phones' },
+    { barcode: 'OPP005', name: 'OPPO Reno 10', price: 19999.00, stock: 10, image: 'oppo.jfif', category: 'phones' },
+    { barcode: 'OPP006', name: 'OPPO Reno 10 Pro', price: 22999.00, stock: 8, image: 'oppo.jfif', category: 'phones' },
+    { barcode: 'OPP007', name: 'OPPO Reno 8', price: 17999.00, stock: 15, image: 'oppo.jfif', category: 'phones' },
+    { barcode: 'OPP008', name: 'OPPO Reno 8 Pro', price: 20999.00, stock: 12, image: 'oppo.jfif', category: 'phones' },
+    { barcode: 'OPP009', name: 'OPPO A98', price: 14999.00, stock: 20, image: 'oppo.jfif', category: 'phones' },
+    { barcode: 'OPP010', name: 'OPPO A78', price: 12999.00, stock: 25, image: 'oppo.jfif', category: 'phones' },
+    { barcode: 'OPP011', name: 'OPPO A58', price: 10999.00, stock: 30, image: 'oppo.jfif', category: 'phones' },
+    { barcode: 'OPP012', name: 'OPPO A38', price: 8999.00, stock: 35, image: 'oppo.jfif', category: 'phones' },
+    { barcode: 'OPP013', name: 'OPPO A18', price: 6999.00, stock: 40, image: 'oppo.jfif', category: 'phones' },
+    { barcode: 'OPP014', name: 'OPPO A17', price: 6499.00, stock: 45, image: 'oppo.jfif', category: 'phones' },
+    { barcode: 'REA001', name: 'Realme 12', price: 15999.00, stock: 20, image: 'realme.jfif', category: 'phones' },
+    { barcode: 'REA002', name: 'Realme 12+', price: 17999.00, stock: 18, image: 'realme.jfif', category: 'phones' },
+    { barcode: 'REA003', name: 'Realme 12 Pro', price: 20999.00, stock: 15, image: 'realme.jfif', category: 'phones' },
+    { barcode: 'REA004', name: 'Realme 12 Pro+', price: 23999.00, stock: 12, image: 'realme.jfif', category: 'phones' },
+    { barcode: 'REA005', name: 'Realme 11', price: 13999.00, stock: 25, image: 'realme.jfif', category: 'phones' },
+    { barcode: 'REA006', name: 'Realme 11 Pro', price: 16999.00, stock: 20, image: 'realme.jfif', category: 'phones' },
+    { barcode: 'REA007', name: 'Realme 11 Pro+', price: 19999.00, stock: 18, image: 'realme.jfif', category: 'phones' },
+    { barcode: 'REA008', name: 'Realme 10', price: 11999.00, stock: 30, image: 'realme.jfif', category: 'phones' },
+    { barcode: 'REA009', name: 'Realme 10 Pro', price: 14999.00, stock: 25, image: 'realme.jfif', category: 'phones' },
+    { barcode: 'REA010', name: 'Realme C67', price: 9999.00, stock: 35, image: 'realme.jfif', category: 'phones' },
+    { barcode: 'REA011', name: 'Realme C55', price: 8999.00, stock: 40, image: 'realme.jfif', category: 'phones' },
+    { barcode: 'REA012', name: 'Realme C53', price: 7999.00, stock: 45, image: 'realme.jfif', category: 'phones' },
+    { barcode: 'REA013', name: 'Realme C35', price: 6999.00, stock: 50, image: 'realme.jfif', category: 'phones' },
+    { barcode: 'SAM001', name: 'Samsung Galaxy S24 Ultra', price: 66990.00, stock: 7, image: 'samsung.jfif', category: 'phones' },
+    { barcode: 'SAM002', name: 'Samsung Galaxy S24+', price: 54990.00, stock: 10, image: 'samsung.jfif', category: 'phones' },
+    { barcode: 'SAM003', name: 'Samsung Galaxy S24', price: 44990.00, stock: 12, image: 'samsung.jfif', category: 'phones' },
+    { barcode: 'SAM004', name: 'Samsung Galaxy S23 Ultra', price: 59990.00, stock: 15, image: 'samsung.jfif', category: 'phones' },
+    { barcode: 'SAM005', name: 'Samsung Galaxy S23+', price: 49990.00, stock: 18, image: 'samsung.jfif', category: 'phones' },
+    { barcode: 'SAM006', name: 'Samsung Galaxy S23', price: 39990.00, stock: 20, image: 'samsung.jfif', category: 'phones' },
+    { barcode: 'SAM007', name: 'Samsung Galaxy S22 Ultra', price: 49990.00, stock: 22, image: 'samsung.jfif', category: 'phones' },
+    { barcode: 'SAM008', name: 'Samsung Galaxy S22+', price: 39990.00, stock: 25, image: 'samsung.jfif', category: 'phones' },
+    { barcode: 'SAM009', name: 'Samsung Galaxy S22', price: 32990.00, stock: 28, image: 'samsung.jfif', category: 'phones' },
+    { barcode: 'SAM010', name: 'Samsung Galaxy A55', price: 24990.00, stock: 30, image: 'samsung.jfif', category: 'phones' },
+    { barcode: 'SAM011', name: 'Samsung Galaxy A35', price: 19990.00, stock: 35, image: 'samsung.jfif', category: 'phones' },
+    { barcode: 'SAM012', name: 'Samsung Galaxy A25', price: 16990.00, stock: 38, image: 'samsung.jfif', category: 'phones' },
+    { barcode: 'SAM013', name: 'Samsung Galaxy A15', price: 12990.00, stock: 40, image: 'samsung.jfif', category: 'phones' },
+    { barcode: 'SAM014', name: 'Samsung Galaxy A05', price: 8999.00, stock: 50, image: 'samsung.jfif', category: 'phones' },
+    { barcode: 'SAM015', name: 'Samsung Galaxy Z Fold5', price: 89990.00, stock: 5, image: 'samsung.jfif', category: 'phones' },
+    { barcode: 'SAM016', name: 'Samsung Galaxy Z Flip5', price: 69990.00, stock: 8, image: 'samsung.jfif', category: 'phones' },
+    { barcode: 'TEC001', name: 'Tecno Camon 30', price: 12999.00, stock: 20, image: 'tecno.jfif', category: 'phones' },
+    { barcode: 'TEC002', name: 'Tecno Camon 30 Pro', price: 15999.00, stock: 15, image: 'tecno.jfif', category: 'phones' },
+    { barcode: 'TEC003', name: 'Tecno Camon 30 Premier', price: 18999.00, stock: 12, image: 'tecno.jfif', category: 'phones' },
+    { barcode: 'TEC004', name: 'Tecno Camon 20', price: 10999.00, stock: 25, image: 'tecno.jfif', category: 'phones' },
+    { barcode: 'TEC005', name: 'Tecno Camon 20 Pro', price: 13999.00, stock: 20, image: 'tecno.jfif', category: 'phones' },
+    { barcode: 'TEC006', name: 'Tecno Phantom V Fold', price: 69990.00, stock: 3, image: 'tecno.jfif', category: 'phones' },
+    { barcode: 'TEC007', name: 'Tecno Phantom V Flip', price: 49990.00, stock: 5, image: 'tecno.jfif', category: 'phones' },
+    { barcode: 'TEC008', name: 'Tecno Pova 6', price: 8999.00, stock: 30, image: 'tecno.jfif', category: 'phones' },
+    { barcode: 'TEC009', name: 'Tecno Pova 6 Pro', price: 10999.00, stock: 25, image: 'tecno.jfif', category: 'phones' },
+    { barcode: 'TEC010', name: 'Tecno Pova 5', price: 7999.00, stock: 35, image: 'tecno.jfif', category: 'phones' },
+    { barcode: 'TEC011', name: 'Tecno Spark 20', price: 6999.00, stock: 40, image: 'tecno.jfif', category: 'phones' },
+    { barcode: 'TEC012', name: 'Tecno Spark 20 Pro', price: 8999.00, stock: 28, image: 'tecno.jfif', category: 'phones' },
+    { barcode: 'TEC013', name: 'Tecno Spark 10', price: 5999.00, stock: 45, image: 'tecno.jfif', category: 'phones' },
+    { barcode: 'VIV001', name: 'Vivo V30', price: 26999.00, stock: 12, image: 'vivo.jfif', category: 'phones' },
+    { barcode: 'VIV002', name: 'Vivo V30 Pro', price: 29999.00, stock: 10, image: 'vivo.jfif', category: 'phones' },
+    { barcode: 'VIV003', name: 'Vivo V29', price: 24999.00, stock: 15, image: 'vivo.jfif', category: 'phones' },
+    { barcode: 'VIV004', name: 'Vivo V29 Pro', price: 27999.00, stock: 12, image: 'vivo.jfif', category: 'phones' },
+    { barcode: 'VIV005', name: 'Vivo V27', price: 22999.00, stock: 18, image: 'vivo.jfif', category: 'phones' },
+    { barcode: 'VIV006', name: 'Vivo V27 Pro', price: 25999.00, stock: 15, image: 'vivo.jfif', category: 'phones' },
+    { barcode: 'VIV007', name: 'Vivo V25', price: 19999.00, stock: 20, image: 'vivo.jfif', category: 'phones' },
+    { barcode: 'VIV008', name: 'Vivo V25 Pro', price: 22999.00, stock: 18, image: 'vivo.jfif', category: 'phones' },
+    { barcode: 'VIV009', name: 'Vivo Y100', price: 14999.00, stock: 25, image: 'vivo.jfif', category: 'phones' },
+    { barcode: 'VIV010', name: 'Vivo Y78', price: 12999.00, stock: 30, image: 'vivo.jfif', category: 'phones' },
+    { barcode: 'VIV011', name: 'Vivo Y36', price: 10999.00, stock: 35, image: 'vivo.jfif', category: 'phones' },
+    { barcode: 'VIV012', name: 'Vivo Y27', price: 9999.00, stock: 38, image: 'vivo.jfif', category: 'phones' },
+    { barcode: 'VIV013', name: 'Vivo Y17s', price: 7999.00, stock: 40, image: 'vivo.jfif', category: 'phones' },
+    { barcode: 'VIV014', name: 'Vivo Y16', price: 6999.00, stock: 45, image: 'vivo.jfif', category: 'phones' },
+    { barcode: 'VIVY01', name: 'Vivo Y11', price: 5999.00, stock: 50, image: 'vivo.jfif', category: 'phones' },
+    { barcode: 'VIVY02', name: 'Vivo Y12', price: 6499.00, stock: 48, image: 'vivo.jfif', category: 'phones' },
+    { barcode: 'VIVY03', name: 'Vivo Y15', price: 6999.00, stock: 45, image: 'vivo.jfif', category: 'phones' },
+    { barcode: 'VIVY04', name: 'Vivo Y20', price: 7499.00, stock: 42, image: 'vivo.jfif', category: 'phones' },
+    { barcode: 'XIA001', name: 'Xiaomi 14 Ultra', price: 59990.00, stock: 8, image: 'xiaomi.jfif', category: 'phones' },
+    { barcode: 'XIA002', name: 'Xiaomi 14 Pro', price: 49990.00, stock: 10, image: 'xiaomi.jfif', category: 'phones' },
+    { barcode: 'XIA003', name: 'Xiaomi 14', price: 39990.00, stock: 12, image: 'xiaomi.jfif', category: 'phones' },
+    { barcode: 'XIA004', name: 'Xiaomi 13 Ultra', price: 49990.00, stock: 15, image: 'xiaomi.jfif', category: 'phones' },
+    { barcode: 'XIA005', name: 'Xiaomi 13 Pro', price: 42990.00, stock: 18, image: 'xiaomi.jfif', category: 'phones' },
+    { barcode: 'XIA006', name: 'Xiaomi 13', price: 34990.00, stock: 20, image: 'xiaomi.jfif', category: 'phones' },
+    { barcode: 'XIA007', name: 'Redmi Note 13 Pro+', price: 22990.00, stock: 22, image: 'xiaomi.jfif', category: 'phones' },
+    { barcode: 'XIA008', name: 'Redmi Note 13 Pro', price: 19990.00, stock: 25, image: 'xiaomi.jfif', category: 'phones' },
+    { barcode: 'XIA009', name: 'Redmi Note 13', price: 14990.00, stock: 30, image: 'xiaomi.jfif', category: 'phones' },
+    { barcode: 'XIA010', name: 'Redmi Note 12 Pro', price: 16990.00, stock: 28, image: 'xiaomi.jfif', category: 'phones' },
+    { barcode: 'XIA011', name: 'Redmi Note 12', price: 12990.00, stock: 35, image: 'xiaomi.jfif', category: 'phones' },
+    { barcode: 'XIA012', name: 'Redmi 13C', price: 8999.00, stock: 40, image: 'xiaomi.jfif', category: 'phones' },
+    { barcode: 'XIA013', name: 'Redmi 12', price: 7999.00, stock: 45, image: 'xiaomi.jfif', category: 'phones' },
+    { barcode: 'XIA014', name: 'POCO X6 Pro', price: 23990.00, stock: 18, image: 'xiaomi.jfif', category: 'phones' },
+    { barcode: 'XIA015', name: 'POCO X6', price: 19990.00, stock: 22, image: 'xiaomi.jfif', category: 'phones' },
+    { barcode: 'XIA016', name: 'POCO F6', price: 27990.00, stock: 15, image: 'xiaomi.jfif', category: 'phones' },
+    { barcode: 'CHG001', name: 'Anker 20W USB-C Charger', price: 890.00, stock: 45, image: 'charger.jpg', category: 'chargers' },
+    { barcode: 'CHG002', name: 'Anker 30W GaN Charger', price: 1290.00, stock: 30, image: 'charger.jpg', category: 'chargers' },
+    { barcode: 'CHG003', name: 'UGREEN 20W USB-C Charger', price: 750.00, stock: 50, image: 'charger.jpg', category: 'chargers' },
+    { barcode: 'CHG004', name: 'UGREEN 30W GaN Charger', price: 1100.00, stock: 35, image: 'charger.jpg', category: 'chargers' },
+    { barcode: 'CHG005', name: 'Baseus 20W USB-C Charger', price: 690.00, stock: 55, image: 'charger.jpg', category: 'chargers' },
+    { barcode: 'CHG006', name: 'Baseus 30W GaN Charger', price: 990.00, stock: 40, image: 'charger.jpg', category: 'chargers' },
+    { barcode: 'CHG007', name: 'Belkin 20W USB-C Charger', price: 890.00, stock: 25, image: 'charger.jpg', category: 'chargers' },
+    { barcode: 'CHG008', name: 'Samsung 25W USB-C Charger', price: 1190.00, stock: 20, image: 'charger.jpg', category: 'chargers' },
+    { barcode: 'CHG009', name: 'Xiaomi 20W USB-C Charger', price: 590.00, stock: 60, image: 'charger.jpg', category: 'chargers' },
+    { barcode: 'CHG010', name: 'Vivo 44W Flash Charger', price: 890.00, stock: 25, image: 'charger.jpg', category: 'chargers' },
+    { barcode: 'CHG011', name: '18W Fast Charger (Quick Charge 3.0)', price: 499.00, stock: 40, image: 'charger.jpg', category: 'chargers' },
+    { barcode: 'CHG012', name: 'UGREEN USB 3.0 Hub with Ethernet', price: 1490.00, stock: 15, image: 'charger.jpg', category: 'chargers' },
+    { barcode: 'CHG013', name: 'Baseus 7-in-1 USB-C Hub', price: 1990.00, stock: 12, image: 'charger.jpg', category: 'chargers' },
+    { barcode: 'CHG014', name: 'Xiaomi 64GB USB Flash Drive', price: 690.00, stock: 30, image: 'charger.jpg', category: 'chargers' },
+    { barcode: 'CAB001', name: 'Anker USB-C to USB-C Cable (1m)', price: 590.00, stock: 60, image: 'cables.png', category: 'cables' },
+    { barcode: 'CAB002', name: 'Anker USB-C to Lightning Cable (1m)', price: 690.00, stock: 45, image: 'cables.png', category: 'cables' },
+    { barcode: 'CAB003', name: 'UGREEN USB-C to USB-C Cable (1m)', price: 450.00, stock: 70, image: 'cables.png', category: 'cables' },
+    { barcode: 'CAB004', name: 'UGREEN USB-C to Lightning Cable', price: 550.00, stock: 50, image: 'cables.png', category: 'cables' },
+    { barcode: 'CAB005', name: 'Baseus USB-C to USB-C Cable (1m)', price: 390.00, stock: 80, image: 'cables.png', category: 'cables' },
+    { barcode: 'CAB006', name: 'Belkin USB-C to USB-C Cable (1m)', price: 590.00, stock: 35, image: 'cables.png', category: 'cables' },
+    { barcode: 'CAB007', name: 'Samsung USB-C to USB-C Cable (1m)', price: 690.00, stock: 30, image: 'cables.png', category: 'cables' },
+    { barcode: 'CAB008', name: 'Xiaomi USB-C to USB-C Cable (1m)', price: 350.00, stock: 85, image: 'cables.png', category: 'cables' },
+    { barcode: 'CAB009', name: 'Vivo USB-C to USB-C Cable (1m)', price: 490.00, stock: 40, image: 'cables.png', category: 'cables' },
+    { barcode: 'CAB010', name: 'Aukey USB-C to USB-C Cable (1m)', price: 490.00, stock: 50, image: 'cables.png', category: 'cables' },
+    { barcode: 'CAS001', name: 'iPhone 15 Silicone Case', price: 249.00, stock: 40, image: 'cases.jpg', category: 'cases' },
+    { barcode: 'CAS002', name: 'Samsung S24 Ultra Case', price: 299.00, stock: 35, image: 'cases.jpg', category: 'cases' },
+    { barcode: 'CAS003', name: 'Xiaomi 14 Case', price: 249.00, stock: 25, image: 'cases.jpg', category: 'cases' },
+    { barcode: 'CAS004', name: 'Redmi Note 13 Case', price: 199.00, stock: 30, image: 'cases.jpg', category: 'cases' },
+    { barcode: 'CAS005', name: 'VIVO V30 Case', price: 249.00, stock: 20, image: 'cases.jpg', category: 'cases' },
+    { barcode: 'CAS006', name: 'OPPO Reno 12 Case', price: 249.00, stock: 25, image: 'cases.jpg', category: 'cases' },
+    { barcode: 'CAS007', name: 'Realme 12 Case', price: 199.00, stock: 30, image: 'cases.jpg', category: 'cases' },
+    { barcode: 'CAS008', name: 'Infinix Note 40 Case', price: 199.00, stock: 35, image: 'cases.jpg', category: 'cases' },
+    { barcode: 'CAS009', name: 'Tecno Camon 30 Case', price: 199.00, stock: 28, image: 'cases.jpg', category: 'cases' },
+    { barcode: 'CAS010', name: 'Huawei Pura 70 Case', price: 299.00, stock: 22, image: 'cases.jpg', category: 'cases' },
+    { barcode: 'CAS011', name: 'Slim Phone Case (Light Green)', price: 249.00, stock: 50, image: 'cases.jpg', category: 'cases' },
+    { barcode: 'EAR001', name: 'JBL Tune 510BT Headphone', price: 2990.00, stock: 20, image: 'earphones.jpg', category: 'earphones' },
+    { barcode: 'EAR002', name: 'JBL Tune 710BT Headphone', price: 3990.00, stock: 15, image: 'earphones.jpg', category: 'earphones' },
+    { barcode: 'EAR003', name: 'Sony WH-CH520 Headphone', price: 3490.00, stock: 18, image: 'earphones.jpg', category: 'earphones' },
+    { barcode: 'EAR004', name: 'Sony WH-CH720N Noise Cancelling', price: 4990.00, stock: 12, image: 'earphones.jpg', category: 'earphones' },
+    { barcode: 'EAR005', name: 'Anker Soundcore Q20i Headphone', price: 2490.00, stock: 25, image: 'earphones.jpg', category: 'earphones' },
+    { barcode: 'EAR006', name: 'Anker Soundcore Q30 Headphone', price: 3490.00, stock: 20, image: 'earphones.jpg', category: 'earphones' },
+    { barcode: 'EAR007', name: 'Baseus Headphone', price: 1290.00, stock: 30, image: 'earphones.jpg', category: 'earphones' },
+    { barcode: 'EAR008', name: 'Marshall Major IV Headphone', price: 5990.00, stock: 10, image: 'earphones.jpg', category: 'earphones' },
+    { barcode: 'EAR009', name: 'Apple AirPods Pro 2', price: 12990.00, stock: 8, image: 'earphones.jpg', category: 'earphones' },
+    { barcode: 'EAR010', name: 'Apple AirPods 3', price: 9990.00, stock: 12, image: 'earphones.jpg', category: 'earphones' },
+    { barcode: 'EAR011', name: 'Samsung Galaxy Buds FE', price: 4990.00, stock: 15, image: 'earphones.jpg', category: 'earphones' },
+    { barcode: 'EAR012', name: 'Samsung Galaxy Buds 2 Pro', price: 8990.00, stock: 10, image: 'earphones.jpg', category: 'earphones' },
+    { barcode: 'EAR013', name: 'Xiaomi Redmi Buds 4', price: 2490.00, stock: 25, image: 'earphones.jpg', category: 'earphones' },
+    { barcode: 'EAR014', name: 'Realme Buds Air 5', price: 2990.00, stock: 20, image: 'earphones.jpg', category: 'earphones' },
+    { barcode: 'EAR015', name: 'SoundPEATS Air3 Deluxe', price: 1990.00, stock: 30, image: 'earphones.jpg', category: 'earphones' },
+    { barcode: 'EAR016', name: 'OPPO Enco Buds 2', price: 1590.00, stock: 35, image: 'earphones.jpg', category: 'earphones' },
+    { barcode: 'EAR017', name: 'Vivo TWS 3', price: 2990.00, stock: 18, image: 'earphones.jpg', category: 'earphones' },
+    { barcode: 'PWR001', name: 'Anker 5000mAh Power Bank', price: 1290.00, stock: 30, image: 'powerbank.jfif', category: 'powerbanks' },
+    { barcode: 'PWR002', name: 'Anker 10000mAh Power Bank', price: 1990.00, stock: 25, image: 'powerbank.jfif', category: 'powerbanks' },
+    { barcode: 'PWR003', name: 'Anker 20000mAh Power Bank', price: 2990.00, stock: 18, image: 'powerbank.jfif', category: 'powerbanks' },
+    { barcode: 'PWR004', name: 'Xiaomi 10000mAh Power Bank', price: 1490.00, stock: 35, image: 'powerbank.jfif', category: 'powerbanks' },
+    { barcode: 'PWR005', name: 'Xiaomi 20000mAh Power Bank', price: 2290.00, stock: 25, image: 'powerbank.jfif', category: 'powerbanks' },
+    { barcode: 'PWR006', name: 'Romoss 10000mAh Power Bank', price: 990.00, stock: 40, image: 'powerbank.jfif', category: 'powerbanks' },
+    { barcode: 'PWR007', name: 'Romoss 20000mAh Power Bank', price: 1590.00, stock: 30, image: 'powerbank.jfif', category: 'powerbanks' },
+    { barcode: 'PWR008', name: 'Baseus 10000mAh Power Bank', price: 1190.00, stock: 38, image: 'powerbank.jfif', category: 'powerbanks' },
+    { barcode: 'PWR009', name: 'Baseus 20000mAh Power Bank', price: 1890.00, stock: 28, image: 'powerbank.jfif', category: 'powerbanks' },
+    { barcode: 'PWR010', name: 'UGREEN 10000mAh Power Bank', price: 1290.00, stock: 35, image: 'powerbank.jfif', category: 'powerbanks' },
+    { barcode: 'PWR011', name: 'VEGER 10000mAh Power Bank', price: 890.00, stock: 50, image: 'powerbank.jfif', category: 'powerbanks' },
+    { barcode: 'PWR012', name: 'Tylex 20000mAh Power Bank', price: 990.00, stock: 45, image: 'powerbank.jfif', category: 'powerbanks' },
+    { barcode: 'PWR013', name: 'Orashare 10000mAh Power Bank', price: 1090.00, stock: 42, image: 'powerbank.jfif', category: 'powerbanks' },
+    { barcode: 'SCR001', name: 'iPhone 15 Tempered Glass', price: 290.00, stock: 50, image: 'screenprotector.jpg', category: 'screenprotectors' },
+    { barcode: 'SCR002', name: 'Samsung S24 Ultra Tempered Glass', price: 350.00, stock: 45, image: 'screenprotector.jpg', category: 'screenprotectors' },
+    { barcode: 'SCR003', name: 'Xiaomi 14 Tempered Glass', price: 290.00, stock: 40, image: 'screenprotector.jpg', category: 'screenprotectors' },
+    { barcode: 'SCR004', name: 'Redmi Note 13 Tempered Glass', price: 250.00, stock: 55, image: 'screenprotector.jpg', category: 'screenprotectors' },
+    { barcode: 'SCR005', name: 'VIVO V30 Tempered Glass', price: 290.00, stock: 35, image: 'screenprotector.jpg', category: 'screenprotectors' },
+    { barcode: 'SCR006', name: 'OPPO Reno 12 Tempered Glass', price: 290.00, stock: 38, image: 'screenprotector.jpg', category: 'screenprotectors' },
+    { barcode: 'SCR007', name: 'Realme 12 Tempered Glass', price: 250.00, stock: 42, image: 'screenprotector.jpg', category: 'screenprotectors' },
+    { barcode: 'SCR008', name: 'Infinix Note 40 Tempered Glass', price: 250.00, stock: 45, image: 'screenprotector.jpg', category: 'screenprotectors' },
+    { barcode: 'SCR009', name: 'Tecno Camon 30 Tempered Glass', price: 250.00, stock: 40, image: 'screenprotector.jpg', category: 'screenprotectors' },
+    { barcode: 'SCR010', name: 'Huawei Pura 70 Tempered Glass', price: 350.00, stock: 30, image: 'screenprotector.jpg', category: 'screenprotectors' },
+    { barcode: 'SCR011', name: 'Privacy Screen Protector', price: 490.00, stock: 25, image: 'screenprotector.jpg', category: 'screenprotectors' },
+    { barcode: 'OTH001', name: 'Anker 15W Wireless Charger', price: 1590.00, stock: 20, image: 'wireless.jfif', category: 'others' },
+    { barcode: 'OTH002', name: 'Belkin 15W Wireless Charger', price: 1890.00, stock: 15, image: 'wireless.jfif', category: 'others' },
+    { barcode: 'OTH003', name: 'UGREEN 15W Wireless Charger', price: 1290.00, stock: 25, image: 'wireless.jfif', category: 'others' },
+    { barcode: 'OTH004', name: 'Samsung 15W Wireless Charger', price: 1790.00, stock: 18, image: 'wireless.jfif', category: 'others' },
+    { barcode: 'OTH005', name: 'PopSockets Phone Grip', price: 490.00, stock: 40, image: 'wireless.jfif', category: 'others' },
+    { barcode: 'OTH006', name: 'Spigen Phone Stand', price: 590.00, stock: 35, image: 'wireless.jfif', category: 'others' },
+    { barcode: 'OTH007', name: 'Lamicall Phone Stand', price: 690.00, stock: 30, image: 'wireless.jfif', category: 'others' },
+    { barcode: 'OTH008', name: 'JBL Flip 6 Bluetooth Speaker', price: 4990.00, stock: 12, image: 'wireless.jfif', category: 'others' },
+    { barcode: 'OTH009', name: 'Sony XB100 Bluetooth Speaker', price: 3490.00, stock: 15, image: 'wireless.jfif', category: 'others' },
+    { barcode: 'OTH010', name: 'Anker Soundcore 3 Bluetooth Speaker', price: 2990.00, stock: 18, image: 'wireless.jfif', category: 'others' },
+    { barcode: 'OTH011', name: 'Marshall Emberton Bluetooth Speaker', price: 5990.00, stock: 10, image: 'wireless.jfif', category: 'others' },
+    { barcode: 'OTH012', name: 'Ultimate Ears Wonderboom 3 Speaker', price: 4990.00, stock: 12, image: 'wireless.jfif', category: 'others' }
+];
+
+var users = {
+    'BryanNialaAropo@gmail.com': { password: '1234567', role: 'admin', fullname: 'Bryan Niala Aropo' },
+    'RolandMaru@gmail.com': { password: '0987654', role: 'cashier', fullname: 'Roland Maru' }
+};
+
+var currentUser = '';
+var currentUserRole = '';
+var currentUserFullname = '';
+var products = [];
+var cart = [];
+var sales = [];
+var currentSale = null;
+var receiptCounter = 1;
+var selectedPayment = 'Cash';
+var cameraStream = null;
+var isCameraOn = false;
+var inventoryHistory = [];
+var loginRole = 'cashier';
+var lowStockAlertShown = false;
+var currentCategory = 'all';
+var currentBrandFilter = '';
+
+function adjustStock(index, amount) {
+    var product = products[index];
+    if (!product) return;
+    var newStock = product.stock + amount;
+    if (newStock < 0) newStock = 0;
+    product.stock = newStock;
+    localStorage.setItem('posProducts', JSON.stringify(products));
+    renderProducts();
+    renderQuickProducts();
+    renderInventory();
+    renderLowStock();
+    updateStats();
+    checkLowStock();
+    updateCategoryCounts();
+    showMessage('✅ Updated stock for ' + product.name + ': ' + newStock, 'success');
+}
+
+function setStock(index, value) {
+    var product = products[index];
+    if (!product) return;
+    var newStock = parseInt(value);
+    if (isNaN(newStock) || newStock < 0) newStock = 0;
+    product.stock = newStock;
+    localStorage.setItem('posProducts', JSON.stringify(products));
+    renderProducts();
+    renderQuickProducts();
+    renderInventory();
+    renderLowStock();
+    updateStats();
+    checkLowStock();
+    updateCategoryCounts();
+}
+
+function getCategoryCount(category) {
+    if (category === 'all') return products.length;
+    return products.filter(function(p) { return p.category === category; }).length;
+}
+
+function updateCategoryCounts() {
+    var categories = ['all', 'phones', 'chargers', 'cables', 'cases', 'earphones', 'powerbanks', 'screenprotectors', 'others'];
+    var map = { 'all': 'All', 'phones': 'Phones', 'chargers': 'Chargers', 'cables': 'Cables', 'cases': 'Cases', 'earphones': 'Earphones', 'powerbanks': 'Powerbanks', 'screenprotectors': 'Screenprotectors', 'others': 'Others' };
+    categories.forEach(function(cat) {
+        var el = document.getElementById('catCount' + map[cat]);
+        if (el) el.textContent = getCategoryCount(cat);
+    });
+}
+
+function filterByCategory(category) {
+    currentCategory = category;
+    currentBrandFilter = '';
+    document.querySelectorAll('.category-filter .cat-btn').forEach(function(btn) {
+        btn.classList.toggle('active', btn.dataset.category === category);
+    });
+    var categoryNames = { 'all': '⚡ Quick Select', 'phones': '📱 Phones', 'chargers': '🔌 Chargers', 'cables': '🔗 Cables', 'cases': '📱 Cases', 'earphones': '🎧 Earphones', 'powerbanks': '🔋 Power Banks', 'screenprotectors': '🛡️ Screen Protectors', 'others': '📌 Others' };
+    document.getElementById('quickProductsTitle').textContent = categoryNames[category] || '⚡ Quick Select';
+    var categorySubs = { 'all': 'All Categories', 'phones': '12 Phone Brands: ASUS, Huawei, Infinix, Apple, Lenovo, Nokia, OPPO, Realme, Samsung, Tecno, Vivo, Xiaomi', 'chargers': 'Brands: Anker, UGREEN, Baseus, Belkin, Aukey, Samsung, Xiaomi, Vivo', 'cables': 'Brands: Anker, UGREEN, Baseus, Belkin, Aukey, Samsung, Xiaomi, Vivo', 'cases': 'Brands: iPhone, Samsung, Xiaomi, Redmi, VIVO, OPPO, Realme, Infinix, Tecno, Huawei', 'earphones': 'Brands: JBL, Sony, Apple, Samsung, Xiaomi, Realme, OPPO, Vivo, SoundPEATS, Anker Soundcore', 'powerbanks': 'Brands: Anker, Xiaomi, Romoss, Baseus, UGREEN, Tylex, VEGER, Orashare', 'screenprotectors': 'Brands: iPhone, Samsung, Xiaomi, Redmi, VIVO, OPPO, Realme, Infinix, Tecno, Huawei', 'others': 'Brands: Anker, Belkin, UGREEN, Samsung, PopSockets, Spigen, Lamicall, JBL, Sony, Marshall, Ultimate Ears' };
+    document.getElementById('quickProductsSub').textContent = categorySubs[category] || 'All Categories';
+    renderBrandTags(category);
+    renderQuickProducts();
+    var searchInput = document.getElementById('barcode');
+    if (searchInput.value.trim().length > 0) {
+        searchProducts(searchInput.value);
+    }
+}
+
+function renderBrandTags(category) {
+    var container = document.getElementById('brandTagsContainer');
+    if (!container) return;
+    var brands = [];
+    if (category === 'all') {
+        brands = ['Samsung', 'Apple', 'Xiaomi', 'OPPO', 'vivo', 'Realme', 'ASUS', 'Huawei', 'Tecno', 'Infinix', 'Nokia', 'Lenovo', 'Anker', 'UGREEN', 'Baseus', 'Spigen', 'JBL', 'Sony'];
+    } else if (category === 'phones') {
+        brands = ['ASUS', 'Huawei', 'Infinix', 'Apple', 'Lenovo', 'Nokia', 'OPPO', 'Realme', 'Samsung', 'Tecno', 'Vivo', 'Xiaomi'];
+    } else if (category === 'chargers') {
+        brands = ['Anker', 'UGREEN', 'Baseus', 'Belkin', 'Aukey', 'Samsung', 'Xiaomi', 'Vivo'];
+    } else if (category === 'cables') {
+        brands = ['Anker', 'UGREEN', 'Baseus', 'Belkin', 'Aukey', 'Samsung', 'Xiaomi', 'Vivo'];
+    } else if (category === 'cases') {
+        brands = ['iPhone', 'Samsung', 'Xiaomi', 'Redmi', 'VIVO', 'OPPO', 'Realme', 'Infinix', 'Tecno', 'Huawei'];
+    } else if (category === 'earphones') {
+        brands = ['JBL', 'Sony', 'Apple', 'Samsung', 'Xiaomi', 'Realme', 'OPPO', 'Vivo', 'SoundPEATS', 'Anker Soundcore'];
+    } else if (category === 'powerbanks') {
+        brands = ['Anker', 'Xiaomi', 'Romoss', 'Baseus', 'UGREEN', 'Tylex', 'VEGER', 'Orashare'];
+    } else if (category === 'screenprotectors') {
+        brands = ['iPhone', 'Samsung', 'Xiaomi', 'Redmi', 'VIVO', 'OPPO', 'Realme', 'Infinix', 'Tecno', 'Huawei'];
+    } else if (category === 'others') {
+        brands = ['Anker', 'Belkin', 'UGREEN', 'Samsung', 'PopSockets', 'Spigen', 'Lamicall', 'JBL', 'Sony', 'Marshall', 'Ultimate Ears'];
+    }
+    container.innerHTML = brands.map(function(brand) { return '<span class="brand-tag ' + (currentBrandFilter === brand ? 'active' : '') + '" onclick="filterByBrand(\'' + brand + '\')">' + brand + '</span>'; }).join('');
+    if (brands.length === 0) {
+        container.innerHTML = '<span style="font-size:0.7rem;color:#888;">No brands available</span>';
+    }
+}
+
+function filterByBrand(brand) {
+    if (currentBrandFilter === brand) {
+        currentBrandFilter = '';
+    } else {
+        currentBrandFilter = brand;
+    }
+    renderBrandTags(currentCategory);
+    renderQuickProducts();
+    var searchInput = document.getElementById('barcode');
+    if (searchInput.value.trim().length > 0) {
+        searchProducts(searchInput.value);
+    }
+}
+
+function renderQuickProducts() {
+    var container = document.getElementById('quickProducts');
+    var filteredProducts = [];
+    if (currentCategory === 'all') {
+        filteredProducts = products;
+    } else {
+        filteredProducts = products.filter(function(p) { return p.category === currentCategory; });
+    }
+    if (currentBrandFilter) {
+        filteredProducts = filteredProducts.filter(function(p) { return p.name.toLowerCase().includes(currentBrandFilter.toLowerCase()); });
+    }
+    var sorted = filteredProducts.slice().sort(function(a, b) { return b.stock - a.stock; });
+    var topProducts = sorted.slice(0, 8);
+    if (topProducts.length === 0) {
+        container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#999;font-size:0.8rem;padding:20px;">📭 No products found in this category</div>';
+        return;
+    }
+    container.innerHTML = topProducts.map(function(product) {
+        var price = '₱' + product.price.toFixed(2);
+        var stock = product.stock;
+        var isNoStock = stock === 0;
+        var isLowStock = stock > 0 && stock <= 5;
+        var classes = 'quick-product-item';
+        var stockText = '📦 ' + stock + ' left';
+        var stockClass = '';
+        var overlay = '';
+        var imageFile = product.image || '';
+        if (isNoStock) {
+            classes += ' no-stock';
+            stockText = 'NO STOCK';
+            stockClass = 'out';
+            overlay = '<div class="no-stock-overlay">NO STOCK</div>';
+        } else if (isLowStock) {
+            classes += ' low-stock';
+            stockText = '⚠️ ' + stock + ' left';
+            stockClass = 'low';
+            overlay = '<div class="low-stock-overlay">⚠️ LOW</div>';
+        }
+        return '<div class="' + classes + '" onclick="' + (isNoStock ? '' : 'quickScanBrand(\'' + product.barcode + '\')') + '" title="' + (isNoStock ? 'NO STOCK - Cannot add' : isLowStock ? '⚠️ LOW STOCK' : 'Click to add') + '">\n            <img src="' + imageFile + '" alt="' + product.name + '" class="qp-icon" onerror="this.style.display=\'none\';this.parentElement.querySelector(\'.qp-name\').style.marginTop=\'10px\'">\n            ' + overlay + '\n            <div class="qp-name">' + (product.name.length > 18 ? product.name.substring(0, 18) + '...' : product.name) + '</div>\n            <div class="qp-price">' + price + '</div>\n            <div class="qp-stock ' + stockClass + '">' + stockText + '</div>\n        </div>';
+    }).join('');
+}
+
+function searchProducts(query) {
+    var resultsDiv = document.getElementById('searchResults');
+    var barcodeInput = document.getElementById('barcode');
+    if (!query || query.trim().length === 0) {
+        resultsDiv.classList.remove('show');
+        resultsDiv.innerHTML = '';
+        return;
+    }
+    var searchTerm = query.toLowerCase().trim();
+    var results = products.filter(function(p) { return p.name.toLowerCase().includes(searchTerm) || p.barcode.toLowerCase().includes(searchTerm); });
+    if (currentCategory !== 'all') {
+        results = results.filter(function(p) { return p.category === currentCategory; });
+    }
+    if (currentBrandFilter) {
+        results = results.filter(function(p) { return p.name.toLowerCase().includes(currentBrandFilter.toLowerCase()); });
+    }
+    if (results.length === 0) {
+        resultsDiv.innerHTML = '<div class="no-results">😕 No products found for "<strong>' + query + '</strong>"</div>';
+        resultsDiv.classList.add('show');
+        return;
+    }
+    resultsDiv.innerHTML = results.slice(0, 10).map(function(p) {
+        var stockClass = p.stock === 0 ? 'out' : (p.stock <= 5 ? 'low' : '');
+        var stockText = p.stock === 0 ? 'NO STOCK' : (p.stock <= 5 ? '⚠️ ' + p.stock + ' left' : p.stock + ' in stock');
+        var categoryEmoji = { 'phones': '📱', 'chargers': '🔌', 'cables': '🔗', 'cases': '📱', 'earphones': '🎧', 'powerbanks': '🔋', 'screenprotectors': '🛡️', 'others': '📌' }[p.category] || '📦';
+        return '<div class="result-item" onclick="selectSearchResult(\'' + p.barcode + '\')">\n            <div>\n                <div class="result-name">' + categoryEmoji + ' ' + p.name + '</div>\n                <div style="font-size:0.65rem;color:#888;">' + p.barcode + ' · ' + (p.category || '') + '</div>\n            </div>\n            <div style="text-align:right;">\n                <div class="result-price">₱' + p.price.toFixed(2) + '</div>\n                <div class="result-stock ' + stockClass + '">' + stockText + '</div>\n            </div>\n        </div>';
+    }).join('');
+    resultsDiv.classList.add('show');
+}
+
+function selectSearchResult(barcode) {
+    document.getElementById('barcode').value = barcode;
+    document.getElementById('searchResults').classList.remove('show');
+    scanProduct();
+}
+
+function openLogoutModal() {
+    document.getElementById('logoutModal').classList.add('show');
+}
+
+function closeLogoutModal() {
+    document.getElementById('logoutModal').classList.remove('show');
+}
+
+function confirmLogout() {
+    closeLogoutModal();
+    if (cameraStream) { cameraStream.getTracks().forEach(function(t) { t.stop(); }); cameraStream = null; isCameraOn = false; document.getElementById('cameraPreview').style.display = 'none'; }
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('loginOverlay').classList.remove('hidden');
+    document.getElementById('loginError').style.display = 'none';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginUser').value = '';
+    currentUser = ''; currentUserRole = ''; currentUserFullname = '';
+    renderLoginBrandGrid();
+}
+
+document.getElementById('logoutModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeLogoutModal();
+    }
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeLogoutModal();
+    }
+});
+
+function validateAmount(input) {
+    if (parseFloat(input.value) < 0) {
+        input.value = '0';
+    }
+    if (input.value === '' || input.value === '-') {
+        input.value = '0';
+    }
+}
+
+function closeLowStockAlert() {
+    document.getElementById('lowStockAlert').classList.remove('show');
+}
+
+function checkLowStock() {
+    var lowItems = products.filter(function(p) { return p.stock <= 5; });
+    var alertDiv = document.getElementById('lowStockAlert');
+    var listDiv = document.getElementById('lowStockAlertList');
+    if (lowItems.length > 0) {
+        alertDiv.classList.add('show');
+        listDiv.innerHTML = lowItems.map(function(p) { return '<div class="item"><span>' + p.name + '</span><span class="stock-count ' + (p.stock === 0 ? 'zero' : '') + '">' + p.stock + ' ' + (p.stock === 0 ? '(NO STOCK!)' : 'left') + '</span></div>'; }).join('');
+        lowStockAlertShown = true;
+    } else {
+        alertDiv.classList.remove('show');
+    }
+    document.getElementById('statLowStock').innerText = lowItems.length;
+    document.getElementById('sidebarLowStock').innerText = lowItems.length;
+}
+
+function renderLoginBrandGrid() {
+    var grid = document.getElementById('loginBrandGrid');
+    var brands = [
+        { name: 'ASUS', image: 'asus.png' },
+        { name: 'Huawei', image: 'huawei.jfif' },
+        { name: 'Infinix', image: 'infinix.jfif' },
+        { name: 'iPhone', image: 'iphone.jfif' },
+        { name: 'Lenovo', image: 'lenovo.jfif' },
+        { name: 'Nokia', image: 'nokia.jfif' },
+        { name: 'OPPO', image: 'oppo.jfif' },
+        { name: 'Realme', image: 'realme.jfif' },
+        { name: 'Samsung', image: 'samsung.jfif' },
+        { name: 'TECNO', image: 'tecno.jfif' },
+        { name: 'Vivo', image: 'vivo.jfif' },
+        { name: 'Xiaomi', image: 'xiaomi.jfif' }
+    ];
+    grid.innerHTML = brands.map(function(brand) { return '<div class="login-brand-item"><img src="' + brand.image + '" alt="' + brand.name + '" class="brand-logo" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<span style=\\\'font-size:1.8rem;\\\'>📱</span><span class=\\\'brand-name\\\'>' + brand.name + '</span>\'"><span class="brand-name">' + brand.name + '</span></div>'; }).join('');
+}
+
+function addNewProduct() {
+    var barcode = document.getElementById('newBarcode').value.trim();
+    var name = document.getElementById('newName').value.trim();
+    var price = parseFloat(document.getElementById('newPrice').value);
+    var stock = parseInt(document.getElementById('newStock').value);
+    if (!barcode || !name || isNaN(price) || price <= 0 || isNaN(stock) || stock < 0) {
+        showMessage('Please fill all fields correctly! Price > 0, Stock >= 0', 'error');
+        return;
+    }
+    if (products.some(function(p) { return p.barcode === barcode; })) {
+        showMessage('Barcode already exists!', 'error');
+        return;
+    }
+    products.push({ barcode: barcode, name: name, price: price, stock: stock, image: '', category: 'others' });
+    saveData();
+    renderProducts();
+    renderQuickProducts();
+    renderInventory();
+    renderLowStock();
+    updateStats();
+    checkLowStock();
+    updateCategoryCounts();
+    document.getElementById('newBarcode').value = '';
+    document.getElementById('newName').value = '';
+    document.getElementById('newPrice').value = '';
+    document.getElementById('newStock').value = '';
+    showMessage('✅ Product added successfully!', 'success');
+}
+
+function selectLoginRole(role) {
+    loginRole = role;
+    document.querySelectorAll('.role-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.querySelector('.role-btn[data-role="' + role + '"]').classList.add('active');
+    document.getElementById('loginUser').value = '';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginError').style.display = 'none';
+    document.getElementById('loginUser').placeholder = 'Email';
+}
+
+function toggleLoginPass() {
+    var passInput = document.getElementById('loginPass');
+    var eyeBtn = document.querySelector('.toggle-password');
+    if (passInput.type === 'password') { passInput.type = 'text'; eyeBtn.textContent = '🙈'; } 
+    else { passInput.type = 'password'; eyeBtn.textContent = '👁️'; }
+}
+
+function handleLogin() {
+    var user = document.getElementById('loginUser').value.trim();
+    var pass = document.getElementById('loginPass').value.trim();
+    var err = document.getElementById('loginError');
+    if (users[user] && users[user].password === pass) {
+        var role = users[user].role;
+        if (role !== loginRole) {
+            err.textContent = 'This account is a ' + role + ', not ' + loginRole;
+            err.style.display = 'block';
+            return;
+        }
+        err.style.display = 'none';
+        currentUser = user;
+        currentUserRole = role;
+        currentUserFullname = users[user].fullname;
+        document.getElementById('loginOverlay').classList.add('hidden');
+        document.getElementById('app').style.display = 'block';
+        var displayName = currentUserFullname || user;
+        document.getElementById('sidebarUserName').textContent = displayName;
+        document.getElementById('userAvatar').textContent = displayName.charAt(0);
+        var roleDisplay = role === 'admin' ? 'Administrator' : 'Cashier';
+        document.getElementById('sidebarUserRole').textContent = roleDisplay;
+        var isAdmin = role === 'admin';
+        document.querySelectorAll('.admin-only').forEach(function(el) {
+            el.style.display = isAdmin ? 'flex' : 'none';
+        });
+        document.querySelectorAll('.admin-only').forEach(function(el) {
+            if (el.classList.contains('menu-label')) {
+                el.style.display = isAdmin ? 'block' : 'none';
+            }
+        });
+        var addProductSection = document.getElementById('addProductSection');
+        if (addProductSection) {
+            addProductSection.style.display = isAdmin ? 'block' : 'none';
+        }
+        var adminTabs = ['inventory', 'categories', 'lowstock', 'suppliers', 'reports', 'expenses', 'settings', 'backup'];
+        adminTabs.forEach(function(tabId) {
+            var tab = document.getElementById('tab-' + tabId);
+            if (tab) {
+                tab.style.display = isAdmin ? 'block' : 'none';
+            }
+        });
+        document.getElementById('storeSub').textContent = isAdmin ? 'ADMIN PANEL' : 'CASHIER POS';
+        showTab('pos');
+        initApp();
+        updateClock();
+        setInterval(updateClock, 60000);
+    } else {
+        err.textContent = 'Invalid email or password';
+        err.style.display = 'block';
+    }
+}
+
+document.getElementById('loginPass').addEventListener('keypress', function(e) { if (e.key === 'Enter') handleLogin(); });
+document.getElementById('loginUser').addEventListener('keypress', function(e) { if (e.key === 'Enter') handleLogin(); });
+
+function updateClock() {
+    var now = new Date();
+    document.getElementById('headerDate').textContent = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    document.getElementById('dashboardDate').textContent = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    document.getElementById('settingsLastLogin').textContent = now.toLocaleString();
+}
+
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+}
+
+function initApp() {
+    loadData();
+    updateCategoryCounts();
+    filterByCategory('all');
+    renderCart();
+    renderProducts();
+    renderTransactions();
+    renderDashboard();
+    renderInventory();
+    renderLowStock();
+    updateStats();
+    document.getElementById('barcode').focus();
+    generateGCashQR();
+    updateClock();
+    setTimeout(function() {
+        checkLowStock();
+    }, 500);
+}
+
+function loadData() {
+    products = allProductsData.map(function(p) { return { ...p }; });
+    var storedProducts = localStorage.getItem('posProducts');
+    if (storedProducts) {
+        var oldProducts = JSON.parse(storedProducts);
+        oldProducts.forEach(function(oldP) {
+            if (!products.some(function(p) { return p.barcode === oldP.barcode; })) {
+                products.push({ ...oldP });
+            }
+        });
+    }
+    console.log('✅ Total Products Loaded:', products.length);
+    var storedSales = localStorage.getItem('posSales');
+    sales = storedSales ? JSON.parse(storedSales) : [];
+    var storedCounter = localStorage.getItem('posReceiptCounter');
+    receiptCounter = storedCounter ? parseInt(storedCounter) : 1;
+    var storedHistory = localStorage.getItem('posInventoryHistory');
+    inventoryHistory = storedHistory ? JSON.parse(storedHistory) : [];
+    saveData();
+}
+
+function saveData() {
+    localStorage.setItem('posProducts', JSON.stringify(products));
+    localStorage.setItem('posSales', JSON.stringify(sales));
+    localStorage.setItem('posReceiptCounter', receiptCounter.toString());
+    localStorage.setItem('posInventoryHistory', JSON.stringify(inventoryHistory));
+}
+
+function generateGCashQR() {
+    var container = document.getElementById('gcashQRCode');
+    if (!container) return;
+    container.innerHTML = '<img src="qr-code.jpg" alt="GCash QR Code" style="width:100px;height:100px;object-fit:contain;border-radius:8px;border:2px solid #007AFF;padding:4px;background:#fff;" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<span style=\\\'color:#888;font-size:0.7rem;\\\'>⚠️ QR code not found</span>\'">';
+}
+
+var originalShowTab = showTab;
+showTab = function(tabName) {
+    originalShowTab(tabName);
+    if (tabName === 'products') {
+        var isAdmin = currentUserRole === 'admin';
+        var addProductSection = document.getElementById('addProductSection');
+        if (addProductSection) {
+            addProductSection.style.display = isAdmin ? 'block' : 'none';
+        }
+    }
+};
+
+function showTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(function(t) {
+        t.classList.remove('active');
+    });
+    document.querySelectorAll('.menu-item').forEach(function(m) {
+        m.classList.remove('active');
+    });
+    var tab = document.getElementById('tab-' + tabName);
+    if (tab) {
+        tab.classList.add('active');
+    }
+    var menuItems = document.querySelectorAll('.menu-item');
+    var allTabs = ['pos', 'dashboard', 'products', 'customers', 'transactions', 'inventory', 'categories', 'lowstock', 'suppliers', 'reports', 'expenses', 'settings', 'backup'];
+    var index = allTabs.indexOf(tabName);
+    if (index >= 0 && menuItems[index]) {
+        menuItems[index].classList.add('active');
+    }
+    var displayName = currentUserFullname || currentUser || 'User';
+    var titles = {
+        'pos': ['🛒 Current Sale (POS)', 'Search product by name, brand, or barcode...'],
+        'dashboard': ['🏠 Dashboard', 'Welcome back, ' + displayName + '!'],
+        'products': ['📦 All Products', 'View and manage products'],
+        'customers': ['👤 Customers', 'Customer database'],
+        'transactions': ['🧾 Recent Transactions', 'Your sales history'],
+        'inventory': ['📋 Inventory Management', 'Track and manage stock levels'],
+        'categories': ['🏷️ Categories', 'Browse products by category'],
+        'lowstock': ['⚠️ Low Stock Items', 'Items that need restocking'],
+        'suppliers': ['🏢 Suppliers', 'Manage supplier relationships'],
+        'reports': ['📊 Reports', 'Sales and performance analytics'],
+        'expenses': ['💰 Expenses', 'Track business expenses'],
+        'settings': ['⚙️ Settings', 'Configure system preferences'],
+        'backup': ['💾 Backup / Restore', 'Secure your data']
+    };
+    var titleData = titles[tabName] || titles['pos'];
+    document.getElementById('pageTitle').textContent = titleData[0];
+    document.getElementById('pageSubtitle').textContent = titleData[1];
+    if (tabName === 'pos') {
+        document.getElementById('barcode').focus();
+        if (selectedPayment === 'GCash') document.getElementById('qrContainer').classList.add('show');
+    }
+    if (tabName === 'products') renderProducts();
+    if (tabName === 'transactions') renderTransactions();
+    if (tabName === 'dashboard') renderDashboard();
+    if (tabName === 'inventory') renderInventory();
+    if (tabName === 'lowstock') renderLowStock();
+    if (window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.remove('open');
+    }
+}
+
+function showMessage(text, type) {
+    var msg = document.getElementById('message');
+    msg.innerText = text;
+    msg.className = 'message ' + type;
+    setTimeout(function() { msg.className = 'message'; }, 3000);
+}
+
+function scanProduct() {
+    var input = document.getElementById('barcode');
+    var barcode = input.value.trim();
+    if (!barcode) { showMessage('Enter barcode or search!', 'error'); return; }
+    var product = products.find(function(p) { return p.barcode === barcode; });
+    if (!product) { 
+        product = products.find(function(p) { return p.name.toLowerCase().includes(barcode.toLowerCase()); });
+        if (!product) {
+            showMessage('Product not found!', 'error'); 
+            input.value = ''; 
+            input.focus(); 
+            return; 
+        }
+    }
+    if (product.stock <= 0) { showMessage('❌ NO STOCK! Cannot add.', 'error'); input.value = ''; input.focus(); return; }
+    if (product.stock <= 5) { showMessage('⚠️ LOW STOCK! Only ' + product.stock + ' left.', 'warning'); input.value = ''; input.focus(); return; }
+    var existingItem = cart.find(function(item) { return item.barcode === product.barcode; });
+    if (existingItem) {
+        if (existingItem.quantity < product.stock) existingItem.quantity++;
+        else { showMessage('Not enough stock!', 'error'); return; }
+    } else {
+        cart.push({ barcode: product.barcode, name: product.name, price: product.price, productId: products.indexOf(product), quantity: 1 });
+    }
+    renderCart();
+    input.value = '';
+    input.focus();
+    document.getElementById('searchResults').classList.remove('show');
+    showMessage('✅ Added: ' + product.name, 'success');
+}
+
+function quickScanBrand(barcode) {
+    var product = products.find(function(p) { return p.barcode === barcode; });
+    if (product) {
+        if (product.stock <= 0) { showMessage('❌ NO STOCK! Cannot add.', 'error'); return; }
+        if (product.stock <= 5) { showMessage('⚠️ LOW STOCK! Only ' + product.stock + ' left.', 'warning'); return; }
+        document.getElementById('barcode').value = barcode;
+        scanProduct();
+    } else showMessage('Product not found!', 'error');
+}
+
+function renderCart() {
+    var container = document.getElementById('cartItems');
+    var count = document.getElementById('cartCount');
+    var total = document.getElementById('cartTotal');
+    var sidebarCount = document.getElementById('sidebarCartCount');
+    var payBtn = document.getElementById('payBtn');
+    var cartTotal = cart.reduce(function(sum, item) { return sum + (item.price * item.quantity); }, 0);
+    cartTotal = Math.round(cartTotal * 100) / 100;
+    var itemCount = cart.reduce(function(sum, item) { return sum + item.quantity; }, 0);
+    count.innerText = itemCount;
+    sidebarCount.innerText = itemCount;
+    total.innerText = cartTotal.toFixed(2);
+    payBtn.disabled = cart.length === 0;
+    var cashInput = document.getElementById('cashTendered');
+    if (cartTotal > 0) {
+        cashInput.value = cartTotal.toFixed(2);
+    } else {
+        cashInput.value = '0';
+    }
+    if (cart.length === 0) {
+        container.innerHTML = '<div class="cart-empty">🛒 Cart is empty</div>';
+        return;
+    }
+    container.innerHTML = cart.map(function(item, index) {
+        return '<div class="cart-item-row">\n            <div class="item-info">\n                <div class="item-name">' + item.name + '</div>\n                <div class="item-price">₱' + item.price.toFixed(2) + '</div>\n            </div>\n            <div class="item-qty">\n                <button class="qty-btn" onclick="changeQuantity(' + index + ', -1)">−</button>\n                <span class="qty-num">' + item.quantity + '</span>\n                <button class="qty-btn" onclick="changeQuantity(' + index + ', 1)">+</button>\n                <button class="item-remove" onclick="removeFromCart(' + index + ')">✕</button>\n            </div>\n        </div>';
+    }).join('');
+}
+
+function changeQuantity(index, change) {
+    var item = cart[index];
+    var product = products[item.productId];
+    if (!product) return;
+    if (change > 0 && product.stock <= 0) { showMessage('❌ NO STOCK! Cannot add.', 'error'); return; }
+    if (change > 0 && product.stock <= 5) { showMessage('⚠️ LOW STOCK! Only ' + product.stock + ' left.', 'warning'); return; }
+    if (change > 0 && item.quantity < product.stock) item.quantity++;
+    else if (change < 0) {
+        if (item.quantity > 1) item.quantity--;
+        else return;
+    }
+    renderCart();
+}
+
+function removeFromCart(index) {
+    cart.splice(index, 1);
+    renderCart();
+}
+
+function clearCart() {
+    cart = [];
+    renderCart();
+    document.getElementById('cashTendered').value = '0';
+    document.getElementById('paymentResult').style.display = 'none';
+    document.getElementById('qrContainer').classList.remove('show');
+}
+
+function selectPayment(method) {
+    selectedPayment = method;
+    document.querySelectorAll('.payment-method-btn').forEach(function(el) { el.classList.remove('active'); });
+    document.querySelector('.payment-method-btn[data-method="' + method + '"]').classList.add('active');
+    if (method === 'GCash') document.getElementById('qrContainer').classList.add('show');
+    else document.getElementById('qrContainer').classList.remove('show');
+}
+
+function processPayment() {
+    var total = cart.reduce(function(sum, item) { return sum + (item.price * item.quantity); }, 0);
+    total = Math.round(total * 100) / 100;
+    var cashInput = document.getElementById('cashTendered');
+    var cash = parseFloat(cashInput.value);
+    var result = document.getElementById('paymentResult');
+    if (cart.length === 0) { 
+        showMessage('Cart is empty!', 'error'); 
+        return; 
+    }
+    if (isNaN(cash) || cash < 0) {
+        cash = total;
+        cashInput.value = total.toFixed(2);
+    }
+    if (cash < total) {
+        cash = total;
+        cashInput.value = total.toFixed(2);
+    }
+    var change = Math.round((cash - total) * 100) / 100;
+    if (change < 0) {
+        change = 0;
+    }
+    cart.forEach(function(item) {
+        var product = products[item.productId];
+        if (product) {
+            var oldStock = product.stock;
+            product.stock = product.stock - item.quantity;
+            if (product.stock < 0) product.stock = 0;
+            inventoryHistory.push({
+                date: new Date().toISOString(),
+                barcode: product.barcode,
+                name: product.name,
+                oldStock: oldStock,
+                newStock: product.stock,
+                user: currentUserFullname || currentUser,
+                action: 'Sale'
+            });
+        }
+    });
+    var receiptNum = String(receiptCounter).padStart(6, '0');
+    currentSale = {
+        id: Date.now(),
+        receiptNumber: receiptNum,
+        date: new Date().toISOString(),
+        items: cart.map(function(item) { return { name: item.name, price: item.price, quantity: item.quantity, subtotal: Math.round((item.price * item.quantity) * 100) / 100 }; }),
+        total: total,
+        cash: cash,
+        change: change,
+        method: selectedPayment,
+        user: currentUserFullname || currentUser
+    };
+    receiptCounter++;
+    sales.unshift(currentSale);
+    saveData();
+    showReceipt(currentSale);
+    clearCart();
+    cashInput.value = '0';
+    result.style.display = 'none';
+    renderProducts();
+    renderQuickProducts();
+    renderTransactions();
+    renderDashboard();
+    renderInventory();
+    renderLowStock();
+    updateStats();
+    checkLowStock();
+    updateCategoryCounts();
+    document.getElementById('qrContainer').classList.remove('show');
+    showMessage('✅ Payment successful! Change: ₱' + change.toFixed(2), 'success');
+}
+
+function showReceipt(sale) {
+    var modal = document.getElementById('receiptModal');
+    var date = new Date(sale.date);
+    var dateStr = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    var timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    
+    document.getElementById('receiptNumber').innerText = '#' + sale.receiptNumber;
+    document.getElementById('receiptDate').innerText = dateStr;
+    document.getElementById('receiptTime').innerText = timeStr;
+    document.getElementById('receiptTotal').innerText = '₱' + sale.total.toFixed(2);
+    
+    document.getElementById('receiptMethod').innerText = sale.method || 'Cash';
+    
+    var cashRow = document.getElementById('receiptCashRow');
+    var changeRow = document.getElementById('receiptChangeRow');
+    if (sale.method === 'Cash') {
+        cashRow.style.display = 'flex';
+        changeRow.style.display = 'flex';
+        document.getElementById('receiptCashTendered').innerText = '₱' + sale.cash.toFixed(2);
+        document.getElementById('receiptChange').innerText = '₱' + sale.change.toFixed(2);
+    } else {
+        cashRow.style.display = 'none';
+        changeRow.style.display = 'none';
+    }
+    
+    var roleLabel = currentUserRole === 'admin' ? 'Admin' : 'Cashier';
+    document.getElementById('receiptCashier').innerText = roleLabel + ': ' + (sale.user || currentUserFullname || 'Unknown');
+    
+    document.getElementById('receiptItems').innerHTML = sale.items.map(function(item) {
+        return '<div class="receipt-item">\n            <span class="item-name">' + item.name + '</span>\n            <span class="item-qty">x' + item.quantity + '</span>\n            <span class="item-price">₱' + item.subtotal.toFixed(2) + '</span>\n        </div>';
+    }).join('');
+    
+    modal.classList.add('show');
+}
+
+function closeReceipt() { 
+    document.getElementById('receiptModal').classList.remove('show'); 
+    currentSale = null; 
+}
+
+function printReceipt() {
+    if (!currentSale) {
+        showMessage('No receipt to print!', 'error');
+        return;
+    }
+    
+    var sale = currentSale;
+    var date = new Date(sale.date);
+    var dateStr = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    var timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    var roleLabel = currentUserRole === 'admin' ? 'Admin' : 'Cashier';
+    var cashierName = roleLabel + ': ' + (sale.user || currentUserFullname || 'Unknown');
+    
+    var itemsHTML = sale.items.map(function(item) {
+        return '<div class="pr-item">\n                <span class="pi-name">' + item.name + '</span>\n                <span class="pi-qty">x' + item.quantity + '</span>\n                <span class="pi-price">₱' + item.subtotal.toFixed(2) + '</span>\n            </div>';
+    }).join('');
+    
+    var paymentHTML = '';
+    if (sale.method === 'Cash') {
+        paymentHTML = '<div class="pp-row"><span class="pp-label">Payment Method:</span><span class="pp-value pp-method-value">Cash</span></div>\n                <div class="pp-row"><span class="pp-label">Cash Tendered:</span><span class="pp-value">₱' + sale.cash.toFixed(2) + '</span></div>\n                <div class="pp-row"><span class="pp-label">Change:</span><span class="pp-value green">₱' + sale.change.toFixed(2) + '</span></div>';
+    } else {
+        paymentHTML = '<div class="pp-row"><span class="pp-label">Payment Method:</span><span class="pp-value pp-method-value">' + sale.method + '</span></div>';
+    }
+    
+    var receiptHTML = '<!DOCTYPE html>\n<html>\n<head>\n    <meta charset="UTF-8">\n    <title>Receipt</title>\n    <style>\n        * { margin: 0; padding: 0; box-sizing: border-box; }\n        body { \n            font-family: "Courier New", Courier, monospace;\n            background: #fff;\n            display: flex;\n            justify-content: center;\n            align-items: flex-start;\n            min-height: 100vh;\n            padding: 10px 0;\n        }\n        .print-receipt-container {\n            font-family: "Courier New", Courier, monospace;\n            font-size: 10px;\n            line-height: 1.3;\n            color: #1a1a1a;\n            width: 80mm;\n            max-width: 80mm;\n            padding: 4px 6px;\n            background: #fff;\n            margin: 0 auto;\n        }\n        .print-receipt-container .pr-header {\n            text-align: center;\n            border-bottom: 2px dashed #333;\n            padding-bottom: 6px;\n            margin-bottom: 4px;\n        }\n        .print-receipt-container .pr-header .pr-logo {\n            width: 32px;\n            height: 32px;\n            object-fit: contain;\n            display: block;\n            margin: 0 auto 2px auto;\n        }\n        .print-receipt-container .pr-header .pr-store {\n            font-size: 16px;\n            font-weight: 700;\n            letter-spacing: 2px;\n            color: #1a2332;\n        }\n        .print-receipt-container .pr-header .pr-tagline {\n            font-size: 8px;\n            color: #777;\n            letter-spacing: 1px;\n            text-transform: uppercase;\n        }\n        .print-receipt-container .pr-header .pr-tagline.sub {\n            font-size: 7px;\n            color: #999;\n        }\n        .print-receipt-container .pr-divider {\n            border-top: 1px dashed #ccc;\n            margin: 3px 0;\n        }\n        .print-receipt-container .pr-info {\n            display: flex;\n            justify-content: space-between;\n            font-size: 9px;\n            color: #555;\n            padding: 2px 0;\n        }\n        .print-receipt-container .pr-info .pr-no {\n            font-weight: 600;\n            color: #1a2332;\n        }\n        .print-receipt-container .pr-items {\n            margin: 3px 0;\n        }\n        .print-receipt-container .pr-item {\n            display: flex;\n            justify-content: space-between;\n            padding: 2px 0;\n            border-bottom: 1px dotted #eee;\n            font-size: 9px;\n        }\n        .print-receipt-container .pr-item .pi-name {\n            flex: 1;\n            font-weight: 500;\n        }\n        .print-receipt-container .pr-item .pi-qty {\n            margin: 0 4px;\n            color: #666;\n            font-weight: 600;\n        }\n        .print-receipt-container .pr-item .pi-price {\n            text-align: right;\n            font-weight: 600;\n            min-width: 55px;\n        }\n        .print-receipt-container .pr-total {\n            display: flex;\n            justify-content: space-between;\n            font-weight: 700;\n            font-size: 15px;\n            padding: 6px 0 5px;\n            border-top: 2px solid #1a2332;\n            border-bottom: 2px solid #1a2332;\n            margin: 3px 0;\n        }\n        .print-receipt-container .pr-total .pt-label {\n            font-size: 13px;\n            text-transform: uppercase;\n            letter-spacing: 1px;\n        }\n        .print-receipt-container .pr-total .pt-amount {\n            color: #FF4757;\n            font-size: 16px;\n        }\n        .print-receipt-container .pr-payment {\n            padding: 3px 0;\n            font-size: 9px;\n        }\n        .print-receipt-container .pr-payment .pp-row {\n            display: flex;\n            justify-content: space-between;\n            padding: 1px 0;\n        }\n        .print-receipt-container .pr-payment .pp-row .pp-label {\n            color: #666;\n        }\n        .print-receipt-container .pr-payment .pp-row .pp-value {\n            font-weight: 600;\n        }\n        .print-receipt-container .pr-payment .pp-row .pp-value.green {\n            color: #1a7a4a;\n        }\n        .print-receipt-container .pr-payment .pp-row .pp-method-label {\n            font-weight: 700;\n            color: #1a2332;\n            font-size: 10px;\n        }\n        .print-receipt-container .pr-payment .pp-row .pp-method-value {\n            font-weight: 700;\n            color: #1a2332;\n            font-size: 10px;\n            text-transform: uppercase;\n        }\n        .print-receipt-container .pr-cashier {\n            padding: 3px 0;\n            border-top: 1px dashed #ddd;\n            margin-top: 3px;\n            font-size: 9px;\n        }\n        .print-receipt-container .pr-cashier .pc-label {\n            color: #666;\n        }\n        .print-receipt-container .pr-cashier .pc-name {\n            font-weight: 600;\n            color: #1a2332;\n        }\n        .print-receipt-container .pr-footer {\n            text-align: center;\n            padding: 4px 0 2px;\n        }\n        .print-receipt-container .pr-footer .pf-thanks {\n            font-weight: 700;\n            font-size: 12px;\n            color: #2ED573;\n        }\n        .print-receipt-container .pr-footer .pf-come {\n            font-size: 9px;\n            color: #888;\n            font-style: italic;\n        }\n        .print-receipt-container .pr-footer .pf-status {\n            display: flex;\n            justify-content: space-between;\n            font-size: 7px;\n            color: #aaa;\n            border-top: 1px dashed #ddd;\n            padding-top: 3px;\n            margin-top: 3px;\n        }\n        .print-receipt-container .pr-footer .pf-status .pf-power {\n            font-weight: 600;\n            color: #666;\n        }\n        @page {\n            size: 80mm auto;\n            margin: 0;\n        }\n        @media print {\n            body { padding: 0; margin: 0; }\n            .print-receipt-container { margin: 0; padding: 3px 4px; }\n        }\n    </style>\n</head>\n<body>\n    <div class="print-receipt-container">\n        <div class="pr-header">\n            <img src="logo.png" alt="Mobile Care Logo" class="pr-logo" onerror="this.style.display=\'none\'">\n            <div class="pr-store">MOBILE CARE</div>\n            <div class="pr-tagline">ACCESSORIES</div>\n            <div class="pr-tagline sub">Cellphones • Chargers • Cases</div>\n        </div>\n        <div class="pr-divider"></div>\n        <div class="pr-info">\n            <span class="pr-no">#' + sale.receiptNumber + '</span>\n            <span>' + dateStr + '</span>\n        </div>\n        <div class="pr-info" style="justify-content:flex-end;">\n            <span>Time: ' + timeStr + '</span>\n        </div>\n        <div class="pr-divider"></div>\n        <div class="pr-items">\n            ' + itemsHTML + '\n        </div>\n        <div class="pr-divider"></div>\n        <div class="pr-total">\n            <span class="pt-label">TOTAL</span>\n            <span class="pt-amount">₱' + sale.total.toFixed(2) + '</span>\n        </div>\n        <div class="pr-divider"></div>\n        <div class="pr-payment">\n            ' + paymentHTML + '\n        </div>\n        <div class="pr-divider"></div>\n        <div class="pr-cashier">\n            <span class="pc-label">Cashier: </span>\n            <span class="pc-name">' + cashierName + '</span>\n        </div>\n        <div class="pr-footer">\n            <div class="pf-thanks">Thank you for your purchase!</div>\n            <div class="pf-come">Come Again!</div>\n            <div class="pf-status">\n                <span class="pf-power">POWER &nbsp;&nbsp; STATUS</span>\n                <span>80mm</span>\n            </div>\n        </div>\n    </div>\n</body>\n</html>';
+    
+    var printWindow = window.open('', '_blank', 'width=400,height=600,menubar=no,toolbar=no,location=no,status=no,scrollbars=yes');
+    if (!printWindow) {
+        showMessage('Please allow pop-ups for this site to print the receipt.', 'error');
+        return;
+    }
+    
+    printWindow.document.write(receiptHTML);
+    printWindow.document.close();
+    
+    printWindow.onload = function() {
+        setTimeout(function() {
+            printWindow.focus();
+            printWindow.print();
+            setTimeout(function() {
+                printWindow.close();
+            }, 1000);
+        }, 500);
+    };
+}
+
+function toggleCamera() {
+    var video = document.getElementById('cameraPreview');
+    if (isCameraOn) {
+        if (cameraStream) { cameraStream.getTracks().forEach(function(t) { t.stop(); }); cameraStream = null; }
+        video.style.display = 'none'; isCameraOn = false; return;
+    }
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(function(stream) { cameraStream = stream; video.srcObject = stream; video.style.display = 'block'; isCameraOn = true; })
+            .catch(function(err) { showMessage('Camera access denied', 'error'); });
+    } else showMessage('Camera not supported', 'error');
+}
+
+function updateStats() {
+    var today = new Date().toDateString();
+    var todaySales = sales.filter(function(s) { return new Date(s.date).toDateString() === today; });
+    var todayTotal = todaySales.reduce(function(sum, s) { return sum + s.total; }, 0);
+    document.getElementById('headerTodaySales').innerText = todayTotal.toFixed(2);
+    document.getElementById('statTodaySales').innerText = todayTotal.toFixed(2);
+    document.getElementById('statTotalTransactions').innerText = sales.length;
+    document.getElementById('statTotalProducts').innerText = products.length;
+    var lowStock = products.filter(function(p) { return p.stock <= 5; }).length;
+    document.getElementById('statLowStock').innerText = lowStock;
+    document.getElementById('sidebarLowStock').innerText = lowStock;
+    document.getElementById('sidebarCartCount').innerText = cart.length;
+    document.getElementById('sidebarProductCount').innerText = products.length;
+    document.getElementById('sidebarInventoryCount').innerText = products.length;
+    document.getElementById('sidebarTransCount').innerText = sales.length;
+}
+
+function renderProducts() {
+    var container = document.getElementById('productsList');
+    document.getElementById('productTotalCount').innerText = products.length;
+    if (products.length === 0) {
+        container.innerHTML = '<div class="empty-state">No products available</div>';
+        return;
+    }
+    container.innerHTML = products.map(function(p, index) {
+        var stockColor = p.stock === 0 ? 'red' : (p.stock <= 5 ? '#FF9F43' : '#2ED573');
+        var stockLabel = p.stock === 0 ? '❌ NO STOCK!' : (p.stock <= 5 ? '⚠️ LOW STOCK' : '✅ In stock');
+        var categoryEmoji = { 'phones': '📱', 'chargers': '🔌', 'cables': '🔗', 'cases': '📱', 'earphones': '🎧', 'powerbanks': '🔋', 'screenprotectors': '🛡️', 'others': '📌' }[p.category] || '📦';
+        return '<div class="list-item">\n            <div class="item-left">\n                <div class="item-title">' + categoryEmoji + ' ' + p.name + '</div>\n                <div class="item-sub" style="color:' + stockColor + ';font-weight:600;">' + stockLabel + ': ' + p.stock + ' left · ' + (p.category || 'Uncategorized') + '</div>\n            </div>\n            <div class="item-right" style="display:flex;align-items:center;gap:6px;">\n                <button onclick="adjustStock(' + index + ', -1)" style="background:#FF4757;color:#fff;border:none;border-radius:4px;width:26px;height:26px;cursor:pointer;font-weight:bold;">−</button>\n                <span style="font-weight:700;min-width:30px;text-align:center;">' + p.stock + '</span>\n                <button onclick="adjustStock(' + index + ', 1)" style="background:#2ED573;color:#fff;border:none;border-radius:4px;width:26px;height:26px;cursor:pointer;font-weight:bold;">+</button>\n                <button onclick="adjustStock(' + index + ', 10)" style="background:#1E90FF;color:#fff;border:none;border-radius:4px;padding:0 8px;height:26px;cursor:pointer;font-weight:bold;font-size:0.75rem;">+10</button>\n                <button onclick="adjustStock(' + index + ', 50)" style="background:#FF9F43;color:#fff;border:none;border-radius:4px;padding:0 8px;height:26px;cursor:pointer;font-weight:bold;font-size:0.75rem;">+50</button>\n            </div>\n        </div>';
+    }).join('');
+}
+
+function renderTransactions() {
+    var container = document.getElementById('transactionsList');
+    document.getElementById('transTotalCount').innerText = sales.length;
+    if (sales.length === 0) {
+        container.innerHTML = '<div class="empty-state">No transactions yet</div>';
+        return;
+    }
+    container.innerHTML = sales.slice(0, 20).map(function(s) { return '<div class="list-item"><div class="item-left"><div class="item-title">#' + s.receiptNumber + '</div><div class="item-sub">' + new Date(s.date).toLocaleString() + ' · ' + s.items.length + ' items · ' + (s.method || 'Cash') + '</div></div><div class="item-right">₱' + s.total.toFixed(2) + '</div></div>'; }).join('');
+}
+
+function renderDashboard() {
+    var today = new Date().toDateString();
+    var todaySales = sales.filter(function(s) { return new Date(s.date).toDateString() === today; });
+    var todayTotal = todaySales.reduce(function(sum, s) { return sum + s.total; }, 0);
+    document.getElementById('dashTodaySales').innerText = todayTotal.toFixed(2);
+    document.getElementById('dashTodayTrans').innerText = todaySales.length;
+    var totalItems = 0;
+    todaySales.forEach(function(s) { s.items.forEach(function(i) { totalItems += i.quantity; }); });
+    document.getElementById('dashItemsSold').innerText = totalItems;
+    var pm = { Cash:0, GCash:0, Card:0, 'Bank Transfer':0, Other:0 };
+    todaySales.forEach(function(s) { if (pm.hasOwnProperty(s.method)) pm[s.method]++; });
+    document.getElementById('dashCashCount').innerText = pm.Cash;
+    document.getElementById('dashGCashCount').innerText = pm.GCash;
+    document.getElementById('dashCardCount').innerText = pm.Card;
+    document.getElementById('dashBankCount').innerText = pm['Bank Transfer'];
+    document.getElementById('dashOtherCount').innerText = pm.Other;
+    var maxMethod = 'Cash';
+    var maxCount = 0;
+    Object.entries(pm).forEach(function(_ref) { var key = _ref[0]; var val = _ref[1]; if (val > maxCount) { maxCount = val; maxMethod = key; } });
+    document.getElementById('dashPayMethods').innerText = maxMethod + (maxCount > 0 ? ' (' + maxCount + ')' : '');
+}
+
+function renderInventory() {
+    var container = document.getElementById('inventoryList');
+    document.getElementById('inventoryCount').innerText = products.length;
+    var total = products.length;
+    var inStock = products.filter(function(p) { return p.stock > 5; }).length;
+    var lowStock = products.filter(function(p) { return p.stock > 0 && p.stock <= 5; }).length;
+    var outStock = products.filter(function(p) { return p.stock === 0; }).length;
+    document.getElementById('invTotalProducts').innerText = total;
+    document.getElementById('invInStock').innerText = inStock;
+    document.getElementById('invLowStock').innerText = lowStock;
+    document.getElementById('invOutStock').innerText = outStock;
+    if (products.length === 0) {
+        container.innerHTML = '<div class="empty-state">No products in inventory</div>';
+        return;
+    }
+    container.innerHTML = products.map(function(p, index) {
+        var statusColor = p.stock === 0 ? '#FF4757' : (p.stock <= 5 ? '#FF9F43' : '#2ED573');
+        var statusLabel = p.stock === 0 ? 'OUT OF STOCK' : (p.stock <= 5 ? 'LOW STOCK' : 'In Stock');
+        return '<div class="list-item">\n            <div class="item-left">\n                <div class="item-title">' + p.name + '</div>\n                <div class="item-sub">' + p.barcode + ' · <span style="color:' + statusColor + ';font-weight:600;">' + statusLabel + '</span></div>\n            </div>\n            <div class="item-right" style="display:flex;align-items:center;gap:6px;color:' + statusColor + ';">\n                <button onclick="adjustStock(' + index + ', -1)" style="background:#FF4757;color:#fff;border:none;border-radius:4px;width:26px;height:26px;cursor:pointer;font-weight:bold;">−</button>\n                <span style="font-weight:700;min-width:30px;text-align:center;">' + p.stock + '</span>\n                <button onclick="adjustStock(' + index + ', 1)" style="background:#2ED573;color:#fff;border:none;border-radius:4px;width:26px;height:26px;cursor:pointer;font-weight:bold;">+</button>\n                <button onclick="adjustStock(' + index + ', 10)" style="background:#1E90FF;color:#fff;border:none;border-radius:4px;padding:0 8px;height:26px;cursor:pointer;font-weight:bold;font-size:0.75rem;">+10</button>\n                <button onclick="adjustStock(' + index + ', 50)" style="background:#FF9F43;color:#fff;border:none;border-radius:4px;padding:0 8px;height:26px;cursor:pointer;font-weight:bold;font-size:0.75rem;">+50</button>\n            </div>\n        </div>';
+    }).join('');
+}
+
+function renderLowStock() {
+    var container = document.getElementById('lowStockList');
+    var lowItems = products.filter(function(p) { return p.stock <= 5; });
+    document.getElementById('lowStockCount').innerText = lowItems.length;
+    if (lowItems.length === 0) {
+        container.innerHTML = '<div class="empty-state">✅ All items are well-stocked!</div>';
+        return;
+    }
+    container.innerHTML = lowItems.map(function(p) { return '<div class="list-item" style="background:#fff5f5;"><div class="item-left"><div class="item-title">' + p.name + '</div><div class="item-sub">⚠️ ' + (p.stock === 0 ? 'NO STOCK!' : 'Low stock') + '</div></div><div class="item-right" style="display:flex;align-items:center;gap:6px;">\n        <button onclick="adjustStock(' + products.indexOf(p) + ', 10)" style="background:#1E90FF;color:#fff;border:none;border-radius:4px;padding:0 8px;height:26px;cursor:pointer;font-weight:bold;font-size:0.75rem;">+10</button>\n        <button onclick="adjustStock(' + products.indexOf(p) + ', 50)" style="background:#FF9F43;color:#fff;border:none;border-radius:4px;padding:0 8px;height:26px;cursor:pointer;font-weight:bold;font-size:0.75rem;">+50</button>\n    </div></div>'; }).join('');
+}
+
+document.getElementById('barcode').addEventListener('keypress', function(e) { 
+    if (e.key === 'Enter') {
+        var query = document.getElementById('barcode').value.trim();
+        if (query.length > 0) {
+            var product = products.find(function(p) { return p.barcode === query; });
+            if (product) {
+                scanProduct();
+            } else {
+                var found = products.find(function(p) { return p.name.toLowerCase().includes(query.toLowerCase()); });
+                if (found) {
+                    document.getElementById('barcode').value = found.barcode;
+                    scanProduct();
+                } else {
+                    showMessage('Product not found! Try searching.', 'error');
+                }
+            }
+        }
+    }
+});
+
+document.getElementById('cashTendered').addEventListener('keypress', function(e) { if (e.key === 'Enter') processPayment(); });
+
+document.addEventListener('click', function(e) {
+    var searchResults = document.getElementById('searchResults');
+    var barcodeInput = document.getElementById('barcode');
+    if (!barcodeInput.contains(e.target) && !searchResults.contains(e.target)) {
+        searchResults.classList.remove('show');
+    }
+});
+
+renderLoginBrandGrid();
+selectLoginRole('cashier');
+</script>
+</body>
+</html>
