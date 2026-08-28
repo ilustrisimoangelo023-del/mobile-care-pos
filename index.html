@@ -1536,6 +1536,156 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(255,71,87,0.35);
         }
+
+        /* Calendar Styles */
+        .calendar-container {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            border: 1px solid #e8edf2;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .calendar-header .month-year {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1a3a5c;
+        }
+        .calendar-header .nav-btn {
+            background: #f0f4fa;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1a3a5c;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .calendar-header .nav-btn:hover {
+            background: #e0e7ef;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+        .calendar-grid .day-label {
+            text-align: center;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: #888;
+            padding: 6px 0;
+        }
+        .calendar-grid .day-cell {
+            text-align: center;
+            padding: 8px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #1a3a5c;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+            position: relative;
+        }
+        .calendar-grid .day-cell:hover {
+            background: #f0f4fa;
+        }
+        .calendar-grid .day-cell.empty {
+            cursor: default;
+            color: transparent;
+        }
+        .calendar-grid .day-cell.empty:hover {
+            background: transparent;
+        }
+        .calendar-grid .day-cell.today {
+            background: #FF4757;
+            color: #fff;
+            font-weight: 700;
+        }
+        .calendar-grid .day-cell.today:hover {
+            background: #e74c3c;
+        }
+        .calendar-grid .day-cell.has-sales {
+            background: #d5f4e6;
+            color: #1a7a4a;
+            font-weight: 600;
+        }
+        .calendar-grid .day-cell.has-sales:hover {
+            background: #b8e6d1;
+        }
+        .calendar-grid .day-cell.has-sales.today {
+            background: #FF4757;
+            color: #fff;
+        }
+        .calendar-grid .day-cell.has-sales.today:hover {
+            background: #e74c3c;
+        }
+        .calendar-grid .day-cell .sale-dot {
+            display: block;
+            width: 6px;
+            height: 6px;
+            background: #2ED573;
+            border-radius: 50%;
+            margin: 2px auto 0;
+        }
+        .calendar-grid .day-cell.has-sales.today .sale-dot {
+            background: #fff;
+        }
+        .calendar-details {
+            border-top: 1px solid #eef3f9;
+            padding-top: 12px;
+            margin-top: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .calendar-details .detail-empty {
+            text-align: center;
+            color: #aaa;
+            padding: 20px;
+            font-size: 0.85rem;
+        }
+        .calendar-details .detail-item {
+            padding: 8px 12px;
+            border-bottom: 1px solid #f0f4fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .calendar-details .detail-item:last-child {
+            border-bottom: none;
+        }
+        .calendar-details .detail-item .detail-left {
+            flex: 1;
+        }
+        .calendar-details .detail-item .detail-title {
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: #1a3a5c;
+        }
+        .calendar-details .detail-item .detail-sub {
+            font-size: 0.7rem;
+            color: #8a9aa8;
+        }
+        .calendar-details .detail-item .detail-right {
+            font-weight: 600;
+            color: #2ED573;
+            font-size: 0.9rem;
+        }
+        .calendar-details .detail-item .detail-products {
+            font-size: 0.7rem;
+            color: #666;
+            margin-top: 2px;
+        }
+
         @media (max-width: 1024px) {
             .stats-row { grid-template-columns: 1fr 1fr; }
             .pos-grid { grid-template-columns: 1fr; }
@@ -1608,6 +1758,8 @@
             .login-brand-item .brand-name { font-size: 0.35rem; }
             .quick-product-item .qp-icon { width: 30px; height: 30px; }
             .category-filter .cat-btn { font-size: 0.6rem; padding: 2px 10px; }
+            .calendar-grid .day-cell { font-size: 0.7rem; padding: 6px 0; }
+            .calendar-header .month-year { font-size: 0.9rem; }
         }
     </style>
 </head>
@@ -1672,6 +1824,9 @@
                 </div>
                 <div class="menu-item" onclick="showTab('dashboard')">
                     <span class="icon">🏠</span> Dashboard
+                </div>
+                <div class="menu-item" onclick="showTab('calendar')">
+                    <span class="icon">📅</span> Sales Calendar
                 </div>
                 <div class="menu-item" onclick="showTab('products')">
                     <span class="icon">📦</span> Products
@@ -1930,6 +2085,26 @@
                         <span class="badge-count" id="transTotalCount">0</span>
                     </div>
                     <div class="list-container" id="transactionsList"></div>
+                </div>
+            </div>
+            <!-- New Calendar Tab -->
+            <div id="tab-calendar" class="tab-content">
+                <div class="pos-panel">
+                    <div class="panel-header">
+                        <h3>📅 Sales Calendar</h3>
+                        <span class="badge-count" id="calendarTotalSales">0</span>
+                    </div>
+                    <div class="calendar-container">
+                        <div class="calendar-header">
+                            <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
+                            <span class="month-year" id="calendarMonthYear">January 2024</span>
+                            <button class="nav-btn" onclick="changeMonth(1)">›</button>
+                        </div>
+                        <div class="calendar-grid" id="calendarGrid"></div>
+                        <div class="calendar-details" id="calendarDetails">
+                            <div class="detail-empty">📅 Select a date to view sales details</div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div id="tab-inventory" class="tab-content admin-tab">
@@ -2465,8 +2640,16 @@ var loginRole = 'cashier';
 var lowStockAlertShown = false;
 var currentCategory = 'all';
 var currentBrandFilter = '';
+// Calendar variables
+var currentCalendarMonth = new Date().getMonth();
+var currentCalendarYear = new Date().getFullYear();
 
 function adjustStock(index, amount) {
+    // Only admin can adjust stock
+    if (currentUserRole !== 'admin') {
+        showMessage('⛔ Only administrators can adjust stock.', 'error');
+        return;
+    }
     var product = products[index];
     if (!product) return;
     var newStock = product.stock + amount;
@@ -2484,6 +2667,11 @@ function adjustStock(index, amount) {
 }
 
 function setStock(index, value) {
+    // Only admin can set stock
+    if (currentUserRole !== 'admin') {
+        showMessage('⛔ Only administrators can set stock.', 'error');
+        return;
+    }
     var product = products[index];
     if (!product) return;
     var newStock = parseInt(value);
@@ -2732,6 +2920,11 @@ function renderLoginBrandGrid() {
 }
 
 function addNewProduct() {
+    // Only admin can add products
+    if (currentUserRole !== 'admin') {
+        showMessage('⛔ Only administrators can add products.', 'error');
+        return;
+    }
     var barcode = document.getElementById('newBarcode').value.trim();
     var name = document.getElementById('newName').value.trim();
     var price = parseFloat(document.getElementById('newPrice').value);
@@ -2858,6 +3051,7 @@ function initApp() {
     document.getElementById('barcode').focus();
     generateGCashQR();
     updateClock();
+    renderCalendar(currentCalendarMonth, currentCalendarYear);
     setTimeout(function() {
         checkLowStock();
     }, 500);
@@ -2906,6 +3100,11 @@ showTab = function(tabName) {
         if (addProductSection) {
             addProductSection.style.display = isAdmin ? 'block' : 'none';
         }
+        // Re-render products to show/hide stock buttons
+        renderProducts();
+    }
+    if (tabName === 'calendar') {
+        renderCalendar(currentCalendarMonth, currentCalendarYear);
     }
 };
 
@@ -2921,7 +3120,7 @@ function showTab(tabName) {
         tab.classList.add('active');
     }
     var menuItems = document.querySelectorAll('.menu-item');
-    var allTabs = ['pos', 'dashboard', 'products', 'customers', 'transactions', 'inventory', 'categories', 'lowstock', 'suppliers', 'reports', 'expenses', 'settings', 'backup'];
+    var allTabs = ['pos', 'dashboard', 'calendar', 'products', 'customers', 'transactions', 'inventory', 'categories', 'lowstock', 'suppliers', 'reports', 'expenses', 'settings', 'backup'];
     var index = allTabs.indexOf(tabName);
     if (index >= 0 && menuItems[index]) {
         menuItems[index].classList.add('active');
@@ -2930,6 +3129,7 @@ function showTab(tabName) {
     var titles = {
         'pos': ['🛒 Current Sale (POS)', 'Search product by name, brand, or barcode...'],
         'dashboard': ['🏠 Dashboard', 'Welcome back, ' + displayName + '!'],
+        'calendar': ['📅 Sales Calendar', 'Click on a date to view sales details'],
         'products': ['📦 All Products', 'View and manage products'],
         'customers': ['👤 Customers', 'Customer database'],
         'transactions': ['🧾 Recent Transactions', 'Your sales history'],
@@ -2954,6 +3154,7 @@ function showTab(tabName) {
     if (tabName === 'dashboard') renderDashboard();
     if (tabName === 'inventory') renderInventory();
     if (tabName === 'lowstock') renderLowStock();
+    if (tabName === 'calendar') renderCalendar(currentCalendarMonth, currentCalendarYear);
     if (window.innerWidth <= 768) {
         document.getElementById('sidebar').classList.remove('open');
     }
@@ -3137,6 +3338,7 @@ function processPayment() {
     checkLowStock();
     updateCategoryCounts();
     document.getElementById('qrContainer').classList.remove('show');
+    renderCalendar(currentCalendarMonth, currentCalendarYear);
     showMessage('✅ Payment successful! Change: ₱' + change.toFixed(2), 'success');
 }
 
@@ -3254,6 +3456,8 @@ function updateStats() {
     document.getElementById('sidebarProductCount').innerText = products.length;
     document.getElementById('sidebarInventoryCount').innerText = products.length;
     document.getElementById('sidebarTransCount').innerText = sales.length;
+    // Update calendar total sales count
+    document.getElementById('calendarTotalSales').innerText = sales.length;
 }
 
 function renderProducts() {
@@ -3263,11 +3467,22 @@ function renderProducts() {
         container.innerHTML = '<div class="empty-state">No products available</div>';
         return;
     }
+    var isAdmin = currentUserRole === 'admin';
     container.innerHTML = products.map(function(p, index) {
         var stockColor = p.stock === 0 ? 'red' : (p.stock <= 5 ? '#FF9F43' : '#2ED573');
         var stockLabel = p.stock === 0 ? '❌ NO STOCK!' : (p.stock <= 5 ? '⚠️ LOW STOCK' : '✅ In stock');
         var categoryEmoji = { 'phones': '📱', 'chargers': '🔌', 'cables': '🔗', 'cases': '📱', 'earphones': '🎧', 'powerbanks': '🔋', 'screenprotectors': '🛡️', 'others': '📌' }[p.category] || '📦';
-        return '<div class="list-item">\n            <div class="item-left">\n                <div class="item-title">' + categoryEmoji + ' ' + p.name + '</div>\n                <div class="item-sub" style="color:' + stockColor + ';font-weight:600;">' + stockLabel + ': ' + p.stock + ' left · ' + (p.category || 'Uncategorized') + '</div>\n            </div>\n            <div class="item-right" style="display:flex;align-items:center;gap:6px;">\n                <button onclick="adjustStock(' + index + ', -1)" style="background:#FF4757;color:#fff;border:none;border-radius:4px;width:26px;height:26px;cursor:pointer;font-weight:bold;">−</button>\n                <span style="font-weight:700;min-width:30px;text-align:center;">' + p.stock + '</span>\n                <button onclick="adjustStock(' + index + ', 1)" style="background:#2ED573;color:#fff;border:none;border-radius:4px;width:26px;height:26px;cursor:pointer;font-weight:bold;">+</button>\n                <button onclick="adjustStock(' + index + ', 10)" style="background:#1E90FF;color:#fff;border:none;border-radius:4px;padding:0 8px;height:26px;cursor:pointer;font-weight:bold;font-size:0.75rem;">+10</button>\n                <button onclick="adjustStock(' + index + ', 50)" style="background:#FF9F43;color:#fff;border:none;border-radius:4px;padding:0 8px;height:26px;cursor:pointer;font-weight:bold;font-size:0.75rem;">+50</button>\n            </div>\n        </div>';
+        
+        // Only show stock adjustment buttons for admin
+        var stockControls = '';
+        if (isAdmin) {
+            stockControls = '<button onclick="adjustStock(' + index + ', -1)" style="background:#FF4757;color:#fff;border:none;border-radius:4px;width:26px;height:26px;cursor:pointer;font-weight:bold;">−</button>\n                <span style="font-weight:700;min-width:30px;text-align:center;">' + p.stock + '</span>\n                <button onclick="adjustStock(' + index + ', 1)" style="background:#2ED573;color:#fff;border:none;border-radius:4px;width:26px;height:26px;cursor:pointer;font-weight:bold;">+</button>\n                <button onclick="adjustStock(' + index + ', 10)" style="background:#1E90FF;color:#fff;border:none;border-radius:4px;padding:0 8px;height:26px;cursor:pointer;font-weight:bold;font-size:0.75rem;">+10</button>\n                <button onclick="adjustStock(' + index + ', 50)" style="background:#FF9F43;color:#fff;border:none;border-radius:4px;padding:0 8px;height:26px;cursor:pointer;font-weight:bold;font-size:0.75rem;">+50</button>';
+        } else {
+            // Cashier view - just show stock count without buttons
+            stockControls = '<span style="font-weight:700;min-width:30px;text-align:center;color:' + stockColor + ';">' + p.stock + '</span>';
+        }
+        
+        return '<div class="list-item">\n            <div class="item-left">\n                <div class="item-title">' + categoryEmoji + ' ' + p.name + '</div>\n                <div class="item-sub" style="color:' + stockColor + ';font-weight:600;">' + stockLabel + ': ' + p.stock + ' left · ' + (p.category || 'Uncategorized') + '</div>\n            </div>\n            <div class="item-right" style="display:flex;align-items:center;gap:6px;">\n                ' + stockControls + '\n            </div>\n        </div>';
     }).join('');
 }
 
@@ -3318,10 +3533,20 @@ function renderInventory() {
         container.innerHTML = '<div class="empty-state">No products in inventory</div>';
         return;
     }
+    var isAdmin = currentUserRole === 'admin';
     container.innerHTML = products.map(function(p, index) {
         var statusColor = p.stock === 0 ? '#FF4757' : (p.stock <= 5 ? '#FF9F43' : '#2ED573');
         var statusLabel = p.stock === 0 ? 'OUT OF STOCK' : (p.stock <= 5 ? 'LOW STOCK' : 'In Stock');
-        return '<div class="list-item">\n            <div class="item-left">\n                <div class="item-title">' + p.name + '</div>\n                <div class="item-sub">' + p.barcode + ' · <span style="color:' + statusColor + ';font-weight:600;">' + statusLabel + '</span></div>\n            </div>\n            <div class="item-right" style="display:flex;align-items:center;gap:6px;color:' + statusColor + ';">\n                <button onclick="adjustStock(' + index + ', -1)" style="background:#FF4757;color:#fff;border:none;border-radius:4px;width:26px;height:26px;cursor:pointer;font-weight:bold;">−</button>\n                <span style="font-weight:700;min-width:30px;text-align:center;">' + p.stock + '</span>\n                <button onclick="adjustStock(' + index + ', 1)" style="background:#2ED573;color:#fff;border:none;border-radius:4px;width:26px;height:26px;cursor:pointer;font-weight:bold;">+</button>\n                <button onclick="adjustStock(' + index + ', 10)" style="background:#1E90FF;color:#fff;border:none;border-radius:4px;padding:0 8px;height:26px;cursor:pointer;font-weight:bold;font-size:0.75rem;">+10</button>\n                <button onclick="adjustStock(' + index + ', 50)" style="background:#FF9F43;color:#fff;border:none;border-radius:4px;padding:0 8px;height:26px;cursor:pointer;font-weight:bold;font-size:0.75rem;">+50</button>\n            </div>\n        </div>';
+        
+        // Only show stock adjustment buttons for admin
+        var stockControls = '';
+        if (isAdmin) {
+            stockControls = '<button onclick="adjustStock(' + index + ', -1)" style="background:#FF4757;color:#fff;border:none;border-radius:4px;width:26px;height:26px;cursor:pointer;font-weight:bold;">−</button>\n                <span style="font-weight:700;min-width:30px;text-align:center;">' + p.stock + '</span>\n                <button onclick="adjustStock(' + index + ', 1)" style="background:#2ED573;color:#fff;border:none;border-radius:4px;width:26px;height:26px;cursor:pointer;font-weight:bold;">+</button>\n                <button onclick="adjustStock(' + index + ', 10)" style="background:#1E90FF;color:#fff;border:none;border-radius:4px;padding:0 8px;height:26px;cursor:pointer;font-weight:bold;font-size:0.75rem;">+10</button>\n                <button onclick="adjustStock(' + index + ', 50)" style="background:#FF9F43;color:#fff;border:none;border-radius:4px;padding:0 8px;height:26px;cursor:pointer;font-weight:bold;font-size:0.75rem;">+50</button>';
+        } else {
+            stockControls = '<span style="font-weight:700;min-width:30px;text-align:center;color:' + statusColor + ';">' + p.stock + '</span>';
+        }
+        
+        return '<div class="list-item">\n            <div class="item-left">\n                <div class="item-title">' + p.name + '</div>\n                <div class="item-sub">' + p.barcode + ' · <span style="color:' + statusColor + ';font-weight:600;">' + statusLabel + '</span></div>\n            </div>\n            <div class="item-right" style="display:flex;align-items:center;gap:6px;color:' + statusColor + ';">\n                ' + stockControls + '\n            </div>\n        </div>';
     }).join('');
 }
 
@@ -3333,7 +3558,128 @@ function renderLowStock() {
         container.innerHTML = '<div class="empty-state">✅ All items are well-stocked!</div>';
         return;
     }
-    container.innerHTML = lowItems.map(function(p) { return '<div class="list-item" style="background:#fff5f5;"><div class="item-left"><div class="item-title">' + p.name + '</div><div class="item-sub">⚠️ ' + (p.stock === 0 ? 'NO STOCK!' : 'Low stock') + '</div></div><div class="item-right" style="display:flex;align-items:center;gap:6px;">\n        <button onclick="adjustStock(' + products.indexOf(p) + ', 10)" style="background:#1E90FF;color:#fff;border:none;border-radius:4px;padding:0 8px;height:26px;cursor:pointer;font-weight:bold;font-size:0.75rem;">+10</button>\n        <button onclick="adjustStock(' + products.indexOf(p) + ', 50)" style="background:#FF9F43;color:#fff;border:none;border-radius:4px;padding:0 8px;height:26px;cursor:pointer;font-weight:bold;font-size:0.75rem;">+50</button>\n    </div></div>'; }).join('');
+    var isAdmin = currentUserRole === 'admin';
+    container.innerHTML = lowItems.map(function(p) {
+        var stockControls = '';
+        if (isAdmin) {
+            stockControls = '<button onclick="adjustStock(' + products.indexOf(p) + ', 10)" style="background:#1E90FF;color:#fff;border:none;border-radius:4px;padding:0 8px;height:26px;cursor:pointer;font-weight:bold;font-size:0.75rem;">+10</button>\n                <button onclick="adjustStock(' + products.indexOf(p) + ', 50)" style="background:#FF9F43;color:#fff;border:none;border-radius:4px;padding:0 8px;height:26px;cursor:pointer;font-weight:bold;font-size:0.75rem;">+50</button>';
+        } else {
+            stockControls = '<span style="font-weight:700;color:#FF4757;">' + p.stock + ' left</span>';
+        }
+        return '<div class="list-item" style="background:#fff5f5;"><div class="item-left"><div class="item-title">' + p.name + '</div><div class="item-sub">⚠️ ' + (p.stock === 0 ? 'NO STOCK!' : 'Low stock') + '</div></div><div class="item-right" style="display:flex;align-items:center;gap:6px;">\n        ' + stockControls + '\n    </div></div>';
+    }).join('');
+}
+
+// Calendar Functions
+function changeMonth(delta) {
+    currentCalendarMonth += delta;
+    if (currentCalendarMonth > 11) {
+        currentCalendarMonth = 0;
+        currentCalendarYear++;
+    } else if (currentCalendarMonth < 0) {
+        currentCalendarMonth = 11;
+        currentCalendarYear--;
+    }
+    renderCalendar(currentCalendarMonth, currentCalendarYear);
+}
+
+function renderCalendar(month, year) {
+    var grid = document.getElementById('calendarGrid');
+    var monthYear = document.getElementById('calendarMonthYear');
+    var details = document.getElementById('calendarDetails');
+    
+    var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    monthYear.textContent = monthNames[month] + ' ' + year;
+    
+    var firstDay = new Date(year, month, 1).getDay();
+    var daysInMonth = new Date(year, month + 1, 0).getDate();
+    var today = new Date();
+    var todayDate = today.getDate();
+    var todayMonth = today.getMonth();
+    var todayYear = today.getFullYear();
+    
+    // Build calendar grid
+    var html = '';
+    var dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    dayLabels.forEach(function(label) {
+        html += '<div class="day-label">' + label + '</div>';
+    });
+    
+    // Empty cells for days before the 1st
+    for (var i = 0; i < firstDay; i++) {
+        html += '<div class="day-cell empty"></div>';
+    }
+    
+    // Get sales for each day in this month
+    var salesByDate = {};
+    sales.forEach(function(sale) {
+        var saleDate = new Date(sale.date);
+        if (saleDate.getMonth() === month && saleDate.getFullYear() === year) {
+            var dayKey = saleDate.getDate();
+            if (!salesByDate[dayKey]) salesByDate[dayKey] = [];
+            salesByDate[dayKey].push(sale);
+        }
+    });
+    
+    // Fill in days
+    for (var d = 1; d <= daysInMonth; d++) {
+        var isToday = (d === todayDate && month === todayMonth && year === todayYear);
+        var hasSales = salesByDate[d] && salesByDate[d].length > 0;
+        var classes = 'day-cell';
+        if (isToday) classes += ' today';
+        if (hasSales) classes += ' has-sales';
+        var dot = hasSales ? '<span class="sale-dot"></span>' : '';
+        html += '<div class="' + classes + '" onclick="viewDaySales(' + year + ',' + month + ',' + d + ')">' + d + dot + '</div>';
+    }
+    
+    grid.innerHTML = html;
+    
+    // Clear details by default
+    details.innerHTML = '<div class="detail-empty">📅 Select a date to view sales details</div>';
+}
+
+function viewDaySales(year, month, day) {
+    var details = document.getElementById('calendarDetails');
+    var selectedDate = new Date(year, month, day);
+    var dateStr = selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    
+    var daySales = sales.filter(function(sale) {
+        var saleDate = new Date(sale.date);
+        return saleDate.getFullYear() === year && 
+               saleDate.getMonth() === month && 
+               saleDate.getDate() === day;
+    });
+    
+    if (daySales.length === 0) {
+        details.innerHTML = '<div class="detail-empty">📭 No sales on ' + dateStr + '</div>';
+        return;
+    }
+    
+    var totalSales = daySales.reduce(function(sum, s) { return sum + s.total; }, 0);
+    var totalItems = 0;
+    daySales.forEach(function(s) { s.items.forEach(function(i) { totalItems += i.quantity; }); });
+    
+    var html = '<div style="margin-bottom:8px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;">';
+    html += '<span style="font-weight:600;color:#1a3a5c;">📅 ' + dateStr + '</span>';
+    html += '<span style="font-weight:600;color:#2ED573;">Total: ₱' + totalSales.toFixed(2) + ' · ' + daySales.length + ' transactions</span>';
+    html += '</div>';
+    
+    daySales.forEach(function(sale) {
+        var saleTime = new Date(sale.date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        html += '<div class="detail-item">';
+        html += '<div class="detail-left">';
+        html += '<div class="detail-title">#' + sale.receiptNumber + ' · ' + saleTime + ' · ' + (sale.method || 'Cash') + '</div>';
+        html += '<div class="detail-products">';
+        sale.items.forEach(function(item, idx) {
+            html += (idx > 0 ? ', ' : '') + item.name + ' (x' + item.quantity + ')';
+        });
+        html += '</div>';
+        html += '</div>';
+        html += '<div class="detail-right">₱' + sale.total.toFixed(2) + '</div>';
+        html += '</div>';
+    });
+    
+    details.innerHTML = html;
 }
 
 document.getElementById('barcode').addEventListener('keypress', function(e) { 
