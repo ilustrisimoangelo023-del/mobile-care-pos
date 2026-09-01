@@ -820,13 +820,13 @@
             letter-spacing: 0.3px;
         }
 
-        /* --- NEW PROFESSIONAL INVENTORY CONTROLS --- */
-        .inv-controls {
+        /* --- PROFESSIONAL INVENTORY & PRODUCT CONTROLS (button-only) --- */
+        .inv-controls, .prod-controls {
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .inv-qty-box {
+        .inv-qty-box, .prod-qty-box {
             display: flex;
             align-items: center;
             background: #fff;
@@ -835,7 +835,7 @@
             overflow: hidden;
             box-shadow: 0 1px 3px rgba(0,0,0,0.04);
         }
-        .inv-qty-box .qty-btn {
+        .inv-qty-box .qty-btn, .prod-qty-box .qty-btn {
             background: transparent;
             border: none;
             width: 32px;
@@ -849,14 +849,14 @@
             transition: 0.2s;
             font-weight: 600;
         }
-        .inv-qty-box .qty-btn:hover {
+        .inv-qty-box .qty-btn:hover, .prod-qty-box .qty-btn:hover {
             background: #f1f5f9;
             color: #0a1e2f;
         }
-        .inv-qty-box .qty-btn:active {
+        .inv-qty-box .qty-btn:active, .prod-qty-box .qty-btn:active {
             transform: scale(0.92);
         }
-        .inv-qty-box .qty-num {
+        .inv-qty-box .qty-num, .prod-qty-box .qty-num {
             min-width: 32px;
             text-align: center;
             font-weight: 700;
@@ -865,7 +865,7 @@
             padding: 0 2px;
             user-select: none;
         }
-        .inv-delete-btn {
+        .inv-delete-btn, .prod-delete-btn {
             background: none;
             border: none;
             color: #94a3b8;
@@ -878,7 +878,7 @@
             align-items: center;
             justify-content: center;
         }
-        .inv-delete-btn:hover {
+        .inv-delete-btn:hover, .prod-delete-btn:hover {
             color: #e74c3c;
             background: #fde8e8;
         }
@@ -898,39 +898,218 @@
             color: #2ecc71;
             font-weight: 700;
         }
-        /* For the table-like row layout */
-        .inv-row {
+        .inv-row, .prod-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 8px;
             flex-wrap: wrap;
         }
-        .inv-row .item-left {
+        .inv-row .item-left, .prod-row .item-left {
             flex: 1;
             min-width: 140px;
         }
-        .inv-row .item-right {
+        .inv-row .item-right, .prod-row .item-right {
             display: flex;
             align-items: center;
             gap: 12px;
             flex-wrap: wrap;
         }
-        /* Responsive tweaks */
         @media (max-width: 600px) {
-            .inv-row .item-right {
+            .inv-row .item-right, .prod-row .item-right {
                 gap: 6px;
             }
-            .inv-qty-box .qty-btn {
+            .inv-qty-box .qty-btn, .prod-qty-box .qty-btn {
                 width: 28px;
                 height: 28px;
             }
-            .inv-qty-box .qty-num {
+            .inv-qty-box .qty-num, .prod-qty-box .qty-num {
                 min-width: 24px;
                 font-size: 0.85rem;
             }
-            .inv-delete-btn {
+            .inv-delete-btn, .prod-delete-btn {
                 font-size: 0.95rem;
+            }
+        }
+
+        /* --- REPAIRS SECTION STYLES --- */
+        .repairs-summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .repairs-summary .stat-card {
+            cursor: default;
+        }
+        .repairs-summary .stat-card .stat-number {
+            font-size: 1.4rem;
+        }
+        .repair-filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+            align-items: center;
+        }
+        .repair-filters .filter-btn {
+            padding: 4px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 40px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #475569;
+            transition: 0.2s;
+        }
+        .repair-filters .filter-btn:hover {
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
+        .repair-filters .filter-btn.active {
+            background: #e74c3c;
+            color: #fff;
+            border-color: #e74c3c;
+        }
+        .repair-actions {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+        .repair-actions .action-btn {
+            background: none;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: 0.2s;
+            font-size: 0.85rem;
+        }
+        .repair-actions .action-btn:hover {
+            background: #f1f5f9;
+            color: #0a1e2f;
+        }
+        .repair-actions .action-btn.edit:hover { color: #3498db; }
+        .repair-actions .action-btn.status:hover { color: #f39c12; }
+        .repair-actions .action-btn.release:hover { color: #2ecc71; }
+        .repair-actions .action-btn.delete:hover { color: #e74c3c; background: #fde8e8; }
+        .status-badge {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 40px;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+        .status-badge.pending { background: #fef9e7; color: #9a7d0a; }
+        .status-badge.diagnosing { background: #e6f0fa; color: #1a56a9; }
+        .status-badge.repairing { background: #fef0e7; color: #b45a2a; }
+        .status-badge.ready { background: #e6f9ed; color: #0b6e4f; }
+        .status-badge.released { background: #f1f5f9; color: #64748b; }
+
+        /* New Repair Modal */
+        .repair-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .repair-form-grid .full-width {
+            grid-column: 1 / -1;
+        }
+        .repair-form-grid label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            display: block;
+            margin-bottom: 2px;
+        }
+        .repair-form-grid input, .repair-form-grid select, .repair-form-grid textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            background: #fff;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        .repair-form-grid input:focus, .repair-form-grid select:focus, .repair-form-grid textarea:focus {
+            border-color: #e74c3c;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(231,76,60,0.08);
+        }
+        .repair-form-grid textarea {
+            resize: vertical;
+            min-height: 50px;
+        }
+        .repair-form-grid .form-actions {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            padding-top: 8px;
+            border-top: 1px solid #f1f5f9;
+        }
+        .btn-save-repair {
+            padding: 8px 24px;
+            background: #2ecc71;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+        .btn-save-repair:hover { background: #27ae60; }
+        .btn-cancel-repair {
+            padding: 8px 24px;
+            background: #f1f5f9;
+            color: #1e293b;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+        .btn-cancel-repair:hover { background: #e2e8f0; }
+
+        .btn-new-repair {
+            padding: 8px 20px;
+            background: #2ecc71;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-new-repair:hover { background: #27ae60; }
+
+        .repair-modal .receipt-wrapper {
+            width: 640px;
+            max-width: 94vw;
+        }
+        @media (max-width: 640px) {
+            .repair-form-grid {
+                grid-template-columns: 1fr;
+            }
+            .repair-form-grid .full-width {
+                grid-column: 1;
+            }
+            .repairs-summary {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (max-width: 480px) {
+            .repairs-summary {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -1017,6 +1196,10 @@
             <div class="menu-item admin-only" onclick="showTab('inventory')">
                 <span class="icon"><i class="fas fa-clipboard-list"></i></span> Inventory
                 <span class="badge blue" id="sidebarInventoryCount">0</span>
+            </div>
+            <div class="menu-item admin-only" onclick="showTab('repairs')">
+                <span class="icon"><i class="fas fa-tools"></i></span> Repairs
+                <span class="badge orange" id="sidebarRepairCount">0</span>
             </div>
             <div class="menu-item admin-only" onclick="showTab('categories')">
                 <span class="icon"><i class="fas fa-tags"></i></span> Categories
@@ -1185,7 +1368,7 @@
             </div>
         </div>
 
-        <!-- OTHER TABS -->
+        <!-- DASHBOARD TAB -->
         <div id="tab-dashboard" class="tab-content">
             <div class="pos-panel">
                 <div class="panel-header"><h3><i class="fas fa-home"></i> Dashboard</h3><span class="badge-count" id="dashboardDate"></span></div>
@@ -1208,6 +1391,7 @@
             </div>
         </div>
 
+        <!-- PRODUCTS TAB - UPDATED WITH BUTTON-ONLY CONTROLS -->
         <div id="tab-products" class="tab-content">
             <div class="pos-panel">
                 <div class="panel-header"><h3><i class="fas fa-box"></i> All Products</h3><span class="badge-count" id="productTotalCount">0</span></div>
@@ -1225,6 +1409,7 @@
             </div>
         </div>
 
+        <!-- CUSTOMERS TAB -->
         <div id="tab-customers" class="tab-content">
             <div class="pos-panel">
                 <div class="panel-header"><h3><i class="fas fa-user"></i> Customers</h3><span class="badge-count">523 Registered</span></div>
@@ -1238,6 +1423,7 @@
             </div>
         </div>
 
+        <!-- TRANSACTIONS TAB -->
         <div id="tab-transactions" class="tab-content">
             <div class="pos-panel">
                 <div class="panel-header"><h3><i class="fas fa-receipt"></i> Recent Transactions</h3><span class="badge-count" id="transTotalCount">0</span></div>
@@ -1245,6 +1431,7 @@
             </div>
         </div>
 
+        <!-- CALENDAR TAB -->
         <div id="tab-calendar" class="tab-content">
             <div class="pos-panel">
                 <div class="panel-header"><h3><i class="fas fa-calendar-alt"></i> Sales Calendar</h3><span class="badge-count" id="calendarTotalSales">0</span></div>
@@ -1262,7 +1449,7 @@
             </div>
         </div>
 
-        <!-- INVENTORY TAB (Admin only) - UPDATED WITH PROFESSIONAL CONTROLS -->
+        <!-- INVENTORY TAB - UPDATED WITH BUTTON-ONLY CONTROLS -->
         <div id="tab-inventory" class="tab-content admin-tab">
             <div class="pos-panel">
                 <div class="panel-header"><h3><i class="fas fa-clipboard-list"></i> Inventory Management</h3><span class="badge-count" id="inventoryCount">0</span></div>
@@ -1278,6 +1465,50 @@
             </div>
         </div>
 
+        <!-- REPAIRS TAB - NEW SECTION -->
+        <div id="tab-repairs" class="tab-content admin-tab">
+            <div class="pos-panel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-tools"></i> Repair Management</h3>
+                    <button class="btn-new-repair" onclick="openNewRepairModal()"><i class="fas fa-plus"></i> New Repair</button>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="repairs-summary" id="repairSummary">
+                    <div class="stat-card">
+                        <div class="stat-top"><span class="stat-label">Total Repairs</span><span class="stat-icon"><i class="fas fa-clipboard-list"></i></span></div>
+                        <div class="stat-number blue" id="repairTotalCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-top"><span class="stat-label">Pending</span><span class="stat-icon"><i class="fas fa-clock"></i></span></div>
+                        <div class="stat-number orange" id="repairPendingCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-top"><span class="stat-label">Repairing</span><span class="stat-icon"><i class="fas fa-tools"></i></span></div>
+                        <div class="stat-number" style="color:#b45a2a;" id="repairRepairingCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-top"><span class="stat-label">Ready for Pickup</span><span class="stat-icon"><i class="fas fa-box-open"></i></span></div>
+                        <div class="stat-number green" id="repairReadyCount">0</div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="repair-filters">
+                    <button class="filter-btn active" data-filter="all" onclick="filterRepairs('all')">All</button>
+                    <button class="filter-btn" data-filter="Pending" onclick="filterRepairs('Pending')">Pending</button>
+                    <button class="filter-btn" data-filter="Diagnosing" onclick="filterRepairs('Diagnosing')">Diagnosing</button>
+                    <button class="filter-btn" data-filter="Repairing" onclick="filterRepairs('Repairing')">Repairing</button>
+                    <button class="filter-btn" data-filter="Ready for Pickup" onclick="filterRepairs('Ready for Pickup')">Ready for Pickup</button>
+                    <button class="filter-btn" data-filter="Released" onclick="filterRepairs('Released')">Released</button>
+                </div>
+
+                <!-- Repairs Table -->
+                <div class="list-container" id="repairsList"></div>
+            </div>
+        </div>
+
+        <!-- CATEGORIES TAB -->
         <div id="tab-categories" class="tab-content admin-tab">
             <div class="pos-panel">
                 <div class="panel-header"><h3><i class="fas fa-tags"></i> Categories</h3><span class="badge-count">6 Categories</span></div>
@@ -1292,6 +1523,7 @@
             </div>
         </div>
 
+        <!-- LOW STOCK TAB -->
         <div id="tab-lowstock" class="tab-content admin-tab">
             <div class="pos-panel">
                 <div class="panel-header"><h3><i class="fas fa-exclamation-triangle"></i> Low Stock Items</h3><span class="badge-count" id="lowStockCount">0</span></div>
@@ -1299,6 +1531,7 @@
             </div>
         </div>
 
+        <!-- SUPPLIERS TAB -->
         <div id="tab-suppliers" class="tab-content admin-tab">
             <div class="pos-panel">
                 <div class="panel-header"><h3><i class="fas fa-building"></i> Suppliers</h3><span class="badge-count">8 Active</span></div>
@@ -1312,6 +1545,7 @@
             </div>
         </div>
 
+        <!-- REPORTS TAB -->
         <div id="tab-reports" class="tab-content admin-tab">
             <div class="pos-panel">
                 <div class="panel-header"><h3><i class="fas fa-chart-bar"></i> Reports</h3><span class="badge-count">Live Data</span></div>
@@ -1334,6 +1568,7 @@
             </div>
         </div>
 
+        <!-- EXPENSES TAB -->
         <div id="tab-expenses" class="tab-content admin-tab">
             <div class="pos-panel">
                 <div class="panel-header"><h3><i class="fas fa-money-bill-wave"></i> Expenses</h3><span class="badge-count">This Month</span></div>
@@ -1354,6 +1589,7 @@
             </div>
         </div>
 
+        <!-- SETTINGS TAB -->
         <div id="tab-settings" class="tab-content admin-tab">
             <div class="pos-panel">
                 <div class="panel-header"><h3><i class="fas fa-cog"></i> Settings</h3><span class="badge-count">Configure</span></div>
@@ -1395,6 +1631,7 @@
             </div>
         </div>
 
+        <!-- BACKUP TAB -->
         <div id="tab-backup" class="tab-content admin-tab">
             <div class="pos-panel">
                 <div class="panel-header"><h3><i class="fas fa-database"></i> Backup / Restore</h3><span class="badge-count">v2.0</span></div>
@@ -1511,6 +1748,78 @@
         <button class="logo-close" onclick="closeLogoPreview()"><i class="fas fa-times"></i></button>
         <img src="logo.png" alt="Mobile Care Logo" class="logo-preview-img" onerror="this.style.display='none';this.parentElement.querySelector('.logo-preview-label').textContent='Logo not found';">
         <div class="logo-preview-label">Mobile Care</div>
+    </div>
+</div>
+
+<!-- NEW REPAIR MODAL -->
+<div id="repairModal" class="modal repair-modal">
+    <div class="receipt-wrapper">
+        <div class="panel-header" style="border-bottom:2px solid #f1f5f9;padding-bottom:12px;margin-bottom:16px;">
+            <h3 id="repairModalTitle"><i class="fas fa-plus-circle"></i> New Repair Order</h3>
+            <span class="badge-count" id="repairModalBadge">#NEW</span>
+        </div>
+        <form id="repairForm" onsubmit="saveRepair(event)">
+            <div class="repair-form-grid">
+                <div>
+                    <label>Repair ID / Job Order</label>
+                    <input type="text" id="repairId" placeholder="Auto-generated" readonly style="background:#f8fafc;cursor:not-allowed;" />
+                </div>
+                <div>
+                    <label>Date Received</label>
+                    <input type="date" id="repairDateReceived" />
+                </div>
+                <div>
+                    <label>Customer Name *</label>
+                    <input type="text" id="repairCustomer" placeholder="Full name" required />
+                </div>
+                <div>
+                    <label>Contact Number *</label>
+                    <input type="text" id="repairContact" placeholder="Phone number" required />
+                </div>
+                <div>
+                    <label>Device / Phone Model *</label>
+                    <input type="text" id="repairDevice" placeholder="e.g. iPhone 15 Pro" required />
+                </div>
+                <div>
+                    <label>Technician</label>
+                    <input type="text" id="repairTechnician" placeholder="Assigned technician" />
+                </div>
+                <div class="full-width">
+                    <label>Problem / Issue *</label>
+                    <textarea id="repairProblem" placeholder="Describe the issue..." required></textarea>
+                </div>
+                <div>
+                    <label>Repair Fee (₱)</label>
+                    <input type="number" id="repairFee" placeholder="0.00" step="0.01" min="0" oninput="calcRepairBalance()" />
+                </div>
+                <div>
+                    <label>Down Payment (₱)</label>
+                    <input type="number" id="repairDownPayment" placeholder="0.00" step="0.01" min="0" oninput="calcRepairBalance()" />
+                </div>
+                <div>
+                    <label>Balance (₱)</label>
+                    <input type="number" id="repairBalance" placeholder="0.00" step="0.01" readonly style="background:#f8fafc;cursor:not-allowed;" />
+                </div>
+                <div>
+                    <label>Expected Completion Date</label>
+                    <input type="date" id="repairExpectedDate" />
+                </div>
+                <div class="full-width">
+                    <label>Repair Status</label>
+                    <select id="repairStatus">
+                        <option value="Pending">Pending</option>
+                        <option value="Diagnosing">Diagnosing</option>
+                        <option value="Repairing">Repairing</option>
+                        <option value="Ready for Pickup">Ready for Pickup</option>
+                        <option value="Released">Released</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel-repair" onclick="closeRepairModal()">Cancel</button>
+                    <button type="submit" class="btn-save-repair"><i class="fas fa-save"></i> Save Repair</button>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -1785,9 +2094,16 @@ var currentBrandFilter = '';
 var currentCalendarMonth = new Date().getMonth();
 var currentCalendarYear = new Date().getFullYear();
 
+// Repair data
+var repairs = [];
+var repairCounter = 1;
+var currentRepairFilter = 'all';
+var editingRepairId = null;
+
 var previewProduct = null;
 var previewQty = 1;
 
+// --- LOGIN FUNCTIONS ---
 function selectLoginRole(role) {
     loginRole = role;
     document.querySelectorAll('.role-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -1832,7 +2148,7 @@ function handleLogin() {
         });
         var addProductSection = document.getElementById('addProductSection');
         if (addProductSection) addProductSection.style.display = isAdmin ? 'block' : 'none';
-        var adminTabs = ['inventory', 'categories', 'lowstock', 'suppliers', 'reports', 'expenses', 'settings', 'backup'];
+        var adminTabs = ['inventory', 'repairs', 'categories', 'lowstock', 'suppliers', 'reports', 'expenses', 'settings', 'backup'];
         adminTabs.forEach(function(tabId) {
             var tab = document.getElementById('tab-' + tabId);
             if (tab) tab.style.display = isAdmin ? 'block' : 'none';
@@ -1864,7 +2180,7 @@ function showTab(tabName) {
     document.querySelectorAll('.menu-item').forEach(function(m) { m.classList.remove('active'); });
     var tab = document.getElementById('tab-' + tabName);
     if (tab) tab.classList.add('active');
-    var allTabs = ['pos','dashboard','calendar','products','customers','transactions','inventory','categories','lowstock','suppliers','reports','expenses','settings','backup'];
+    var allTabs = ['pos','dashboard','calendar','products','customers','transactions','inventory','repairs','categories','lowstock','suppliers','reports','expenses','settings','backup'];
     var idx = allTabs.indexOf(tabName);
     if (idx >= 0 && document.querySelectorAll('.menu-item')[idx]) document.querySelectorAll('.menu-item')[idx].classList.add('active');
     var titles = {
@@ -1875,6 +2191,7 @@ function showTab(tabName) {
         'customers': ['Customers', 'Customer database'],
         'transactions': ['Recent Transactions', 'Your sales history'],
         'inventory': ['Inventory Management', 'Track and manage stock levels'],
+        'repairs': ['Repair Management', 'Manage repair orders'],
         'categories': ['Categories', 'Browse products by category'],
         'lowstock': ['Low Stock Items', 'Items that need restocking'],
         'suppliers': ['Suppliers', 'Manage supplier relationships'],
@@ -1884,13 +2201,20 @@ function showTab(tabName) {
         'backup': ['Backup / Restore', 'Secure your data']
     };
     var titleData = titles[tabName] || titles['pos'];
-    document.getElementById('pageTitle').innerHTML = '<i class="fas fa-' + (tabName === 'pos' ? 'shopping-cart' : tabName === 'dashboard' ? 'home' : tabName === 'calendar' ? 'calendar-alt' : tabName === 'products' ? 'box' : tabName === 'customers' ? 'user' : tabName === 'transactions' ? 'receipt' : 'cog') + '"></i> ' + titleData[0];
+    var iconMap = {
+        'pos': 'shopping-cart', 'dashboard': 'home', 'calendar': 'calendar-alt', 'products': 'box',
+        'customers': 'user', 'transactions': 'receipt', 'inventory': 'clipboard-list', 'repairs': 'tools',
+        'categories': 'tags', 'lowstock': 'exclamation-triangle', 'suppliers': 'building',
+        'reports': 'chart-bar', 'expenses': 'money-bill-wave', 'settings': 'cog', 'backup': 'database'
+    };
+    document.getElementById('pageTitle').innerHTML = '<i class="fas fa-' + (iconMap[tabName] || 'shopping-cart') + '"></i> ' + titleData[0];
     document.getElementById('pageSubtitle').textContent = titleData[1];
     if (tabName === 'pos') { document.getElementById('barcode').focus(); if (selectedPayment === 'GCash') document.getElementById('qrContainer').classList.add('show'); }
     if (tabName === 'products') renderProducts();
     if (tabName === 'transactions') renderTransactions();
     if (tabName === 'dashboard') renderDashboard();
     if (tabName === 'inventory') renderInventory();
+    if (tabName === 'repairs') renderRepairs();
     if (tabName === 'lowstock') renderLowStock();
     if (tabName === 'calendar') renderCalendar(currentCalendarMonth, currentCalendarYear);
     if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
@@ -1912,6 +2236,7 @@ function initApp() {
     renderTransactions();
     renderDashboard();
     renderInventory();
+    renderRepairs();
     renderLowStock();
     updateStats();
     document.getElementById('barcode').focus();
@@ -1936,6 +2261,21 @@ function loadData() {
     receiptCounter = storedCounter ? parseInt(storedCounter) : 1;
     var storedHistory = localStorage.getItem('posInventoryHistory');
     inventoryHistory = storedHistory ? JSON.parse(storedHistory) : [];
+    // Load repairs
+    var storedRepairs = localStorage.getItem('posRepairs');
+    if (storedRepairs) {
+        repairs = JSON.parse(storedRepairs);
+        repairCounter = repairs.length > 0 ? Math.max(...repairs.map(r => parseInt(r.id.replace('R-', '')))) + 1 : 1;
+    } else {
+        // Seed with sample data
+        repairs = [
+            { id: 'R-001', customer: 'Juan Dela Cruz', contact: '0917-123-4567', device: 'iPhone 14 Pro', problem: 'Broken screen', technician: 'Roland Maru', fee: 2500, downPayment: 1000, balance: 1500, dateReceived: '2026-08-28', expectedDate: '2026-09-02', status: 'Pending' },
+            { id: 'R-002', customer: 'Maria Santos', contact: '0918-765-4321', device: 'Samsung S24 Ultra', problem: 'Battery not charging', technician: 'Bryan Aropo', fee: 1800, downPayment: 800, balance: 1000, dateReceived: '2026-08-27', expectedDate: '2026-09-01', status: 'Diagnosing' },
+            { id: 'R-003', customer: 'Jose Reyes', contact: '0922-888-9999', device: 'Xiaomi 14', problem: 'Camera not working', technician: 'Roland Maru', fee: 3200, downPayment: 1500, balance: 1700, dateReceived: '2026-08-26', expectedDate: '2026-08-31', status: 'Repairing' }
+        ];
+        repairCounter = 4;
+        saveRepairs();
+    }
     saveData();
 }
 
@@ -1944,6 +2284,11 @@ function saveData() {
     localStorage.setItem('posSales', JSON.stringify(sales));
     localStorage.setItem('posReceiptCounter', receiptCounter.toString());
     localStorage.setItem('posInventoryHistory', JSON.stringify(inventoryHistory));
+    saveRepairs();
+}
+
+function saveRepairs() {
+    localStorage.setItem('posRepairs', JSON.stringify(repairs));
 }
 
 function generateGCashQR() {
@@ -1952,6 +2297,7 @@ function generateGCashQR() {
     container.innerHTML = '<img src="qr-code.jpg" alt="GCash QR Code" style="width:100px;height:100px;object-fit:contain;border-radius:12px;border:2px solid #007AFF;padding:4px;background:#fff;" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<span style=\\\'color:#94a3b8;font-size:0.7rem;\\\'><i class=\\\'fas fa-exclamation-circle\\\'></i> QR code not found</span>\'">';
 }
 
+// --- PRODUCT FUNCTIONS ---
 function scanProduct() {
     var input = document.getElementById('barcode');
     var barcode = input.value.trim();
@@ -1975,16 +2321,6 @@ function scanProduct() {
     input.focus();
     document.getElementById('searchResults').classList.remove('show');
     showMessage('Added: ' + product.name, 'success');
-}
-
-function quickScanBrand(barcode) {
-    var product = products.find(function(p) { return p.barcode === barcode; });
-    if (product) {
-        if (product.stock <= 0) { showMessage('NO STOCK! Cannot add.', 'error'); return; }
-        if (product.stock <= 5) { showMessage('LOW STOCK! Only ' + product.stock + ' left.', 'warning'); return; }
-        document.getElementById('barcode').value = barcode;
-        scanProduct();
-    } else showMessage('Product not found!', 'error');
 }
 
 function renderCart() {
@@ -2305,28 +2641,37 @@ function updateStats() {
     document.getElementById('sidebarProductCount').innerText = products.length;
     document.getElementById('sidebarInventoryCount').innerText = products.length;
     document.getElementById('sidebarTransCount').innerText = sales.length;
+    document.getElementById('sidebarRepairCount').innerText = repairs.length;
     document.getElementById('calendarTotalSales').innerText = sales.length;
 }
 
+// --- RENDER PRODUCTS (with button-only controls) ---
 function renderProducts() {
     var container = document.getElementById('productsList');
     document.getElementById('productTotalCount').innerText = products.length;
     if (products.length === 0) { container.innerHTML = '<div class="empty-state">No products available</div>'; return; }
     var isAdmin = currentUserRole === 'admin';
     container.innerHTML = products.map(function(p, index) {
-        var stockColor = p.stock === 0 ? 'red' : (p.stock <= 5 ? '#f39c12' : '#2ecc71');
+        var stockColor = p.stock === 0 ? '#e74c3c' : (p.stock <= 5 ? '#f39c12' : '#2ecc71');
         var stockLabel = p.stock === 0 ? 'NO STOCK' : (p.stock <= 5 ? 'LOW STOCK' : 'In stock');
         var controls = '';
         if (isAdmin) {
-            controls = '<button onclick="adjustStock(' + index + ',-1)" style="background:#e74c3c;color:#fff;border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-weight:bold;"><i class="fas fa-minus"></i></button>\n                <span style="font-weight:700;min-width:30px;text-align:center;">' + p.stock + '</span>\n                <button onclick="adjustStock(' + index + ',1)" style="background:#2ecc71;color:#fff;border:none;border-radius:6px;width:28px;height:28px;cursor:pointer;font-weight:bold;"><i class="fas fa-plus"></i></button>\n                <button onclick="adjustStock(' + index + ',10)" style="background:#3498db;color:#fff;border:none;border-radius:6px;padding:0 8px;height:28px;cursor:pointer;font-weight:bold;font-size:0.75rem;">+10</button>\n                <button onclick="adjustStock(' + index + ',50)" style="background:#f39c12;color:#fff;border:none;border-radius:6px;padding:0 8px;height:28px;cursor:pointer;font-weight:bold;font-size:0.75rem;">+50</button>';
+            controls = '<div class="prod-controls">' +
+                '<div class="prod-qty-box">' +
+                    '<button class="qty-btn" onclick="adjustStock(' + index + ',-1)" title="Decrease"><i class="fas fa-minus"></i></button>' +
+                    '<span class="qty-num">' + p.stock + '</span>' +
+                    '<button class="qty-btn" onclick="adjustStock(' + index + ',1)" title="Increase"><i class="fas fa-plus"></i></button>' +
+                '</div>' +
+                '<button class="prod-delete-btn" onclick="deleteProduct(' + index + ')" title="Delete Product"><i class="fas fa-trash-alt"></i></button>' +
+            '</div>';
         } else {
-            controls = '<span style="font-weight:700;min-width:30px;text-align:center;color:' + stockColor + ';">' + p.stock + '</span>';
+            controls = '<span style="font-weight:700;color:' + stockColor + ';">' + p.stock + '</span>';
         }
-        return '<div class="list-item">\n            <div class="item-left">\n                <div class="item-title">' + p.name + '</div>\n                <div class="item-sub" style="color:' + stockColor + ';font-weight:600;">' + stockLabel + ': ' + p.stock + ' left · ' + (p.category || 'Uncategorized') + '</div>\n            </div>\n            <div class="item-right" style="display:flex;align-items:center;gap:6px;">' + controls + '</div>\n        </div>';
+        return '<div class="list-item prod-row">\n            <div class="item-left">\n                <div class="item-title">' + p.name + '</div>\n                <div class="item-sub" style="color:' + stockColor + ';font-weight:600;">' + stockLabel + ': ' + p.stock + ' left · ' + (p.category || 'Uncategorized') + '</div>\n            </div>\n            <div class="item-right">' + controls + '</div>\n        </div>';
     }).join('');
 }
 
-// UPDATED INVENTORY RENDER FUNCTION WITH PROFESSIONAL CONTROLS
+// --- RENDER INVENTORY (with button-only controls) ---
 function renderInventory() {
     var container = document.getElementById('inventoryList');
     document.getElementById('inventoryCount').innerText = products.length;
@@ -2343,9 +2688,8 @@ function renderInventory() {
     container.innerHTML = products.map(function(p, index) {
         var statusColor = p.stock === 0 ? '#e74c3c' : (p.stock <= 5 ? '#f39c12' : '#2ecc71');
         var statusLabel = p.stock === 0 ? 'OUT OF STOCK' : (p.stock <= 5 ? 'LOW STOCK' : 'In Stock');
-        var discount = '0.00'; // placeholder
-        var totalAmount = (p.price * p.stock).toFixed(2); // placeholder total value
-        // Professional controls
+        var discount = '0.00';
+        var totalAmount = (p.price * p.stock).toFixed(2);
         var controls = '';
         if (isAdmin) {
             controls = '<div class="inv-controls">' +
@@ -2365,9 +2709,7 @@ function renderInventory() {
                 '<div class="item-sub">' + p.barcode + ' · <span style="color:' + statusColor + ';font-weight:600;">' + statusLabel + '</span></div>' +
             '</div>' +
             '<div class="item-right">' +
-                // Discount column (placeholder)
                 '<span class="inv-discount-total"><span class="discount-label">Disc:</span> ₱' + discount + '</span>' +
-                // Total column (placeholder)
                 '<span class="inv-discount-total"><span class="total-amount">₱' + totalAmount + '</span></span>' +
                 controls +
             '</div>' +
@@ -2375,7 +2717,6 @@ function renderInventory() {
     }).join('');
 }
 
-// Delete product function
 function deleteProduct(index) {
     if (currentUserRole !== 'admin') { showMessage('Only administrators can delete products.', 'error'); return; }
     var product = products[index];
@@ -2393,7 +2734,6 @@ function deleteProduct(index) {
     }
 }
 
-// Legacy adjustStock function remains for other parts, but inventory uses it too
 function adjustStock(index, amount) {
     if (currentUserRole !== 'admin') { showMessage('Only administrators can adjust stock.', 'error'); return; }
     var product = products[index];
@@ -2412,6 +2752,208 @@ function adjustStock(index, amount) {
     showMessage('Updated stock for ' + product.name + ': ' + newStock, 'success');
 }
 
+// --- REPAIR FUNCTIONS ---
+function renderRepairs() {
+    var container = document.getElementById('repairsList');
+    var filtered = repairs;
+    if (currentRepairFilter !== 'all') {
+        filtered = repairs.filter(function(r) { return r.status === currentRepairFilter; });
+    }
+    // Sort by newest first
+    filtered = filtered.slice().sort(function(a, b) { return b.id.localeCompare(a.id); });
+    
+    if (filtered.length === 0) {
+        container.innerHTML = '<div class="empty-state">No repair orders found</div>';
+    } else {
+        container.innerHTML = filtered.map(function(r) {
+            var statusClass = r.status.toLowerCase().replace(' ', '');
+            if (statusClass === 'readyforpickup') statusClass = 'ready';
+            var statusMap = {
+                'pending': 'Pending', 'diagnosing': 'Diagnosing', 'repairing': 'Repairing',
+                'ready': 'Ready for Pickup', 'released': 'Released'
+            };
+            var displayStatus = statusMap[statusClass] || r.status;
+            return '<div class="list-item">' +
+                '<div class="item-left">' +
+                    '<div class="item-title">' + r.id + ' - ' + r.customer + '</div>' +
+                    '<div class="item-sub">' + r.device + ' · ' + r.problem.substring(0, 30) + (r.problem.length > 30 ? '...' : '') + ' · ' + (r.technician || 'Unassigned') + '</div>' +
+                '</div>' +
+                '<div class="item-right" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' +
+                    '<span style="font-size:0.75rem;color:#94a3b8;">₱' + r.fee.toFixed(2) + '</span>' +
+                    '<span class="status-badge ' + statusClass + '">' + displayStatus + '</span>' +
+                    '<div class="repair-actions">' +
+                        '<button class="action-btn edit" onclick="viewRepair(\'' + r.id + '\')" title="View/Edit"><i class="fas fa-eye"></i></button>' +
+                        '<button class="action-btn status" onclick="updateRepairStatus(\'' + r.id + '\')" title="Update Status"><i class="fas fa-sync-alt"></i></button>' +
+                        (r.status !== 'Released' ? '<button class="action-btn release" onclick="releaseRepair(\'' + r.id + '\')" title="Release"><i class="fas fa-check-circle"></i></button>' : '') +
+                        '<button class="action-btn delete" onclick="deleteRepair(\'' + r.id + '\')" title="Delete"><i class="fas fa-trash-alt"></i></button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+    }
+    
+    // Update summary
+    var total = repairs.length;
+    var pending = repairs.filter(function(r) { return r.status === 'Pending'; }).length;
+    var diagnosing = repairs.filter(function(r) { return r.status === 'Diagnosing'; }).length;
+    var repairing = repairs.filter(function(r) { return r.status === 'Repairing'; }).length;
+    var ready = repairs.filter(function(r) { return r.status === 'Ready for Pickup'; }).length;
+    var released = repairs.filter(function(r) { return r.status === 'Released'; }).length;
+    
+    document.getElementById('repairTotalCount').innerText = total;
+    document.getElementById('repairPendingCount').innerText = pending + diagnosing;
+    document.getElementById('repairRepairingCount').innerText = repairing;
+    document.getElementById('repairReadyCount').innerText = ready;
+    document.getElementById('sidebarRepairCount').innerText = total;
+}
+
+function filterRepairs(status) {
+    currentRepairFilter = status;
+    document.querySelectorAll('.repair-filters .filter-btn').forEach(function(btn) {
+        btn.classList.toggle('active', btn.dataset.filter === status);
+    });
+    renderRepairs();
+}
+
+function openNewRepairModal() {
+    editingRepairId = null;
+    document.getElementById('repairModalTitle').innerHTML = '<i class="fas fa-plus-circle"></i> New Repair Order';
+    document.getElementById('repairModalBadge').textContent = '#NEW';
+    document.getElementById('repairForm').reset();
+    var newId = 'R-' + String(repairCounter).padStart(3, '0');
+    document.getElementById('repairId').value = newId;
+    document.getElementById('repairDateReceived').value = new Date().toISOString().split('T')[0];
+    document.getElementById('repairBalance').value = '0.00';
+    document.getElementById('repairStatus').value = 'Pending';
+    document.getElementById('repairModal').classList.add('show');
+}
+
+function closeRepairModal() {
+    document.getElementById('repairModal').classList.remove('show');
+    editingRepairId = null;
+}
+
+function calcRepairBalance() {
+    var fee = parseFloat(document.getElementById('repairFee').value) || 0;
+    var down = parseFloat(document.getElementById('repairDownPayment').value) || 0;
+    var balance = fee - down;
+    if (balance < 0) balance = 0;
+    document.getElementById('repairBalance').value = balance.toFixed(2);
+}
+
+function saveRepair(e) {
+    e.preventDefault();
+    var id = document.getElementById('repairId').value;
+    var customer = document.getElementById('repairCustomer').value.trim();
+    var contact = document.getElementById('repairContact').value.trim();
+    var device = document.getElementById('repairDevice').value.trim();
+    var problem = document.getElementById('repairProblem').value.trim();
+    var technician = document.getElementById('repairTechnician').value.trim();
+    var fee = parseFloat(document.getElementById('repairFee').value) || 0;
+    var downPayment = parseFloat(document.getElementById('repairDownPayment').value) || 0;
+    var balance = fee - downPayment;
+    if (balance < 0) balance = 0;
+    var dateReceived = document.getElementById('repairDateReceived').value;
+    var expectedDate = document.getElementById('repairExpectedDate').value;
+    var status = document.getElementById('repairStatus').value;
+    
+    if (!customer || !contact || !device || !problem) {
+        showMessage('Please fill in all required fields.', 'error');
+        return;
+    }
+    
+    var repairData = {
+        id: id,
+        customer: customer,
+        contact: contact,
+        device: device,
+        problem: problem,
+        technician: technician || 'Unassigned',
+        fee: fee,
+        downPayment: downPayment,
+        balance: balance,
+        dateReceived: dateReceived || new Date().toISOString().split('T')[0],
+        expectedDate: expectedDate || '',
+        status: status
+    };
+    
+    if (editingRepairId) {
+        // Edit existing
+        var index = repairs.findIndex(function(r) { return r.id === editingRepairId; });
+        if (index !== -1) {
+            repairs[index] = repairData;
+            showMessage('Repair order updated successfully!', 'success');
+        }
+    } else {
+        // New repair
+        repairs.push(repairData);
+        repairCounter++;
+        showMessage('New repair order created!', 'success');
+    }
+    
+    saveRepairs();
+    closeRepairModal();
+    renderRepairs();
+    updateStats();
+}
+
+function viewRepair(id) {
+    var repair = repairs.find(function(r) { return r.id === id; });
+    if (!repair) return;
+    editingRepairId = id;
+    document.getElementById('repairModalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Repair Order';
+    document.getElementById('repairModalBadge').textContent = '#' + id;
+    document.getElementById('repairId').value = repair.id;
+    document.getElementById('repairCustomer').value = repair.customer;
+    document.getElementById('repairContact').value = repair.contact;
+    document.getElementById('repairDevice').value = repair.device;
+    document.getElementById('repairProblem').value = repair.problem;
+    document.getElementById('repairTechnician').value = repair.technician || '';
+    document.getElementById('repairFee').value = repair.fee;
+    document.getElementById('repairDownPayment').value = repair.downPayment;
+    document.getElementById('repairBalance').value = repair.balance.toFixed(2);
+    document.getElementById('repairDateReceived').value = repair.dateReceived || '';
+    document.getElementById('repairExpectedDate').value = repair.expectedDate || '';
+    document.getElementById('repairStatus').value = repair.status;
+    document.getElementById('repairModal').classList.add('show');
+}
+
+function updateRepairStatus(id) {
+    var repair = repairs.find(function(r) { return r.id === id; });
+    if (!repair) return;
+    var statuses = ['Pending', 'Diagnosing', 'Repairing', 'Ready for Pickup', 'Released'];
+    var currentIdx = statuses.indexOf(repair.status);
+    var nextIdx = (currentIdx + 1) % statuses.length;
+    var newStatus = statuses[nextIdx];
+    repair.status = newStatus;
+    saveRepairs();
+    renderRepairs();
+    showMessage('Status updated to: ' + newStatus, 'success');
+}
+
+function releaseRepair(id) {
+    var repair = repairs.find(function(r) { return r.id === id; });
+    if (!repair) return;
+    if (repair.status === 'Ready for Pickup') {
+        repair.status = 'Released';
+        saveRepairs();
+        renderRepairs();
+        showMessage('Repair ' + id + ' released successfully!', 'success');
+    } else {
+        showMessage('Repair must be "Ready for Pickup" before releasing.', 'warning');
+    }
+}
+
+function deleteRepair(id) {
+    if (!confirm('Are you sure you want to delete repair order ' + id + '?')) return;
+    repairs = repairs.filter(function(r) { return r.id !== id; });
+    saveRepairs();
+    renderRepairs();
+    updateStats();
+    showMessage('Repair order ' + id + ' deleted.', 'warning');
+}
+
+// --- OTHER RENDER FUNCTIONS ---
 function renderTransactions() {
     var container = document.getElementById('transactionsList');
     document.getElementById('transTotalCount').innerText = sales.length;
@@ -2452,7 +2994,13 @@ function renderLowStock() {
         var index = products.indexOf(p);
         var controls = '';
         if (isAdmin) {
-            controls = '<button onclick="adjustStock(' + index + ',10)" style="background:#3498db;color:#fff;border:none;border-radius:6px;padding:0 8px;height:28px;cursor:pointer;font-weight:bold;font-size:0.75rem;">+10</button>\n                <button onclick="adjustStock(' + index + ',50)" style="background:#f39c12;color:#fff;border:none;border-radius:6px;padding:0 8px;height:28px;cursor:pointer;font-weight:bold;font-size:0.75rem;">+50</button>';
+            controls = '<div class="prod-controls">' +
+                '<div class="prod-qty-box">' +
+                    '<button class="qty-btn" onclick="adjustStock(' + index + ',-1)" title="Decrease"><i class="fas fa-minus"></i></button>' +
+                    '<span class="qty-num">' + p.stock + '</span>' +
+                    '<button class="qty-btn" onclick="adjustStock(' + index + ',1)" title="Increase"><i class="fas fa-plus"></i></button>' +
+                '</div>' +
+            '</div>';
         } else {
             controls = '<span style="font-weight:700;color:#e74c3c;">' + p.stock + ' left</span>';
         }
