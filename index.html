@@ -1112,6 +1112,282 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* ===== NEW DASHBOARD STYLES (only for #tab-dashboard) ===== */
+        #tab-dashboard .dashboard-new {
+            background: #0b1420;
+            border-radius: 20px;
+            padding: 20px 22px 26px;
+            color: #eef2f6;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        #tab-dashboard .dash-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        #tab-dashboard .dash-top-row .dash-greeting h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #ffffff;
+            letter-spacing: -0.3px;
+        }
+        #tab-dashboard .dash-top-row .dash-greeting p {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.45);
+            margin-top: 2px;
+        }
+        #tab-dashboard .dash-top-row .dash-date-badge {
+            background: rgba(255,255,255,0.06);
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.75);
+            border: 1px solid rgba(255,255,255,0.06);
+            letter-spacing: 0.3px;
+        }
+        #tab-dashboard .dash-top-row .dash-today-sales {
+            background: #2ecc71;
+            padding: 6px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #0b1420;
+            box-shadow: 0 4px 14px rgba(46,204,113,0.25);
+        }
+        #tab-dashboard .dash-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        #tab-dashboard .dash-stat-card {
+            background: rgba(255,255,255,0.04);
+            border-radius: 16px;
+            padding: 14px 18px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.2s;
+            cursor: default;
+        }
+        #tab-dashboard .dash-stat-card:hover {
+            background: rgba(255,255,255,0.07);
+            border-color: rgba(255,255,255,0.10);
+        }
+        #tab-dashboard .dash-stat-card .dsc-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #tab-dashboard .dash-stat-card .dsc-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: rgba(255,255,255,0.4);
+            font-weight: 500;
+        }
+        #tab-dashboard .dash-stat-card .dsc-icon {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.2);
+        }
+        #tab-dashboard .dash-stat-card .dsc-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            margin-top: 4px;
+        }
+        #tab-dashboard .dash-stat-card .dsc-number.green { color: #2ecc71; }
+        #tab-dashboard .dash-stat-card .dsc-number.blue { color: #3498db; }
+        #tab-dashboard .dash-stat-card .dsc-number.orange { color: #f39c12; }
+        #tab-dashboard .dash-stat-card .dsc-number.red { color: #e74c3c; }
+        #tab-dashboard .dash-stat-card .dsc-change {
+            font-size: 0.6rem;
+            color: #2ecc71;
+            font-weight: 500;
+        }
+        #tab-dashboard .dash-stat-card .dsc-change.down { color: #e74c3c; }
+
+        #tab-dashboard .dash-main-grid {
+            display: grid;
+            grid-template-columns: 1.3fr 0.7fr;
+            gap: 18px;
+        }
+        #tab-dashboard .dash-panel {
+            background: rgba(255,255,255,0.03);
+            border-radius: 16px;
+            padding: 16px 18px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        #tab-dashboard .dash-panel .panel-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        #tab-dashboard .dash-panel .panel-head h4 {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.8);
+            letter-spacing: 0.3px;
+        }
+        #tab-dashboard .dash-panel .panel-head .panel-link {
+            font-size: 0.6rem;
+            color: rgba(255,255,255,0.25);
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        #tab-dashboard .dash-panel .panel-head .panel-link:hover {
+            color: rgba(255,255,255,0.6);
+        }
+
+        /* sales overview (mini bar chart) */
+        #tab-dashboard .dash-sales-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 100px;
+            padding-top: 6px;
+            gap: 6px;
+        }
+        #tab-dashboard .dash-sales-chart .bar-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        #tab-dashboard .dash-sales-chart .bar-col .bar {
+            width: 100%;
+            max-width: 28px;
+            background: linear-gradient(180deg, #2ecc71, #27ae60);
+            border-radius: 4px 4px 2px 2px;
+            transition: height 0.4s;
+            min-height: 4px;
+        }
+        #tab-dashboard .dash-sales-chart .bar-col .bar-label {
+            font-size: 0.5rem;
+            color: rgba(255,255,255,0.25);
+            text-align: center;
+        }
+
+        #tab-dashboard .dash-top-products .top-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.75rem;
+        }
+        #tab-dashboard .dash-top-products .top-item:last-child {
+            border-bottom: none;
+        }
+        #tab-dashboard .dash-top-products .top-item .tp-name {
+            color: rgba(255,255,255,0.8);
+        }
+        #tab-dashboard .dash-top-products .top-item .tp-sold {
+            color: #2ecc71;
+            font-weight: 600;
+        }
+
+        #tab-dashboard .dash-low-stock .low-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.7rem;
+        }
+        #tab-dashboard .dash-low-stock .low-item:last-child {
+            border-bottom: none;
+        }
+        #tab-dashboard .dash-low-stock .low-item .ls-name {
+            color: rgba(255,255,255,0.75);
+        }
+        #tab-dashboard .dash-low-stock .low-item .ls-stock {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        #tab-dashboard .dash-recent .rec-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.7rem;
+        }
+        #tab-dashboard .dash-recent .rec-item:last-child {
+            border-bottom: none;
+        }
+        #tab-dashboard .dash-recent .rec-item .rec-left {
+            display: flex;
+            flex-direction: column;
+        }
+        #tab-dashboard .dash-recent .rec-item .rec-id {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.6rem;
+        }
+        #tab-dashboard .dash-recent .rec-item .rec-name {
+            color: rgba(255,255,255,0.8);
+        }
+        #tab-dashboard .dash-recent .rec-item .rec-amount {
+            color: #2ecc71;
+            font-weight: 600;
+        }
+
+        #tab-dashboard .dash-categories-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-top: 4px;
+        }
+        #tab-dashboard .dash-categories-grid .cat-box {
+            background: rgba(255,255,255,0.04);
+            border-radius: 10px;
+            padding: 8px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.7rem;
+        }
+        #tab-dashboard .dash-categories-grid .cat-box .cat-name {
+            color: rgba(255,255,255,0.7);
+        }
+        #tab-dashboard .dash-categories-grid .cat-box .cat-count {
+            color: #3498db;
+            font-weight: 600;
+            font-size: 0.65rem;
+        }
+
+        #tab-dashboard .dash-category-sales .cat-sales-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.7rem;
+        }
+        #tab-dashboard .dash-category-sales .cat-sales-item:last-child {
+            border-bottom: none;
+        }
+        #tab-dashboard .dash-category-sales .cat-sales-item .cs-name {
+            color: rgba(255,255,255,0.7);
+        }
+        #tab-dashboard .dash-category-sales .cat-sales-item .cs-amount {
+            color: #f39c12;
+            font-weight: 600;
+        }
+
+        @media (max-width: 1024px) {
+            #tab-dashboard .dash-stats-grid { grid-template-columns: 1fr 1fr; }
+            #tab-dashboard .dash-main-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 600px) {
+            #tab-dashboard .dash-stats-grid { grid-template-columns: 1fr; }
+            #tab-dashboard .dash-categories-grid { grid-template-columns: 1fr; }
+            #tab-dashboard .dash-top-row { flex-direction: column; align-items: stretch; }
+        }
+        /* end dashboard styles */
     </style>
 </head>
 <body>
@@ -1252,7 +1528,7 @@
             </div>
         </div>
 
-        <!-- STATS -->
+        <!-- STATS (kept for legacy but hidden in dashboard tab) -->
         <div class="stats-row" id="statsRow">
             <div class="stat-card" onclick="showTab('transactions')">
                 <div class="stat-top"><span class="stat-label">Today's Sales</span><span class="stat-icon"><i class="fas fa-wallet"></i></span></div>
@@ -1368,30 +1644,137 @@
             </div>
         </div>
 
-        <!-- DASHBOARD TAB -->
+        <!-- DASHBOARD TAB - NEW DESIGN (only this tab changes) -->
         <div id="tab-dashboard" class="tab-content">
-            <div class="pos-panel">
-                <div class="panel-header"><h3><i class="fas fa-home"></i> Dashboard</h3><span class="badge-count" id="dashboardDate"></span></div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-                    <div style="background:#f8fafc;padding:14px;border-radius:12px;text-align:center;"><div style="font-size:0.7rem;color:#94a3b8;">Total Sales Today</div><div style="font-size:1.4rem;font-weight:700;color:#2ecc71;">₱<span id="dashTodaySales">0.00</span></div></div>
-                    <div style="background:#f8fafc;padding:14px;border-radius:12px;text-align:center;"><div style="font-size:0.7rem;color:#94a3b8;">Transactions</div><div style="font-size:1.4rem;font-weight:700;color:#3498db;"><span id="dashTodayTrans">0</span></div></div>
-                    <div style="background:#f8fafc;padding:14px;border-radius:12px;text-align:center;"><div style="font-size:0.7rem;color:#94a3b8;">Items Sold</div><div style="font-size:1.4rem;font-weight:700;color:#f39c12;"><span id="dashItemsSold">0</span></div></div>
-                    <div style="background:#f8fafc;padding:14px;border-radius:12px;text-align:center;"><div style="font-size:0.7rem;color:#94a3b8;">Payment Methods</div><div style="font-size:1.4rem;font-weight:700;color:#e74c3c;"><span id="dashPayMethods">Cash</span></div></div>
+            <div class="dashboard-new">
+                <!-- top row -->
+                <div class="dash-top-row">
+                    <div class="dash-greeting">
+                        <h2>Dashboard Overview</h2>
+                        <p>Welcome back, <span id="dashUserName">Admin</span>! Here's what's happening in your store today.</p>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                        <span class="dash-date-badge"><i class="far fa-calendar-alt"></i> <span id="dashDateDisplay"></span></span>
+                        <span class="dash-today-sales">Today: ₱<span id="dashHeaderToday">0.00</span></span>
+                    </div>
                 </div>
-                <div style="border-top:1px solid #f1f5f9;padding-top:12px;">
-                    <div style="font-weight:600;color:#0a1e2f;margin-bottom:8px;font-size:0.85rem;"><i class="fas fa-chart-pie"></i> Payment Method Breakdown</div>
-                    <div id="dashPaymentBreakdown">
-                        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.8rem;"><span>Cash</span><span id="dashCashCount">0</span></div>
-                        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.8rem;"><span>GCash</span><span id="dashGCashCount">0</span></div>
-                        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.8rem;"><span>Card</span><span id="dashCardCount">0</span></div>
-                        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.8rem;"><span>Bank Transfer</span><span id="dashBankCount">0</span></div>
-                        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.8rem;"><span>Other</span><span id="dashOtherCount">0</span></div>
+
+                <!-- summary cards -->
+                <div class="dash-stats-grid">
+                    <div class="dash-stat-card">
+                        <div class="dsc-top">
+                            <span class="dsc-label">Today's Sales</span>
+                            <span class="dsc-icon"><i class="fas fa-wallet"></i></span>
+                        </div>
+                        <div class="dsc-number green">₱<span id="dscTodaySales">0.00</span></div>
+                        <span class="dsc-change"><i class="fas fa-arrow-up"></i> 12% vs yesterday</span>
+                    </div>
+                    <div class="dash-stat-card">
+                        <div class="dsc-top">
+                            <span class="dsc-label">Transactions</span>
+                            <span class="dsc-icon"><i class="fas fa-file-invoice"></i></span>
+                        </div>
+                        <div class="dsc-number blue"><span id="dscTransactions">0</span></div>
+                        <span class="dsc-change"><i class="fas fa-arrow-up"></i> 8% vs yesterday</span>
+                    </div>
+                    <div class="dash-stat-card">
+                        <div class="dsc-top">
+                            <span class="dsc-label">Products</span>
+                            <span class="dsc-icon"><i class="fas fa-boxes"></i></span>
+                        </div>
+                        <div class="dsc-number orange"><span id="dscProducts">0</span></div>
+                        <span class="dsc-change">Active products</span>
+                    </div>
+                    <div class="dash-stat-card">
+                        <div class="dsc-top">
+                            <span class="dsc-label">Low Stock Items</span>
+                            <span class="dsc-icon"><i class="fas fa-exclamation-circle"></i></span>
+                        </div>
+                        <div class="dsc-number red"><span id="dscLowStock">0</span></div>
+                        <span class="dsc-change down"><i class="fas fa-arrow-down"></i> Need restocking</span>
+                    </div>
+                </div>
+
+                <!-- main grid -->
+                <div class="dash-main-grid">
+                    <!-- left column -->
+                    <div style="display:flex;flex-direction:column;gap:18px;">
+                        <!-- Sales Overview (mini chart) -->
+                        <div class="dash-panel">
+                            <div class="panel-head">
+                                <h4><i class="fas fa-chart-line" style="margin-right:6px;"></i> Sales Overview</h4>
+                                <span style="font-size:0.6rem;color:rgba(255,255,255,0.2);">This Week</span>
+                            </div>
+                            <div class="dash-sales-chart" id="dashSalesChart"></div>
+                        </div>
+                        <!-- Top Selling Products -->
+                        <div class="dash-panel dash-top-products">
+                            <div class="panel-head">
+                                <h4><i class="fas fa-star" style="margin-right:6px;"></i> Top Selling Products</h4>
+                                <span class="panel-link" onclick="showTab('products')">View All</span>
+                            </div>
+                            <div id="dashTopProducts"></div>
+                        </div>
+                        <!-- Low Stock Alert -->
+                        <div class="dash-panel dash-low-stock">
+                            <div class="panel-head">
+                                <h4><i class="fas fa-exclamation-triangle" style="margin-right:6px;color:#e74c3c;"></i> Low Stock Alert</h4>
+                                <span class="panel-link" onclick="showTab('lowstock')">View All</span>
+                            </div>
+                            <div id="dashLowStockItems"></div>
+                        </div>
+                    </div>
+
+                    <!-- right column -->
+                    <div style="display:flex;flex-direction:column;gap:18px;">
+                        <!-- Recent Transactions -->
+                        <div class="dash-panel dash-recent">
+                            <div class="panel-head">
+                                <h4><i class="fas fa-history" style="margin-right:6px;"></i> Recent Transactions</h4>
+                                <span class="panel-link" onclick="showTab('transactions')">View All</span>
+                            </div>
+                            <div id="dashRecentTransactions"></div>
+                        </div>
+                        <!-- Product Categories -->
+                        <div class="dash-panel">
+                            <div class="panel-head">
+                                <h4><i class="fas fa-tags" style="margin-right:6px;"></i> Product Categories</h4>
+                                <span class="panel-link" onclick="showTab('categories')">View All</span>
+                            </div>
+                            <div class="dash-categories-grid" id="dashCategoriesGrid"></div>
+                        </div>
+                        <!-- Sales by Category -->
+                        <div class="dash-panel dash-category-sales">
+                            <div class="panel-head">
+                                <h4><i class="fas fa-chart-pie" style="margin-right:6px;"></i> Sales by Category</h4>
+                                <span class="panel-link" onclick="showTab('reports')">View All</span>
+                            </div>
+                            <div id="dashCategorySales"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- PRODUCTS TAB - UPDATED WITH BUTTON-ONLY CONTROLS -->
+        <!-- CALENDAR TAB -->
+        <div id="tab-calendar" class="tab-content">
+            <div class="pos-panel">
+                <div class="panel-header"><h3><i class="fas fa-calendar-alt"></i> Sales Calendar</h3><span class="badge-count" id="calendarTotalSales">0</span></div>
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <button class="nav-btn" onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
+                        <span class="month-year" id="calendarMonthYear">January 2024</span>
+                        <button class="nav-btn" onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid"></div>
+                    <div class="calendar-details" id="calendarDetails">
+                        <div class="detail-empty"><i class="fas fa-calendar-day"></i> Select a date to view sales details</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRODUCTS TAB -->
         <div id="tab-products" class="tab-content">
             <div class="pos-panel">
                 <div class="panel-header"><h3><i class="fas fa-box"></i> All Products</h3><span class="badge-count" id="productTotalCount">0</span></div>
@@ -1431,25 +1814,7 @@
             </div>
         </div>
 
-        <!-- CALENDAR TAB -->
-        <div id="tab-calendar" class="tab-content">
-            <div class="pos-panel">
-                <div class="panel-header"><h3><i class="fas fa-calendar-alt"></i> Sales Calendar</h3><span class="badge-count" id="calendarTotalSales">0</span></div>
-                <div class="calendar-container">
-                    <div class="calendar-header">
-                        <button class="nav-btn" onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i></button>
-                        <span class="month-year" id="calendarMonthYear">January 2024</span>
-                        <button class="nav-btn" onclick="changeMonth(1)"><i class="fas fa-chevron-right"></i></button>
-                    </div>
-                    <div class="calendar-grid" id="calendarGrid"></div>
-                    <div class="calendar-details" id="calendarDetails">
-                        <div class="detail-empty"><i class="fas fa-calendar-day"></i> Select a date to view sales details</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- INVENTORY TAB - UPDATED WITH BUTTON-ONLY CONTROLS -->
+        <!-- INVENTORY TAB -->
         <div id="tab-inventory" class="tab-content admin-tab">
             <div class="pos-panel">
                 <div class="panel-header"><h3><i class="fas fa-clipboard-list"></i> Inventory Management</h3><span class="badge-count" id="inventoryCount">0</span></div>
@@ -1465,15 +1830,13 @@
             </div>
         </div>
 
-        <!-- REPAIRS TAB - NEW SECTION -->
+        <!-- REPAIRS TAB -->
         <div id="tab-repairs" class="tab-content admin-tab">
             <div class="pos-panel">
                 <div class="panel-header">
                     <h3><i class="fas fa-tools"></i> Repair Management</h3>
                     <button class="btn-new-repair" onclick="openNewRepairModal()"><i class="fas fa-plus"></i> New Repair</button>
                 </div>
-
-                <!-- Summary Cards -->
                 <div class="repairs-summary" id="repairSummary">
                     <div class="stat-card">
                         <div class="stat-top"><span class="stat-label">Total Repairs</span><span class="stat-icon"><i class="fas fa-clipboard-list"></i></span></div>
@@ -1492,8 +1855,6 @@
                         <div class="stat-number green" id="repairReadyCount">0</div>
                     </div>
                 </div>
-
-                <!-- Filters -->
                 <div class="repair-filters">
                     <button class="filter-btn active" data-filter="all" onclick="filterRepairs('all')">All</button>
                     <button class="filter-btn" data-filter="Pending" onclick="filterRepairs('Pending')">Pending</button>
@@ -1502,8 +1863,6 @@
                     <button class="filter-btn" data-filter="Ready for Pickup" onclick="filterRepairs('Ready for Pickup')">Ready for Pickup</button>
                     <button class="filter-btn" data-filter="Released" onclick="filterRepairs('Released')">Released</button>
                 </div>
-
-                <!-- Repairs Table -->
                 <div class="list-container" id="repairsList"></div>
             </div>
         </div>
@@ -2169,6 +2528,16 @@ function updateClock() {
     document.getElementById('headerDate').textContent = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     document.getElementById('dashboardDate').textContent = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
     document.getElementById('settingsLastLogin').textContent = now.toLocaleString();
+    // update dashboard date
+    var dashDate = document.getElementById('dashDateDisplay');
+    if (dashDate) {
+        dashDate.textContent = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+    // update greeting
+    var dashUser = document.getElementById('dashUserName');
+    if (dashUser && currentUserFullname) {
+        dashUser.textContent = currentUserFullname;
+    }
 }
 
 function toggleSidebar() {
@@ -2185,7 +2554,7 @@ function showTab(tabName) {
     if (idx >= 0 && document.querySelectorAll('.menu-item')[idx]) document.querySelectorAll('.menu-item')[idx].classList.add('active');
     var titles = {
         'pos': ['Current Sale (POS)', 'Search product by name, brand, or barcode...'],
-        'dashboard': ['Dashboard', 'Welcome back, ' + (currentUserFullname || 'User') + '!'],
+        'dashboard': ['Dashboard Overview', 'Welcome back, ' + (currentUserFullname || 'User') + '!'],
         'calendar': ['Sales Calendar', 'Click on a date to view sales details'],
         'products': ['All Products', 'View and manage products'],
         'customers': ['Customers', 'Customer database'],
@@ -2267,7 +2636,6 @@ function loadData() {
         repairs = JSON.parse(storedRepairs);
         repairCounter = repairs.length > 0 ? Math.max(...repairs.map(r => parseInt(r.id.replace('R-', '')))) + 1 : 1;
     } else {
-        // Seed with sample data
         repairs = [
             { id: 'R-001', customer: 'Juan Dela Cruz', contact: '0917-123-4567', device: 'iPhone 14 Pro', problem: 'Broken screen', technician: 'Roland Maru', fee: 2500, downPayment: 1000, balance: 1500, dateReceived: '2026-08-28', expectedDate: '2026-09-02', status: 'Pending' },
             { id: 'R-002', customer: 'Maria Santos', contact: '0918-765-4321', device: 'Samsung S24 Ultra', problem: 'Battery not charging', technician: 'Bryan Aropo', fee: 1800, downPayment: 800, balance: 1000, dateReceived: '2026-08-27', expectedDate: '2026-09-01', status: 'Diagnosing' },
@@ -2759,7 +3127,6 @@ function renderRepairs() {
     if (currentRepairFilter !== 'all') {
         filtered = repairs.filter(function(r) { return r.status === currentRepairFilter; });
     }
-    // Sort by newest first
     filtered = filtered.slice().sort(function(a, b) { return b.id.localeCompare(a.id); });
     
     if (filtered.length === 0) {
@@ -2792,7 +3159,6 @@ function renderRepairs() {
         }).join('');
     }
     
-    // Update summary
     var total = repairs.length;
     var pending = repairs.filter(function(r) { return r.status === 'Pending'; }).length;
     var diagnosing = repairs.filter(function(r) { return r.status === 'Diagnosing'; }).length;
@@ -2878,14 +3244,12 @@ function saveRepair(e) {
     };
     
     if (editingRepairId) {
-        // Edit existing
         var index = repairs.findIndex(function(r) { return r.id === editingRepairId; });
         if (index !== -1) {
             repairs[index] = repairData;
             showMessage('Repair order updated successfully!', 'success');
         }
     } else {
-        // New repair
         repairs.push(repairData);
         repairCounter++;
         showMessage('New repair order created!', 'success');
@@ -2963,25 +3327,147 @@ function renderTransactions() {
     }).join('');
 }
 
+// --- RENDER DASHBOARD (completely new design) ---
 function renderDashboard() {
     var today = new Date().toDateString();
     var todaySales = sales.filter(function(s) { return new Date(s.date).toDateString() === today; });
     var todayTotal = todaySales.reduce(function(sum, s) { return sum + s.total; }, 0);
-    document.getElementById('dashTodaySales').innerText = todayTotal.toFixed(2);
-    document.getElementById('dashTodayTrans').innerText = todaySales.length;
-    var totalItems = 0;
-    todaySales.forEach(function(s) { s.items.forEach(function(i) { totalItems += i.quantity; }); });
-    document.getElementById('dashItemsSold').innerText = totalItems;
-    var pm = { Cash:0, GCash:0, Card:0, 'Bank Transfer':0, Other:0 };
-    todaySales.forEach(function(s) { if (pm.hasOwnProperty(s.method)) pm[s.method]++; });
-    document.getElementById('dashCashCount').innerText = pm.Cash;
-    document.getElementById('dashGCashCount').innerText = pm.GCash;
-    document.getElementById('dashCardCount').innerText = pm.Card;
-    document.getElementById('dashBankCount').innerText = pm['Bank Transfer'];
-    document.getElementById('dashOtherCount').innerText = pm.Other;
-    var maxMethod = 'Cash', maxCount = 0;
-    Object.entries(pm).forEach(function(_ref) { var k = _ref[0], v = _ref[1]; if (v > maxCount) { maxCount = v; maxMethod = k; } });
-    document.getElementById('dashPayMethods').innerText = maxMethod + (maxCount > 0 ? ' (' + maxCount + ')' : '');
+    var totalTrans = sales.length;
+    var totalProducts = products.length;
+    var lowStockItems = products.filter(function(p) { return p.stock <= 5; });
+    var lowCount = lowStockItems.length;
+
+    // update summary cards
+    document.getElementById('dscTodaySales').innerText = todayTotal.toFixed(2);
+    document.getElementById('dscTransactions').innerText = totalTrans;
+    document.getElementById('dscProducts').innerText = totalProducts;
+    document.getElementById('dscLowStock').innerText = lowCount;
+    document.getElementById('dashHeaderToday').innerText = todayTotal.toFixed(2);
+
+    // update user greeting
+    var dashUser = document.getElementById('dashUserName');
+    if (dashUser && currentUserFullname) {
+        dashUser.textContent = currentUserFullname;
+    }
+
+    // Sales Chart (last 7 days)
+    var chartContainer = document.getElementById('dashSalesChart');
+    var dayLabels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    var dayTotals = [0,0,0,0,0,0,0];
+    var now = new Date();
+    var currentDay = now.getDay(); // 0=Sun
+    var startIdx = (currentDay === 0) ? 6 : currentDay - 1; // Monday start
+    sales.forEach(function(s) {
+        var d = new Date(s.date);
+        var diff = Math.floor((now - d) / (1000*60*60*24));
+        if (diff >= 0 && diff < 7) {
+            var dayIdx = (7 - diff) % 7;
+            dayTotals[dayIdx] += s.total;
+        }
+    });
+    // reorder to Monday-Sunday
+    var orderedTotals = [];
+    for (var i=0; i<7; i++) {
+        orderedTotals.push(dayTotals[(i+startIdx) % 7]);
+    }
+    var maxVal = Math.max(...orderedTotals, 1);
+    var chartHTML = orderedTotals.map(function(val, idx) {
+        var pct = (val / maxVal) * 80 + 10;
+        return '<div class="bar-col"><div class="bar" style="height:' + pct + '%;"></div><div class="bar-label">' + dayLabels[idx] + '</div></div>';
+    }).join('');
+    chartContainer.innerHTML = chartHTML;
+
+    // Top Selling Products (based on sales)
+    var productSales = {};
+    sales.forEach(function(s) {
+        s.items.forEach(function(item) {
+            if (!productSales[item.name]) productSales[item.name] = 0;
+            productSales[item.name] += item.quantity;
+        });
+    });
+    var topProducts = Object.entries(productSales).sort(function(a,b){return b[1]-a[1]}).slice(0,5);
+    var topHTML = '';
+    if (topProducts.length === 0) {
+        topHTML = '<div style="color:rgba(255,255,255,0.3);font-size:0.75rem;padding:6px 0;">No sales data yet</div>';
+    } else {
+        topProducts.forEach(function(item) {
+            topHTML += '<div class="top-item"><span class="tp-name">' + item[0] + '</span><span class="tp-sold">' + item[1] + ' sold</span></div>';
+        });
+    }
+    document.getElementById('dashTopProducts').innerHTML = topHTML;
+
+    // Low Stock Items
+    var lowHTML = '';
+    if (lowStockItems.length === 0) {
+        lowHTML = '<div style="color:rgba(255,255,255,0.3);font-size:0.75rem;padding:6px 0;">All items are well-stocked</div>';
+    } else {
+        lowStockItems.slice(0,5).forEach(function(p) {
+            lowHTML += '<div class="low-item"><span class="ls-name">' + p.name + '</span><span class="ls-stock">' + p.stock + ' left</span></div>';
+        });
+    }
+    document.getElementById('dashLowStockItems').innerHTML = lowHTML;
+
+    // Recent Transactions (last 5)
+    var recentHTML = '';
+    var recentSales = sales.slice(0,5);
+    if (recentSales.length === 0) {
+        recentHTML = '<div style="color:rgba(255,255,255,0.3);font-size:0.75rem;padding:6px 0;">No transactions</div>';
+    } else {
+        recentSales.forEach(function(s) {
+            var dateStr = new Date(s.date).toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+            var userShort = (s.user || 'Cashier').split(' ')[0] || 'C';
+            recentHTML += '<div class="rec-item"><div class="rec-left"><span class="rec-id">#' + s.receiptNumber + ' · ' + dateStr + '</span><span class="rec-name">' + userShort + '</span></div><span class="rec-amount">₱' + s.total.toFixed(2) + '</span></div>';
+        });
+    }
+    document.getElementById('dashRecentTransactions').innerHTML = recentHTML;
+
+    // Product Categories (counts)
+    var catMap = {
+        'phones': 'Phones',
+        'chargers': 'Chargers',
+        'cables': 'Cables',
+        'cases': 'Cases',
+        'earphones': 'Earphones',
+        'powerbanks': 'Power Banks',
+        'screenprotectors': 'Screen Protectors',
+        'others': 'Others'
+    };
+    var catCounts = {};
+    products.forEach(function(p) {
+        var cat = p.category || 'others';
+        if (!catCounts[cat]) catCounts[cat] = 0;
+        catCounts[cat]++;
+    });
+    var catHTML = '';
+    var catKeys = Object.keys(catMap);
+    catKeys.forEach(function(key) {
+        var label = catMap[key] || key;
+        var count = catCounts[key] || 0;
+        catHTML += '<div class="cat-box"><span class="cat-name">' + label + '</span><span class="cat-count">' + count + ' products</span></div>';
+    });
+    document.getElementById('dashCategoriesGrid').innerHTML = catHTML;
+
+    // Sales by Category (based on sales items)
+    var categorySales = {};
+    sales.forEach(function(s) {
+        s.items.forEach(function(item) {
+            var product = products.find(function(p) { return p.name === item.name; });
+            var cat = product ? (product.category || 'others') : 'others';
+            if (!categorySales[cat]) categorySales[cat] = 0;
+            categorySales[cat] += item.subtotal || (item.price * item.quantity);
+        });
+    });
+    var catSalesHTML = '';
+    var sortedCats = Object.entries(categorySales).sort(function(a,b){return b[1]-a[1]});
+    if (sortedCats.length === 0) {
+        catSalesHTML = '<div style="color:rgba(255,255,255,0.3);font-size:0.75rem;padding:6px 0;">No sales data</div>';
+    } else {
+        sortedCats.slice(0,6).forEach(function(item) {
+            var label = catMap[item[0]] || item[0];
+            catSalesHTML += '<div class="cat-sales-item"><span class="cs-name">' + label + '</span><span class="cs-amount">₱' + item[1].toFixed(2) + '</span></div>';
+        });
+    }
+    document.getElementById('dashCategorySales').innerHTML = catSalesHTML;
 }
 
 function renderLowStock() {
