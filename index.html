@@ -8,7 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js">
     </script>
     <style>
-        /* ───────── RESET & BASE ───────── */
         * {
             margin: 0;
             padding: 0;
@@ -30,7 +29,6 @@
             background: #0b1420;
             color: #eef2f6;
         }
-
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -49,7 +47,6 @@
             background: rgba(255, 255, 255, 0.15);
         }
 
-        /* ───────── LOGIN OVERLAY ───────── */
         #loginOverlay {
             position: fixed;
             top: 0;
@@ -62,6 +59,7 @@
             align-items: center;
             z-index: 2000;
             overflow: hidden;
+            transition: background 0.25s;
         }
         body.dark-mode #loginOverlay {
             background: linear-gradient(145deg, #0b1a2a, #1a2f3f);
@@ -69,7 +67,6 @@
         #loginOverlay.hidden {
             display: none;
         }
-
         .login-brand-grid {
             position: absolute;
             top: 0;
@@ -132,7 +129,6 @@
         body.dark-mode .login-brand-item .brand-name {
             color: rgba(255, 255, 255, 0.2);
         }
-
         .login-glow {
             position: absolute;
             border-radius: 50%;
@@ -463,33 +459,6 @@
         body.dark-mode .auth-error {
             background: rgba(231, 76, 60, 0.12);
         }
-        .auth-card .terms-row {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            margin: 14px 0 18px;
-            font-size: 0.9rem;
-            color: #2c3e50;
-        }
-        body.dark-mode .auth-card .terms-row {
-            color: #c0d0e0;
-        }
-        .auth-card .terms-row input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: #e74c3c;
-            margin-top: 2px;
-            flex-shrink: 0;
-            cursor: pointer;
-        }
-        .auth-card .terms-row .terms-text a {
-            color: #e74c3c;
-            font-weight: 600;
-            text-decoration: none;
-        }
-        .auth-card .terms-row .terms-text a:hover {
-            text-decoration: underline;
-        }
         .auth-card .secure-badge {
             display: flex;
             align-items: center;
@@ -558,7 +527,6 @@
             color: #fff !important;
         }
 
-        /* ───────── APP WRAPPER & SIDEBAR ───────── */
         .app-wrapper {
             display: flex;
             min-height: 100vh;
@@ -795,7 +763,6 @@
             border-color: #e74c3c;
         }
 
-        /* ───────── MAIN CONTENT ───────── */
         .main-content {
             margin-left: 270px;
             flex: 1;
@@ -882,7 +849,6 @@
             color: rgba(255, 255, 255, 0.6);
         }
 
-        /* ───────── STATS ROW ───────── */
         .stats-row {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -1074,18 +1040,12 @@
             display: block !important;
         }
 
-        /* ════════════════════════════════════════════ */
-        /*  REDESIGNED POS PRODUCT SELECTION          */
-        /*  Dark theme · Reference-matching UI        */
-        /* ════════════════════════════════════════════ */
-
         .pos-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
 
-        /* ── LEFT PANEL (Product Selection) ── */
         .pos-panel.products-panel {
             background: #0d1117;
             border-radius: 20px;
@@ -1131,7 +1091,6 @@
             color: #fff;
         }
 
-        /* Search bar */
         .pos-panel.products-panel .scanner-input {
             display: flex;
             gap: 10px;
@@ -1234,7 +1193,6 @@
             font-weight: 600;
         }
 
-        /* ── Category Pills ── */
         .pos-panel.products-panel .category-filter {
             display: flex;
             flex-wrap: wrap;
@@ -1271,7 +1229,6 @@
             color: rgba(255, 255, 255, 0.5);
         }
 
-        /* Category colors */
         .pos-panel.products-panel .category-filter .cat-btn[data-category="all"] {
             border-color: rgba(46, 204, 113, 0.3);
             color: rgba(255, 255, 255, 0.7);
@@ -1350,7 +1307,6 @@
             color: rgba(11, 20, 32, 0.5);
         }
 
-        /* ── Product Grid ── */
         .pos-panel.products-panel .quick-products-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -1499,7 +1455,6 @@
             color: rgba(255, 255, 255, 0.2);
         }
 
-        /* ── Brand Tags ── */
         .pos-panel.products-panel .brand-list-section {
             margin-top: 14px;
             border-top: 1px solid rgba(255, 255, 255, 0.04);
@@ -1537,7 +1492,6 @@
             border-color: #2ecc71;
         }
 
-        /* ── RIGHT PANEL (Cart) ── */
         .pos-panel.cart-panel {
             background: rgba(255, 255, 255, 0.6);
             border-radius: 16px;
@@ -1577,7 +1531,6 @@
             font-weight: 600;
         }
 
-        /* Cart items - keep existing styles but ensure readability */
         .pos-panel.cart-panel .cart-items-list {
             max-height: 260px;
             overflow-y: auto;
@@ -1912,7 +1865,6 @@
             font-size: 0.9rem;
         }
 
-        /* ── Responsive ── */
         @media (max-width: 1024px) {
             .pos-grid {
                 grid-template-columns: 1fr;
@@ -1970,7 +1922,6 @@
             }
         }
 
-        /* ───────── OTHER MODALS ───────── */
         .product-preview-modal {
             display: none;
             position: fixed;
@@ -2173,7 +2124,6 @@
             color: rgba(255, 255, 255, 0.2);
         }
 
-        /* ───────── RECEIPT MODAL ───────── */
         .modal {
             display: none;
             position: fixed;
@@ -2766,7 +2716,6 @@
             }
         }
 
-        /* ───────── OTHER MODALS ───────── */
         .repair-modal .receipt-wrapper {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
@@ -2930,11 +2879,6 @@
             color: #fff;
         }
 
-        /* ════════════════════════════════════════════ */
-        /* DASHBOARD — REDESIGNED with simple revenue  */
-        /* and calendar (from first image)            */
-        /* ════════════════════════════════════════════ */
-
         #tab-dashboard .dashboard-new {
             background: rgba(255, 255, 255, 0.4);
             border-radius: 20px;
@@ -2996,7 +2940,6 @@
             box-shadow: 0 4px 20px rgba(46, 204, 113, 0.15);
         }
 
-        /* ── Stats Grid ── */
         #tab-dashboard .dash-stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -3075,7 +3018,6 @@
             color: #e74c3c !important;
         }
 
-        /* ── Revenue Table (exact match from image) ── */
         .dash-revenue-table {
             background: rgba(255, 255, 255, 0.6);
             border-radius: 16px;
@@ -3150,7 +3092,6 @@
             font-weight: 600;
         }
 
-        /* ── Community Growth / Stats ── */
         .dash-growth-stats {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -3182,7 +3123,6 @@
             color: rgba(255, 255, 255, 0.25);
         }
 
-        /* ── Dashboard Calendar (mini) ── */
         .dash-calendar-mini {
             background: rgba(255, 255, 255, 0.6);
             border-radius: 16px;
@@ -3308,7 +3248,6 @@
             background: #0b1420;
         }
 
-        /* ── Main grid ── */
         #tab-dashboard .dash-main-grid {
             display: grid;
             grid-template-columns: 1.3fr 0.7fr;
@@ -3564,7 +3503,6 @@
             }
         }
 
-        /* ───────── OTHER TABS ───────── */
         .list-container {
             max-height: 450px;
             overflow-y: auto;
@@ -3722,7 +3660,6 @@
             background: #d68910;
         }
 
-        /* ───────── SETTINGS MODAL ───────── */
         .settings-gear-btn {
             background: none;
             border: none;
@@ -3881,7 +3818,6 @@
             left: 25px;
         }
 
-        /* ───────── OTHER ───────── */
         .calendar-container {
             background: rgba(255, 255, 255, 0.4);
             border-radius: 16px;
@@ -4065,7 +4001,6 @@
             font-size: 1rem;
         }
 
-        /* ───────── LOGOUT MODAL ───────── */
         #logoutModal {
             display: none;
             position: fixed;
@@ -4164,7 +4099,6 @@
             box-shadow: 0 4px 20px rgba(231, 76, 60, 0.3);
         }
 
-        /* ───────── GCASH POPUP ───────── */
         .gcash-popup-overlay {
             display: none;
             position: fixed;
@@ -4350,7 +4284,6 @@
             transform: translateY(-1px);
         }
 
-        /* ───────── LOGO PREVIEW ───────── */
         .logo-preview-modal {
             display: none;
             position: fixed;
@@ -4430,7 +4363,6 @@
             color: #fff;
         }
 
-        /* ───────── SETTINGS GRID ───────── */
         .settings-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -4555,7 +4487,6 @@
             background: rgba(231, 76, 60, 0.2);
         }
 
-        /* ───────── PASSWORD RESET MODAL ───────── */
         .reset-modal .receipt-wrapper {
             max-width: 460px;
             width: 100%;
@@ -4746,9 +4677,6 @@
             color: #e74c3c !important;
         }
 
-        /* ════════════════════════════════════════════ */
-        /* LANDING OVERLAY — full-screen cover        */
-        /* ════════════════════════════════════════════ */
         #landingOverlay {
             position: fixed;
             top: 0;
@@ -4849,32 +4777,6 @@
             font-weight: 300;
             letter-spacing: 0.5px;
             margin-top: 2px;
-        }
-
-        #landingOverlay .landing-brand .landing-login-btn {
-            display: inline-block;
-            margin-top: 16px;
-            padding: 14px 44px;
-            background: #2ecc71;
-            color: #0b1420 !important;
-            border: none;
-            border-radius: 40px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.3s ease;
-            box-shadow: 0 4px 30px rgba(46, 204, 113, 0.25);
-            text-decoration: none;
-            font-family: inherit;
-            letter-spacing: 0.5px;
-        }
-        #landingOverlay .landing-brand .landing-login-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 40px rgba(46, 204, 113, 0.35);
-            background: #27ae60;
-        }
-        #landingOverlay .landing-brand .landing-login-btn i {
-            margin-right: 8px;
         }
 
         #landingOverlay .landing-categories {
@@ -4999,10 +4901,6 @@
                 height: 44px;
                 font-size: 1.4rem;
             }
-            #landingOverlay .landing-brand .landing-login-btn {
-                padding: 12px 32px;
-                font-size: 1rem;
-            }
         }
         @media (max-width: 520px) {
             #landingOverlay .landing-categories {
@@ -5041,11 +4939,6 @@
             #landingOverlay .landing-category-card .cat-desc {
                 font-size: 0.55rem;
             }
-            #landingOverlay .landing-brand .landing-login-btn {
-                padding: 10px 24px;
-                font-size: 0.9rem;
-                margin-top: 12px;
-            }
         }
         @media (max-width: 380px) {
             #landingOverlay .landing-categories {
@@ -5057,7 +4950,6 @@
             }
         }
 
-        /* ─── Cashier status dot ─── */
         .cashier-status-dot {
             display: inline-block;
             width: 8px;
@@ -5072,7 +4964,6 @@
             background: #95a5a6;
         }
 
-        /* ─── Product controls ─── */
         .prod-controls {
             display: flex;
             align-items: center;
@@ -5219,7 +5110,6 @@
             color: #3498db !important;
         }
 
-        /* ─── Repairs Summary ─── */
         .repairs-summary {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -5336,7 +5226,6 @@
             color: #2ecc71 !important;
         }
 
-        /* ─── Add product form ─── */
         .add-product-form {
             background: rgba(255, 255, 255, 0.3);
             border-radius: 12px;
@@ -5400,7 +5289,6 @@
             transform: translateY(-1px);
         }
 
-        /* ─── Responsive fixes ─── */
         @media (max-width: 1024px) {
             .repairs-summary {
                 grid-template-columns: 1fr 1fr;
@@ -5420,12 +5308,170 @@
                 min-width: unset;
             }
         }
+
+        #landingMenuOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3200;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+            padding: 20px;
+        }
+        #landingMenuOverlay.show {
+            display: flex;
+        }
+        .landing-menu-box {
+            background: rgba(20, 30, 44, 0.97);
+            border-radius: 28px;
+            padding: 36px 40px 32px;
+            max-width: 380px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
+            animation: slideDown 0.3s ease;
+            position: relative;
+        }
+        body.light-mode .landing-menu-box {
+            background: rgba(255, 255, 255, 0.98);
+            border-color: rgba(0, 0, 0, 0.04);
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.15);
+        }
+        .landing-menu-box .menu-close-btn {
+            position: absolute;
+            top: 14px;
+            right: 18px;
+            background: none;
+            border: none;
+            font-size: 1.6rem;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.3);
+            transition: 0.2s;
+            line-height: 1;
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+        body.light-mode .landing-menu-box .menu-close-btn {
+            color: rgba(0, 0, 0, 0.3);
+        }
+        .landing-menu-box .menu-close-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        body.light-mode .landing-menu-box .menu-close-btn:hover {
+            color: #0b1420;
+            background: rgba(0, 0, 0, 0.05);
+        }
+        .landing-menu-box .menu-brand {
+            margin-bottom: 24px;
+        }
+        .landing-menu-box .menu-brand .brand-icon-sm {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            margin-bottom: 8px;
+        }
+        body.light-mode .landing-menu-box .menu-brand .brand-icon-sm {
+            background: rgba(0, 0, 0, 0.03);
+            border-color: rgba(0, 0, 0, 0.04);
+        }
+        .landing-menu-box .menu-brand .brand-icon-sm i {
+            font-size: 2rem;
+            color: #2ecc71 !important;
+        }
+        .landing-menu-box .menu-brand h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.3px;
+            margin: 0;
+        }
+        body.light-mode .landing-menu-box .menu-brand h2 {
+            color: #0b1420;
+        }
+        .landing-menu-box .menu-brand .menu-sub {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.25);
+            letter-spacing: 0.5px;
+        }
+        body.light-mode .landing-menu-box .menu-brand .menu-sub {
+            color: rgba(0, 0, 0, 0.25);
+        }
+        .landing-menu-box .menu-item-btn {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            background: rgba(255, 255, 255, 0.02);
+            cursor: pointer;
+            transition: 0.25s;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+            font-size: 1.1rem;
+            font-family: inherit;
+            width: 100%;
+            text-align: left;
+        }
+        body.light-mode .landing-menu-box .menu-item-btn {
+            border-color: rgba(0, 0, 0, 0.04);
+            background: rgba(0, 0, 0, 0.01);
+            color: #0b1420;
+        }
+        .landing-menu-box .menu-item-btn:hover {
+            background: rgba(46, 204, 113, 0.10);
+            border-color: rgba(46, 204, 113, 0.2);
+            transform: translateX(4px);
+        }
+        body.light-mode .landing-menu-box .menu-item-btn:hover {
+            background: rgba(46, 204, 113, 0.08);
+            border-color: rgba(46, 204, 113, 0.15);
+        }
+        .landing-menu-box .menu-item-btn .mi-icon {
+            width: 32px;
+            text-align: center;
+            font-size: 1.2rem;
+            color: #2ecc71 !important;
+        }
+        .landing-menu-box .menu-item-btn .mi-text {
+            flex: 1;
+        }
+        .landing-menu-box .menu-item-btn .mi-arrow {
+            color: rgba(255, 255, 255, 0.15);
+        }
+        body.light-mode .landing-menu-box .menu-item-btn .mi-arrow {
+            color: rgba(0, 0, 0, 0.15);
+        }
+        .landing-menu-box .menu-footer {
+            margin-top: 18px;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.12);
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            padding-top: 14px;
+        }
+        body.light-mode .landing-menu-box .menu-footer {
+            color: rgba(0, 0, 0, 0.12);
+            border-top-color: rgba(0, 0, 0, 0.04);
+        }
     </style>
 </head>
 <body>
-    <!-- ════════════════════════════════════════════ -->
-    <!-- LANDING OVERLAY                            -->
-    <!-- ════════════════════════════════════════════ -->
+
     <div id="landingOverlay">
         <div class="landing-glow g1"></div>
         <div class="landing-glow g2"></div>
@@ -5440,7 +5486,6 @@
             <h1>Mobile Care <span>Accessories</span></h1>
             <div class="tagline">Premium Accessories for Your Devices</div>
             <div class="sub-tagline">High quality products · best prices · perfect for your everyday needs</div>
-            <button class="landing-login-btn" id="landingLoginBtn"><i class="fas fa-sign-in-alt"></i> Log In</button>
         </div>
         <div class="landing-categories">
             <div class="landing-category-card">
@@ -5474,15 +5519,40 @@
         </div>
     </div>
 
-    <!-- ════════════════════════════════════════════ -->
-    <!-- LOGIN OVERLAY                              -->
-    <!-- ════════════════════════════════════════════ -->
+    <div id="landingMenuOverlay">
+        <div class="landing-menu-box">
+            <button class="menu-close-btn" onclick="closeLandingMenu()"><i class="fas fa-times"></i></button>
+            <div class="menu-brand">
+                <div class="brand-icon-sm"><i class="fas fa-mobile-alt"></i></div>
+                <h2>Mobile Care</h2>
+                <div class="menu-sub">ACCESSORIES STORE</div>
+            </div>
+            <button class="menu-item-btn" onclick="handleLandingMenuAction('login')">
+                <span class="mi-icon"><i class="fas fa-sign-in-alt"></i></span>
+                <span class="mi-text">Log in</span>
+                <span class="mi-arrow"><i class="fas fa-chevron-right"></i></span>
+            </button>
+            <button class="menu-item-btn" onclick="handleLandingMenuAction('home')">
+                <span class="mi-icon"><i class="fas fa-home"></i></span>
+                <span class="mi-text">Home</span>
+                <span class="mi-arrow"><i class="fas fa-chevron-right"></i></span>
+            </button>
+            <button class="menu-item-btn" onclick="handleLandingMenuAction('about')">
+                <span class="mi-icon"><i class="fas fa-info-circle"></i></span>
+                <span class="mi-text">About Product</span>
+                <span class="mi-arrow"><i class="fas fa-chevron-right"></i></span>
+            </button>
+            <div class="menu-footer">
+                <i class="fas fa-shield-alt" style="margin-right:4px;"></i> Secure &bull; <i class="fas fa-bolt" style="margin:0 4px;"></i> Fast
+            </div>
+        </div>
+    </div>
+
     <div id="loginOverlay">
         <div class="login-glow g1"></div>
         <div class="login-glow g2"></div>
         <div class="login-glow g3"></div>
         <div class="login-brand-grid" id="loginBrandGrid"></div>
-
         <div class="auth-wrapper">
             <div id="loginScreen" class="auth-card auth-screen active">
                 <div class="brand-header">
@@ -5518,7 +5588,7 @@
                 </div>
                 <button class="auth-btn" onclick="handleLogin()"><i class="fas fa-sign-in-alt"></i> Sign In</button>
                 <div class="auth-footer">
-                    Don't have an account? <span class="link" onclick="showRegister()">Create new account</span>
+                    Don't have an account? Contact your administrator.
                 </div>
                 <div class="secure-badge">
                     <span><i class="fas fa-shield-alt"></i> Secure</span>
@@ -5526,64 +5596,9 @@
                     <span><i class="fas fa-check-circle"></i> Reliable</span>
                 </div>
             </div>
-
-            <div id="registerScreen" class="auth-card auth-screen">
-                <div class="brand-header">
-                    <div class="logo-icon"><img src="logo.png" alt="Mobile Care" onerror="this.style.display='none';this.parentElement.innerHTML='<i class=\'fas fa-mobile-alt\'></i>'"></div>
-                    <h2>Mobile Care</h2>
-                </div>
-                <div class="subhead"><strong>Create Account</strong> · Join us and start managing</div>
-                <div id="registerError" class="auth-error" style="display:none;"></div>
-                <div class="form-group">
-                    <label><i class="fas fa-user-circle" style="margin-right:6px;color:#e74c3c;"></i> Full Name</label>
-                    <div class="input-icon-wrap">
-                        <span class="input-icon"><i class="fas fa-id-card"></i></span>
-                        <input type="text" id="regFullName" placeholder="Enter your full name" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label><i class="fas fa-envelope" style="margin-right:6px;color:#e74c3c;"></i> Username / Email</label>
-                    <div class="input-icon-wrap">
-                        <span class="input-icon"><i class="fas fa-user"></i></span>
-                        <input type="email" id="regUser" placeholder="Enter your email" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label><i class="fas fa-lock" style="margin-right:6px;color:#e74c3c;"></i> Password</label>
-                    <div class="input-icon-wrap">
-                        <span class="input-icon"><i class="fas fa-key"></i></span>
-                        <input type="password" id="regPass" placeholder="8+ characters with number or symbol" />
-                        <button type="button" class="toggle-password" onclick="toggleRegPass()"><i class="fas fa-eye"></i></button>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label><i class="fas fa-check-circle" style="margin-right:6px;color:#e74c3c;"></i> Confirm Password</label>
-                    <div class="input-icon-wrap">
-                        <span class="input-icon"><i class="fas fa-shield-alt"></i></span>
-                        <input type="password" id="regConfirmPass" placeholder="Confirm your password" />
-                        <button type="button" class="toggle-password" onclick="toggleRegConfirmPass()"><i class="fas fa-eye"></i></button>
-                    </div>
-                </div>
-                <div class="terms-row">
-                    <input type="checkbox" id="regTerms" checked />
-                    <span class="terms-text">I agree to the <a href="#" onclick="event.preventDefault();showMessage('Terms & Privacy policy', 'info');">Terms</a> and <a href="#" onclick="event.preventDefault();showMessage('Privacy policy', 'info');">Privacy Policy</a></span>
-                </div>
-                <button class="auth-btn" onclick="handleRegister()"><i class="fas fa-user-plus"></i> Create Account</button>
-                <div class="auth-footer">
-                    Already have an account? <span class="link" onclick="showLogin()">Back to Sign In</span>
-                </div>
-                <div class="secure-badge">
-                    <span><i class="fas fa-shield-alt"></i> Secure</span>
-                    <span><i class="fas fa-lock"></i> Encrypted</span>
-                    <span><i class="fas fa-check-circle"></i> Trusted</span>
-                </div>
-            </div>
         </div>
     </div>
 
-    <!-- ════════════════════════════════════════════ -->
-    <!-- PASSWORD RESET MODAL                       -->
-    <!-- ════════════════════════════════════════════ -->
     <div id="resetModal" class="modal reset-modal">
         <div class="receipt-wrapper">
             <div class="panel-header">
@@ -5618,9 +5633,6 @@
         </div>
     </div>
 
-    <!-- ════════════════════════════════════════════ -->
-    <!-- LOGOUT MODAL                              -->
-    <!-- ════════════════════════════════════════════ -->
     <div id="logoutModal">
         <div class="logout-modal-box">
             <span class="logout-icon"><i class="fas fa-sign-out-alt"></i></span>
@@ -5633,9 +5645,6 @@
         </div>
     </div>
 
-    <!-- ════════════════════════════════════════════ -->
-    <!-- GCASH PAYMENT POPUP                        -->
-    <!-- ════════════════════════════════════════════ -->
     <div id="gcashPopup" class="gcash-popup-overlay" onclick="closeGcashPopup(event)">
         <div class="gcash-popup-box" onclick="event.stopPropagation();">
             <button class="gcash-close-btn" onclick="closeGcashPopup()"><i class="fas fa-times"></i></button>
@@ -5659,12 +5668,8 @@
         </div>
     </div>
 
-    <!-- ════════════════════════════════════════════ -->
-    <!-- APP                                        -->
-    <!-- ════════════════════════════════════════════ -->
     <div id="app" style="display:none;">
         <div class="app-wrapper">
-            <!-- SIDEBAR -->
             <aside class="sidebar" id="sidebar">
                 <div class="sidebar-brand">
                     <div class="logo">
@@ -5676,7 +5681,6 @@
                 </div>
                 <nav class="sidebar-menu">
                     <div class="menu-label">Dashboard</div>
-                    <!-- Dashboard menu item – admin only -->
                     <div class="menu-item admin-only" onclick="showTab('dashboard')">
                         <span class="icon"><i class="fas fa-home"></i></span> Dashboard
                     </div>
@@ -5749,7 +5753,6 @@
                 </div>
             </aside>
 
-            <!-- MAIN CONTENT -->
             <main class="main-content">
                 <div class="top-header">
                     <div class="page-title">
@@ -5764,7 +5767,6 @@
                     </div>
                 </div>
 
-                <!-- STATS ROW -->
                 <div class="stats-row" id="statsRow">
                     <div class="stat-card" onclick="showTab('transactions')">
                         <div class="stat-top"><span class="stat-label">Today's Sales</span><span class="stat-icon"><i class="fas fa-wallet"></i></span></div>
@@ -5788,7 +5790,6 @@
                     </div>
                 </div>
 
-                <!-- LOW STOCK ALERT -->
                 <div id="lowStockAlert" class="low-stock-alert">
                     <div class="alert-title">
                         <i class="fas fa-exclamation-triangle"></i> <span>LOW STOCK ALERT!</span>
@@ -5798,9 +5799,6 @@
                 </div>
                 <div id="message" class="message"></div>
 
-                <!-- ════════════════════════════════════════════ -->
-                <!-- POS TAB                                    -->
-                <!-- ════════════════════════════════════════════ -->
                 <div id="tab-pos" class="tab-content active">
                     <div class="pos-grid">
                         <div class="pos-panel products-panel">
@@ -5874,9 +5872,6 @@
                     </div>
                 </div>
 
-                <!-- ════════════════════════════════════════════ -->
-                <!-- DASHBOARD TAB — ADMIN ONLY                 -->
-                <!-- ════════════════════════════════════════════ -->
                 <div id="tab-dashboard" class="tab-content admin-tab">
                     <div class="dashboard-new">
                         <div class="dash-top-row">
@@ -5890,7 +5885,6 @@
                             </div>
                         </div>
 
-                        <!-- Stats -->
                         <div class="dash-stats-grid">
                             <div class="dash-stat-card">
                                 <div class="dsc-top"><span class="dsc-label">Today's Sales</span><span class="dsc-icon"><i class="fas fa-wallet"></i></span></div>
@@ -5914,7 +5908,6 @@
                             </div>
                         </div>
 
-                        <!-- Growth stats (community growth style) -->
                         <div class="dash-growth-stats">
                             <div class="growth-card">
                                 <div class="growth-number" id="growthCommunity">65%</div>
@@ -5926,7 +5919,6 @@
                             </div>
                         </div>
 
-                        <!-- Simple Revenue Table (exact match from image) -->
                         <div class="dash-revenue-table" id="dashRevenueTable">
                             <div class="rev-header">
                                 <h4><i class="fas fa-chart-line" style="color:#2ecc71;margin-right:6px;"></i> Revenue Overview</h4>
@@ -5952,7 +5944,6 @@
                             </div>
                         </div>
 
-                        <!-- Dashboard Calendar (mini) -->
                         <div class="dash-calendar-mini" id="dashCalendarMini">
                             <div class="cal-header">
                                 <h4><i class="fas fa-calendar-alt" style="color:#3498db;margin-right:6px;"></i> <span id="dashCalMonthYear">September 2024</span></h4>
@@ -5964,7 +5955,6 @@
                             <div class="cal-grid" id="dashCalGrid"></div>
                         </div>
 
-                        <!-- Main grid -->
                         <div class="dash-main-grid">
                             <div style="display:flex;flex-direction:column;gap:18px;">
                                 <div class="dash-panel dash-top-products">
@@ -5994,9 +5984,6 @@
                     </div>
                 </div>
 
-                <!-- ════════════════════════════════════════════ -->
-                <!-- CALENDAR TAB                               -->
-                <!-- ════════════════════════════════════════════ -->
                 <div id="tab-calendar" class="tab-content">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-calendar-alt"></i> Sales Calendar</h3><span class="badge-count" id="calendarTotalSales">0</span></div>
@@ -6014,11 +6001,6 @@
                     </div>
                 </div>
 
-                <!-- ════════════════════════════════════════════ -->
-                <!-- OTHER TABS (products, customers, etc.)     -->
-                <!-- ════════════════════════════════════════════ -->
-
-                <!-- PRODUCTS TAB -->
                 <div id="tab-products" class="tab-content">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-box"></i> All Products</h3><span class="badge-count" id="productTotalCount">0</span></div>
@@ -6036,7 +6018,6 @@
                     </div>
                 </div>
 
-                <!-- CUSTOMERS TAB -->
                 <div id="tab-customers" class="tab-content">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-user"></i> Customers</h3><span class="badge-count">523 Registered</span></div>
@@ -6050,7 +6031,6 @@
                     </div>
                 </div>
 
-                <!-- TRANSACTIONS TAB -->
                 <div id="tab-transactions" class="tab-content">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-receipt"></i> Recent Transactions</h3><span class="badge-count" id="transTotalCount">0</span></div>
@@ -6058,7 +6038,6 @@
                     </div>
                 </div>
 
-                <!-- INVENTORY TAB -->
                 <div id="tab-inventory" class="tab-content admin-tab">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-clipboard-list"></i> Inventory Management</h3><span class="badge-count" id="inventoryCount">0</span></div>
@@ -6074,7 +6053,6 @@
                     </div>
                 </div>
 
-                <!-- REPAIRS TAB -->
                 <div id="tab-repairs" class="tab-content admin-tab">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header">
@@ -6099,7 +6077,6 @@
                     </div>
                 </div>
 
-                <!-- CATEGORIES TAB -->
                 <div id="tab-categories" class="tab-content admin-tab">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-tags"></i> Categories</h3><span class="badge-count">6 Categories</span></div>
@@ -6113,7 +6090,6 @@
                     </div>
                 </div>
 
-                <!-- LOW STOCK TAB -->
                 <div id="tab-lowstock" class="tab-content admin-tab">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-exclamation-triangle"></i> Low Stock Items</h3><span class="badge-count" id="lowStockCount">0</span></div>
@@ -6121,7 +6097,6 @@
                     </div>
                 </div>
 
-                <!-- SUPPLIERS TAB -->
                 <div id="tab-suppliers" class="tab-content admin-tab">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-building"></i> Suppliers</h3><span class="badge-count">8 Active</span></div>
@@ -6135,7 +6110,6 @@
                     </div>
                 </div>
 
-                <!-- REPORTS TAB -->
                 <div id="tab-reports" class="tab-content admin-tab">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-chart-bar"></i> Reports</h3><span class="badge-count">Live Data</span></div>
@@ -6174,7 +6148,6 @@
                     </div>
                 </div>
 
-                <!-- EXPENSES TAB -->
                 <div id="tab-expenses" class="tab-content admin-tab">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-money-bill-wave"></i> Expenses</h3><span class="badge-count">This Month</span></div>
@@ -6204,7 +6177,6 @@
                     </div>
                 </div>
 
-                <!-- SETTINGS TAB -->
                 <div id="tab-settings" class="tab-content admin-tab">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-cog"></i> Settings</h3><span class="badge-count">Configure</span></div>
@@ -6243,10 +6215,13 @@
                                 <button class="btn-setting" onclick="showMessage('Email settings feature coming soon!', 'warning')"><i class="fas fa-envelope"></i> Email Settings</button>
                             </div>
                         </div>
+                        <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(0,0,0,0.04);">
+                            <div style="font-weight:600;color:rgba(0,0,0,0.3);margin-bottom:8px;">Admin Tools</div>
+                            <button class="btn-setting green" onclick="openAdminCreateAccount()"><i class="fas fa-user-plus"></i> Create Cashier Account</button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- BACKUP TAB -->
                 <div id="tab-backup" class="tab-content admin-tab">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-database"></i> Backup / Restore</h3><span class="badge-count">v2.0</span></div>
@@ -6275,7 +6250,6 @@
                     </div>
                 </div>
 
-                <!-- CASHIERS TAB -->
                 <div id="tab-cashiers" class="tab-content admin-tab">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header">
@@ -6289,9 +6263,6 @@
             </main>
         </div>
 
-        <!-- ════════════════════════════════════════════ -->
-        <!-- RECEIPT MODAL                              -->
-        <!-- ════════════════════════════════════════════ -->
         <div id="receiptModal" class="modal">
             <div class="receipt-wrapper">
                 <div class="receipt-content" id="receiptContent">
@@ -6310,9 +6281,7 @@
                         <span>Time: <span id="receiptTime">01:09 PM</span></span>
                     </div>
                     <div class="receipt-divider"></div>
-                    <div class="receipt-items" id="receiptItems">
-                        <!-- dynamic items -->
-                    </div>
+                    <div class="receipt-items" id="receiptItems"></div>
                     <div class="receipt-divider"></div>
                     <div class="receipt-total">
                         <span class="total-label">TOTAL</span>
@@ -6324,7 +6293,6 @@
                             <span class="label">Payment Method:</span>
                             <span class="value method-value" id="receiptMethod">GCASH</span>
                         </div>
-                        <!-- hide cash tendered and change on print -->
                         <div class="pay-row" id="receiptCashRow" style="display:none;">
                             <span class="label">Cash Tendered:</span>
                             <span class="value" id="receiptCashTendered">₱0.00</span>
@@ -6359,7 +6327,6 @@
             </div>
         </div>
 
-        <!-- PRODUCT PREVIEW MODAL -->
         <div id="productPreviewModal" class="product-preview-modal">
             <div class="product-preview-box">
                 <button class="preview-close" onclick="closePreview()"><i class="fas fa-times"></i></button>
@@ -6376,7 +6343,6 @@
             </div>
         </div>
 
-        <!-- LOGO PREVIEW MODAL -->
         <div id="logoPreviewModal" class="logo-preview-modal" onclick="closeLogoPreview(event)">
             <div class="logo-preview-box" onclick="event.stopPropagation();">
                 <button class="logo-close" onclick="closeLogoPreview()"><i class="fas fa-times"></i></button>
@@ -6385,7 +6351,6 @@
             </div>
         </div>
 
-        <!-- REPAIR MODAL -->
         <div id="repairModal" class="modal repair-modal">
             <div class="receipt-wrapper">
                 <div class="panel-header">
@@ -6415,7 +6380,6 @@
             </div>
         </div>
 
-        <!-- SETTINGS MODAL -->
         <div id="settingsModal" class="settings-modal">
             <div class="settings-modal-box">
                 <button class="settings-close" onclick="closeSettingsModal()"><i class="fas fa-times"></i></button>
@@ -6436,49 +6400,93 @@
             </div>
         </div>
 
+        <div id="adminCreateAccountModal" class="modal reset-modal" style="z-index:6000;">
+            <div class="receipt-wrapper">
+                <div class="panel-header">
+                    <h3><i class="fas fa-user-plus" style="color:#2ecc71;"></i> Create Cashier Account</h3>
+                    <button class="close-btn" onclick="closeAdminCreateAccount()"><i class="fas fa-times"></i></button>
+                </div>
+                <div id="adminCreateMessage" class="reset-message"></div>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="adminRegFullName" placeholder="Enter full name" />
+                </div>
+                <div class="form-group">
+                    <label>Email / Username</label>
+                    <input type="email" id="adminRegUser" placeholder="Enter email address" />
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="adminRegPass" placeholder="Min 8 characters" />
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <input type="password" id="adminRegConfirmPass" placeholder="Confirm password" />
+                </div>
+                <button class="btn-reset" onclick="adminCreateAccount()"><i class="fas fa-check"></i> Create Account</button>
+                <button class="btn-reset btn-secondary" onclick="closeAdminCreateAccount()" style="margin-top:8px;">Cancel</button>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        // ============================================================
-        // LANDING OVERLAY — Hamburger button to reveal login
-        // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             const landing = document.getElementById('landingOverlay');
             const menuBtn = document.getElementById('landingMenuBtn');
-            const loginBtn = document.getElementById('landingLoginBtn');
 
-            function revealLogin() {
-                if (landing) landing.classList.add('hidden');
-                setTimeout(function() {
-                    const loginInput = document.getElementById('loginUser');
-                    if (loginInput) loginInput.focus();
-                }, 400);
+            function openLandingMenu() {
+                const overlay = document.getElementById('landingMenuOverlay');
+                if (overlay) {
+                    overlay.classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                }
             }
 
             if (menuBtn) {
                 menuBtn.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    revealLogin();
-                });
-            }
-            if (loginBtn) {
-                loginBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    revealLogin();
+                    openLandingMenu();
                 });
             }
             if (landing) {
                 landing.addEventListener('click', function(e) {
                     if (e.target === landing) {
-                        revealLogin();
+                        openLandingMenu();
                     }
                 });
             }
         });
 
-        // ============================================================
-        // DARK MODE & THEME TOGGLE
-        // ============================================================
+        function closeLandingMenu() {
+            const overlay = document.getElementById('landingMenuOverlay');
+            if (overlay) {
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function handleLandingMenuAction(action) {
+            closeLandingMenu();
+            if (action === 'login') {
+                const landingOverlay = document.getElementById('landingOverlay');
+                if (landingOverlay) landingOverlay.classList.add('hidden');
+                const loginOverlay = document.getElementById('loginOverlay');
+                if (loginOverlay) {
+                    loginOverlay.classList.remove('hidden');
+                    setTimeout(function() {
+                        const input = document.getElementById('loginUser');
+                        if (input) input.focus();
+                    }, 400);
+                }
+            } else if (action === 'home') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                showMessage('Welcome to Mobile Care!', 'success');
+            } else if (action === 'about') {
+                showMessage('Mobile Care Accessories — Premium products for your devices. Quality guaranteed.', 'info');
+            }
+        }
+
         function getStoredTheme() {
             return localStorage.getItem('posTheme') || 'light';
         }
@@ -6492,6 +6500,17 @@
             if (overlay) {
                 if (theme === 'dark') overlay.classList.add('dark-mode');
                 else overlay.classList.remove('dark-mode');
+            }
+            const landingMenuBox = document.querySelector('.landing-menu-box');
+            if (landingMenuBox) {
+                if (theme === 'dark') landingMenuBox.classList.remove('light-mode');
+                else landingMenuBox.classList.add('light-mode');
+            }
+            const body = document.body;
+            if (theme === 'dark') {
+                body.classList.add('dark-mode');
+            } else {
+                body.classList.remove('dark-mode');
             }
         }
 
@@ -6521,12 +6540,12 @@
             if (e.target === this) closeSettingsModal();
         });
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeSettingsModal();
+            if (e.key === 'Escape') {
+                closeSettingsModal();
+                closeAdminCreateAccount();
+            }
         });
 
-        // ============================================================
-        // CASHIER MANAGEMENT
-        // ============================================================
         function getCashiersData() {
             let data = localStorage.getItem('posCashiers');
             if (!data) {
@@ -6600,9 +6619,6 @@
             }).join('');
         }
 
-        // ============================================================
-        // LOGIN / REGISTER UI FUNCTIONS
-        // ============================================================
         function showRegister() {
             document.getElementById('loginScreen').classList.remove('active');
             document.getElementById('registerScreen').classList.add('active');
@@ -6620,23 +6636,6 @@
         function toggleLoginPass() {
             const inp = document.getElementById('loginPass');
             const btn = document.querySelector('#loginScreen .toggle-password');
-            if (inp.type === 'password') { inp.type = 'text';
-                btn.innerHTML = '<i class="fas fa-eye-slash"></i>'; } else { inp.type = 'password';
-                btn.innerHTML = '<i class="fas fa-eye"></i>'; }
-        }
-
-        function toggleRegPass() {
-            const inp = document.getElementById('regPass');
-            const btn = document.querySelector('#registerScreen .toggle-password');
-            if (inp.type === 'password') { inp.type = 'text';
-                btn.innerHTML = '<i class="fas fa-eye-slash"></i>'; } else { inp.type = 'password';
-                btn.innerHTML = '<i class="fas fa-eye"></i>'; }
-        }
-
-        function toggleRegConfirmPass() {
-            const inp = document.getElementById('regConfirmPass');
-            const btns = document.querySelectorAll('#registerScreen .toggle-password');
-            const btn = btns[1] || btns[0];
             if (inp.type === 'password') { inp.type = 'text';
                 btn.innerHTML = '<i class="fas fa-eye-slash"></i>'; } else { inp.type = 'password';
                 btn.innerHTML = '<i class="fas fa-eye"></i>'; }
@@ -6670,9 +6669,6 @@
             document.getElementById('loginError').style.display = 'none';
         }
 
-        // ============================================================
-        // USERS DATA
-        // ============================================================
         var users = {
             'BryanNialaAropo@gmail.com': { password: '1234567', role: 'admin', fullname: 'Bryan Niala Aropo' },
             'RolandMaru@gmail.com': { password: '0987654', role: 'cashier', fullname: 'Roland Maru' }
@@ -6683,9 +6679,6 @@
         var currentUserFullname = '';
         var loginRole = 'cashier';
 
-        // ============================================================
-        // handleLogin with cashier status update
-        // ============================================================
         function handleLogin() {
             var user = document.getElementById('loginUser').value.trim();
             var pass = document.getElementById('loginPass').value.trim();
@@ -6714,6 +6707,8 @@
                 document.getElementById('app').style.display = 'block';
                 const landing = document.getElementById('landingOverlay');
                 if (landing) landing.classList.add('hidden');
+                const menuOverlay = document.getElementById('landingMenuOverlay');
+                if (menuOverlay) menuOverlay.classList.remove('show');
                 var displayName = currentUserFullname || user;
                 document.getElementById('sidebarUserName').textContent = displayName;
                 document.getElementById('userAvatar').textContent = displayName.charAt(0);
@@ -6734,7 +6729,6 @@
                     if (tab) tab.style.display = isAdmin ? 'block' : 'none';
                 });
                 document.getElementById('storeSub').textContent = isAdmin ? 'ADMIN PANEL' : 'CASHIER POS';
-                // Show POS tab by default
                 showTab('pos');
                 initApp();
                 updateClock();
@@ -6747,59 +6741,6 @@
                 err.style.background = 'rgba(231,76,60,0.08)';
                 err.style.borderColor = 'rgba(231,76,60,0.12)';
             }
-        }
-
-        function handleRegister() {
-            const fullname = document.getElementById('regFullName').value.trim();
-            const user = document.getElementById('regUser').value.trim();
-            const pass = document.getElementById('regPass').value.trim();
-            const confirm = document.getElementById('regConfirmPass').value.trim();
-            const terms = document.getElementById('regTerms').checked;
-            const err = document.getElementById('registerError');
-            err.style.display = 'none';
-
-            if (!fullname || !user || !pass || !confirm) {
-                err.textContent = 'Please fill in all fields.';
-                err.style.display = 'block';
-                return;
-            }
-            if (pass.length < 8) {
-                err.textContent = 'Password must be at least 8 characters.';
-                err.style.display = 'block';
-                return;
-            }
-            if (pass !== confirm) {
-                err.textContent = 'Passwords do not match.';
-                err.style.display = 'block';
-                return;
-            }
-            if (!terms) {
-                err.textContent = 'You must agree to the Terms and Privacy Policy.';
-                err.style.display = 'block';
-                return;
-            }
-            if (users[user]) {
-                err.textContent = 'Username already exists. Please choose another.';
-                err.style.display = 'block';
-                return;
-            }
-            users[user] = { password: pass, role: 'cashier', fullname: fullname };
-            const cashiers = getCashiersData();
-            cashiers[user] = {
-                fullname: fullname,
-                username: user,
-                role: 'cashier',
-                status: 'offline',
-                loginTime: null,
-                lastLogout: null,
-                lastActive: null,
-                dateAdded: new Date().toISOString()
-            };
-            saveCashiersData(cashiers);
-            alert('Account created successfully! You can now sign in.');
-            showLogin();
-            document.getElementById('loginUser').value = user;
-            document.getElementById('loginPass').value = '';
         }
 
         function updateClock() {
@@ -6822,9 +6763,6 @@
             document.getElementById('sidebar').classList.toggle('open');
         }
 
-        // ============================================================
-        // showTab
-        // ============================================================
         function showTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
             document.querySelectorAll('.menu-item').forEach(function(m) { m.classList.remove('active'); });
@@ -6890,9 +6828,6 @@
             if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
         }
 
-        // ============================================================
-        // PRODUCT DATA
-        // ============================================================
         var allProductsData = [
             { barcode: 'P001', name: 'iPhone 11', price: 29990.00, stock: 8, image: 'iphone.jfif',
                 category: 'phones' },
@@ -6996,15 +6931,9 @@
         var previewProduct = null;
         var previewQty = 1;
 
-        // ============================================================
-        // DASHBOARD CALENDAR STATE
-        // ============================================================
         var dashCalMonth = new Date().getMonth();
         var dashCalYear = new Date().getFullYear();
 
-        // ============================================================
-        // initApp
-        // ============================================================
         function initApp() {
             loadData();
             updateCategoryCounts();
@@ -7174,9 +7103,6 @@
             document.getElementById('logoutModal').classList.remove('show');
         }
 
-        // ============================================================
-        // PASSWORD RESET FUNCTIONS
-        // ============================================================
         var resetCodeData = null;
         var resetTimerInterval = null;
 
@@ -7334,9 +7260,6 @@
             }
         }
 
-        // ============================================================
-        // POS FUNCTIONS
-        // ============================================================
         function scanProduct() {
             var input = document.getElementById('barcode');
             var barcode = input.value.trim();
@@ -8149,9 +8072,6 @@
             }).join('');
         }
 
-        // ============================================================
-        // DASHBOARD — REDESIGNED
-        // ============================================================
         function renderDashboard() {
             var today = new Date().toDateString();
             var todaySales = sales.filter(function(s) { return new Date(s.date).toDateString() === today; });
@@ -8172,7 +8092,6 @@
                 dashUser.textContent = currentUserFullname;
             }
 
-            // Top products
             var productSales = {};
             sales.forEach(function(s) {
                 s.items.forEach(function(item) {
@@ -8193,7 +8112,6 @@
             }
             document.getElementById('dashTopProducts').innerHTML = topHTML;
 
-            // Low stock
             var lowHTML = '';
             if (lowStockItems.length === 0) {
                 lowHTML =
@@ -8206,7 +8124,6 @@
             }
             document.getElementById('dashLowStockItems').innerHTML = lowHTML;
 
-            // Recent transactions
             var recentHTML = '';
             var recentSales = sales.slice(0, 5);
             if (recentSales.length === 0) {
@@ -8224,7 +8141,6 @@
             }
             document.getElementById('dashRecentTransactions').innerHTML = recentHTML;
 
-            // Categories
             var catMap = {
                 'phones': 'Phones',
                 'chargers': 'Chargers',
@@ -8248,7 +8164,6 @@
             });
             document.getElementById('dashCategoriesGrid').innerHTML = catHTML;
 
-            // Category sales
             var categorySales = {};
             sales.forEach(function(s) {
                 s.items.forEach(function(item) {
@@ -8272,21 +8187,14 @@
             }
             document.getElementById('dashCategorySales').innerHTML = catSalesHTML;
 
-            // Revenue table is static, no need to update
-
-            // Growth stats
             var totalRevenue = sales.reduce(function(sum, s) { return sum + s.total; }, 0);
             document.getElementById('growthRevenue').innerText = '₱' + totalRevenue.toFixed(0);
             var growthPct = 65 + Math.floor(Math.random() * 10);
             document.getElementById('growthCommunity').innerText = growthPct + '%';
 
-            // Dashboard calendar
             renderDashCalendar();
         }
 
-        // ============================================================
-        // DASHBOARD CALENDAR (Mini)
-        // ============================================================
         function renderDashCalendar() {
             var grid = document.getElementById('dashCalGrid');
             var monthYear = document.getElementById('dashCalMonthYear');
@@ -8352,9 +8260,6 @@
             showMessage(dateStr + ': ' + daySales.length + ' transactions · ₱' + total.toFixed(2), 'success');
         }
 
-        // ============================================================
-        // LOW STOCK
-        // ============================================================
         function renderLowStock() {
             var container = document.getElementById('lowStockList');
             var low = products.filter(function(p) { return p.stock <= 5; });
@@ -8384,9 +8289,6 @@
             }).join('');
         }
 
-        // ============================================================
-        // CALENDAR TAB (full)
-        // ============================================================
         function changeMonth(delta) {
             currentCalendarMonth += delta;
             if (currentCalendarMonth > 11) { currentCalendarMonth = 0;
@@ -8469,9 +8371,6 @@
             details.innerHTML = html;
         }
 
-        // ============================================================
-        // ADD NEW PRODUCT
-        // ============================================================
         function addNewProduct() {
             if (currentUserRole !== 'admin') { showMessage('Only administrators can add products.', 'error'); return; }
             var barcode = document.getElementById('newBarcode').value.trim();
@@ -8503,9 +8402,6 @@
             showMessage('Product added successfully!', 'success');
         }
 
-        // ============================================================
-        // CAMERA TOGGLE
-        // ============================================================
         function toggleCamera() {
             var video = document.getElementById('cameraPreview');
             if (isCameraOn) {
@@ -8525,9 +8421,6 @@
             } else showMessage('Camera not supported', 'error');
         }
 
-        // ============================================================
-        // LOGIN BRAND GRID
-        // ============================================================
         function renderLoginBrandGrid() {
             var grid = document.getElementById('loginBrandGrid');
             var items = [
@@ -8562,9 +8455,6 @@
             }).join('');
         }
 
-        // ============================================================
-        // RECEIPT
-        // ============================================================
         function showReceipt(sale) {
             var modal = document.getElementById('receiptModal');
             var date = new Date(sale.date);
@@ -8575,7 +8465,6 @@
             document.getElementById('receiptTime').innerText = timeStr;
             document.getElementById('receiptTotal').innerText = '₱' + sale.total.toFixed(2);
             document.getElementById('receiptMethod').innerText = sale.method || 'Cash';
-            // Hide cash rows if not cash
             var cashRow = document.getElementById('receiptCashRow');
             var changeRow = document.getElementById('receiptChangeRow');
             if (sale.method === 'Cash') {
@@ -8590,14 +8479,12 @@
             var roleLabel = currentUserRole === 'admin' ? 'Admin' : 'Cashier';
             document.getElementById('receiptCashier').innerText = roleLabel + ': ' + (sale.user ||
                 currentUserFullname || 'Unknown');
-            // Build items
             var itemsHtml = sale.items.map(function(item) {
                 return '<div class="receipt-item"><span class="item-name">' + item.name +
                     '</span><span class="item-qty">' + item.quantity +
                     '</span><span class="item-price">₱' + item.subtotal.toFixed(2) + '</span></div>';
             }).join('');
             document.getElementById('receiptItems').innerHTML = itemsHtml;
-            // Barcode
             var barcodeEl = document.getElementById('receiptBarcode');
             if (barcodeEl) {
                 var dateStrShort = date.getFullYear().toString() +
@@ -8632,12 +8519,83 @@
             document.getElementById('logoPreviewModal').classList.remove('show');
         }
 
+        function openAdminCreateAccount() {
+            if (currentUserRole !== 'admin') { showMessage('Only administrators can create accounts.', 'error'); return; }
+            document.getElementById('adminCreateAccountModal').classList.add('show');
+            document.getElementById('adminRegFullName').value = '';
+            document.getElementById('adminRegUser').value = '';
+            document.getElementById('adminRegPass').value = '';
+            document.getElementById('adminRegConfirmPass').value = '';
+            document.getElementById('adminCreateMessage').className = 'reset-message';
+            document.getElementById('adminCreateMessage').style.display = 'none';
+        }
+
+        function closeAdminCreateAccount() {
+            document.getElementById('adminCreateAccountModal').classList.remove('show');
+        }
+
+        function adminCreateAccount() {
+            const fullname = document.getElementById('adminRegFullName').value.trim();
+            const user = document.getElementById('adminRegUser').value.trim();
+            const pass = document.getElementById('adminRegPass').value.trim();
+            const confirm = document.getElementById('adminRegConfirmPass').value.trim();
+            const msg = document.getElementById('adminCreateMessage');
+            msg.className = 'reset-message';
+            msg.style.display = 'none';
+
+            if (!fullname || !user || !pass || !confirm) {
+                msg.textContent = 'Please fill in all fields.';
+                msg.className = 'reset-message error';
+                msg.style.display = 'block';
+                return;
+            }
+            if (pass.length < 8) {
+                msg.textContent = 'Password must be at least 8 characters.';
+                msg.className = 'reset-message error';
+                msg.style.display = 'block';
+                return;
+            }
+            if (pass !== confirm) {
+                msg.textContent = 'Passwords do not match.';
+                msg.className = 'reset-message error';
+                msg.style.display = 'block';
+                return;
+            }
+            if (users[user]) {
+                msg.textContent = 'Email already exists. Please choose another.';
+                msg.className = 'reset-message error';
+                msg.style.display = 'block';
+                return;
+            }
+            users[user] = { password: pass, role: 'cashier', fullname: fullname };
+            const cashiers = getCashiersData();
+            cashiers[user] = {
+                fullname: fullname,
+                username: user,
+                role: 'cashier',
+                status: 'offline',
+                loginTime: null,
+                lastLogout: null,
+                lastActive: null,
+                dateAdded: new Date().toISOString()
+            };
+            saveCashiersData(cashiers);
+            msg.textContent = 'Cashier account created successfully!';
+            msg.className = 'reset-message success';
+            msg.style.display = 'block';
+            renderCashiers();
+            setTimeout(function() {
+                closeAdminCreateAccount();
+            }, 1500);
+        }
+
         document.getElementById('logoutModal').addEventListener('click', function(e) { if (e.target === this)
                 closeLogoutModal(); });
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') { closeLogoutModal();
                 closeLogoPreview();
-                closeGcashPopup(); }
+                closeGcashPopup();
+                closeAdminCreateAccount(); }
         });
         document.getElementById('barcode').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
@@ -8662,12 +8620,13 @@
             if (!input.contains(e.target) && !results.contains(e.target)) results.classList.remove('show');
         });
 
-        // ============================================================
-        // BOOTSTRAP
-        // ============================================================
         renderLoginBrandGrid();
         selectLoginRole('cashier');
         showLogin();
+
+        document.getElementById('landingMenuOverlay')?.addEventListener('click', function(e) {
+            if (e.target === this) closeLandingMenu();
+        });
     </script>
 </body>
 </html>
