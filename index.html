@@ -7,6 +7,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js">
     </script>
+
+    <!-- Firebase v9 compat (CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js">
+    </script>
+
     <style>
         /* ----- reset & base ----- */
         * {
@@ -5636,11 +5643,59 @@
             color: rgba(0, 0, 0, 0.12);
             border-top-color: rgba(0, 0, 0, 0.04);
         }
+
+        /* ===== LOADING OVERLAY FOR FIREBASE ===== */
+        #firebaseLoading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(6px);
+            z-index: 99999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 16px;
+        }
+        #firebaseLoading.show {
+            display: flex;
+        }
+        #firebaseLoading .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-top: 5px solid #2ecc71;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        #firebaseLoading .load-text {
+            color: #fff;
+            font-weight: 500;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+        }
     </style>
 </head>
 <body>
 
-    <!-- landing overlay (unchanged) -->
+    <!-- ===== LOADING OVERLAY ===== -->
+    <div id="firebaseLoading">
+        <div class="spinner"></div>
+        <div class="load-text">Loading inventory...</div>
+    </div>
+
+    <!-- ===== LANDING OVERLAY (unchanged) ===== -->
     <div id="landingOverlay">
         <div class="landing-glow g1"></div>
         <div class="landing-glow g2"></div>
@@ -5649,9 +5704,7 @@
             <i class="fas fa-bars"></i>
         </button>
         <div class="landing-brand">
-            <div class="brand-icon">
-                <i class="fas fa-mobile-alt"></i>
-            </div>
+            <div class="brand-icon"><i class="fas fa-mobile-alt"></i></div>
             <h1>Mobile Care <span>Accessories</span></h1>
             <div class="tagline">Premium Accessories for Your Devices</div>
             <div class="sub-tagline">High quality products · best prices · perfect for your everyday needs</div>
@@ -5697,7 +5750,7 @@
         </div>
     </div>
 
-    <!-- login overlay (unchanged) -->
+    <!-- ===== LOGIN OVERLAY ===== -->
     <div id="loginOverlay">
         <div class="login-glow g1"></div>
         <div class="login-glow g2"></div>
@@ -5749,7 +5802,7 @@
         </div>
     </div>
 
-    <!-- reset modal (unchanged) -->
+    <!-- ===== RESET MODAL ===== -->
     <div id="resetModal" class="modal reset-modal">
         <div class="receipt-wrapper">
             <div class="panel-header">
@@ -5784,7 +5837,7 @@
         </div>
     </div>
 
-    <!-- logout modal (unchanged) -->
+    <!-- ===== LOGOUT MODAL ===== -->
     <div id="logoutModal">
         <div class="logout-modal-box">
             <span class="logout-icon"><i class="fas fa-sign-out-alt"></i></span>
@@ -5797,7 +5850,7 @@
         </div>
     </div>
 
-    <!-- GCash popup (unchanged) -->
+    <!-- ===== GCASH POPUP ===== -->
     <div id="gcashPopup" class="gcash-popup-overlay" onclick="closeGcashPopup(event)">
         <div class="gcash-popup-box" onclick="event.stopPropagation();">
             <button class="gcash-close-btn" onclick="closeGcashPopup()"><i class="fas fa-times"></i></button>
@@ -5821,9 +5874,10 @@
         </div>
     </div>
 
-    <!-- main app -->
+    <!-- ===== MAIN APP ===== -->
     <div id="app" style="display:none;">
         <div class="app-wrapper">
+            <!-- SIDEBAR (unchanged) -->
             <aside class="sidebar" id="sidebar">
                 <div class="sidebar-brand">
                     <div class="logo">
@@ -5907,7 +5961,9 @@
                 </div>
             </aside>
 
+            <!-- MAIN CONTENT -->
             <main class="main-content">
+                <!-- TOP HEADER -->
                 <div class="top-header">
                     <div class="page-title">
                         <h2 id="pageTitle"><i class="fas fa-shopping-cart"></i> Current Sale (POS)</h2>
@@ -5921,6 +5977,7 @@
                     </div>
                 </div>
 
+                <!-- STATS ROW -->
                 <div class="stats-row" id="statsRow">
                     <div class="stat-card" onclick="showTab('transactions')">
                         <div class="stat-top"><span class="stat-label">Today's Sales</span><span class="stat-icon"><i class="fas fa-wallet"></i></span></div>
@@ -5953,9 +6010,10 @@
                 </div>
                 <div id="message" class="message"></div>
 
-                <!-- POS tab -->
+                <!-- ===== TAB: POS ===== -->
                 <div id="tab-pos" class="tab-content active">
                     <div class="pos-grid">
+                        <!-- Products Panel -->
                         <div class="pos-panel products-panel">
                             <div class="panel-header">
                                 <h3><i class="fas fa-search"></i> Scan / Search Product</h3>
@@ -5968,16 +6026,16 @@
                             </div>
                             <div class="search-results" id="searchResults"></div>
                             <div class="category-filter" id="categoryFilter">
-                                <button class="cat-btn active" data-category="all" onclick="filterByCategory('all')">All <span class="cat-count" id="catCountAll">40</span></button>
-                                <button class="cat-btn" data-category="phones" onclick="filterByCategory('phones')">Phones <span class="cat-count" id="catCountPhones">12</span></button>
-                                <button class="cat-btn" data-category="chargers" onclick="filterByCategory('chargers')">Chargers <span class="cat-count" id="catCountChargers">8</span></button>
-                                <button class="cat-btn" data-category="cables" onclick="filterByCategory('cables')">Cables <span class="cat-count" id="catCountCables">8</span></button>
-                                <button class="cat-btn" data-category="laptops" onclick="filterByCategory('laptops')">Laptops <span class="cat-count" id="catCountLaptops">4</span></button>
-                                <button class="cat-btn" data-category="earphones" onclick="filterByCategory('earphones')">Earphones <span class="cat-count" id="catCountEarphones">8</span></button>
+                                <button class="cat-btn active" data-category="all" onclick="filterByCategory('all')">All <span class="cat-count" id="catCountAll">0</span></button>
+                                <button class="cat-btn" data-category="phones" onclick="filterByCategory('phones')">Phones <span class="cat-count" id="catCountPhones">0</span></button>
+                                <button class="cat-btn" data-category="chargers" onclick="filterByCategory('chargers')">Chargers <span class="cat-count" id="catCountChargers">0</span></button>
+                                <button class="cat-btn" data-category="cables" onclick="filterByCategory('cables')">Cables <span class="cat-count" id="catCountCables">0</span></button>
+                                <button class="cat-btn" data-category="laptops" onclick="filterByCategory('laptops')">Laptops <span class="cat-count" id="catCountLaptops">0</span></button>
+                                <button class="cat-btn" data-category="earphones" onclick="filterByCategory('earphones')">Earphones <span class="cat-count" id="catCountEarphones">0</span></button>
                             </div>
                             <div class="quick-products-title">
                                 <span class="qpt-left"><i class="fas fa-bolt"></i> <span id="quickProductsTitle">All Products</span></span>
-                                <span class="qpt-right" id="quickProductsSub">40 items</span>
+                                <span class="qpt-right" id="quickProductsSub">0 items</span>
                             </div>
                             <div class="quick-products-grid" id="quickProducts"></div>
                             <div class="brand-list-section" id="brandListSection">
@@ -5985,6 +6043,7 @@
                                 <div id="brandTagsContainer"></div>
                             </div>
                         </div>
+                        <!-- Cart Panel -->
                         <div class="pos-panel cart-panel">
                             <div class="panel-header">
                                 <h3><i class="fas fa-shopping-basket"></i> Cart Items</h3>
@@ -6027,7 +6086,7 @@
                     </div>
                 </div>
 
-                <!-- dashboard tab (unchanged) -->
+                <!-- ===== TAB: DASHBOARD ===== -->
                 <div id="tab-dashboard" class="tab-content admin-tab">
                     <div class="dashboard-new">
                         <div class="dash-top-row">
@@ -6077,7 +6136,7 @@
                     </div>
                 </div>
 
-                <!-- calendar tab (unchanged) -->
+                <!-- ===== TAB: CALENDAR ===== -->
                 <div id="tab-calendar" class="tab-content">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-calendar-alt"></i> Sales Calendar</h3><span class="badge-count" id="calendarTotalSales">0</span></div>
@@ -6095,7 +6154,7 @@
                     </div>
                 </div>
 
-                <!-- products tab (unchanged) -->
+                <!-- ===== TAB: PRODUCTS ===== -->
                 <div id="tab-products" class="tab-content">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-box"></i> All Products</h3><span class="badge-count" id="productTotalCount">0</span></div>
@@ -6113,7 +6172,7 @@
                     </div>
                 </div>
 
-                <!-- customers tab (unchanged) -->
+                <!-- ===== TAB: CUSTOMERS ===== -->
                 <div id="tab-customers" class="tab-content">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-user"></i> Customers</h3><span class="badge-count">523 Registered</span></div>
@@ -6127,7 +6186,7 @@
                     </div>
                 </div>
 
-                <!-- transactions tab (unchanged) -->
+                <!-- ===== TAB: TRANSACTIONS ===== -->
                 <div id="tab-transactions" class="tab-content">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-receipt"></i> Recent Transactions</h3><span class="badge-count" id="transTotalCount">0</span></div>
@@ -6135,7 +6194,7 @@
                     </div>
                 </div>
 
-                <!-- inventory tab (unchanged) -->
+                <!-- ===== TAB: INVENTORY ===== -->
                 <div id="tab-inventory" class="tab-content admin-tab">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-clipboard-list"></i> Inventory Management</h3><span class="badge-count" id="inventoryCount">0</span></div>
@@ -6151,7 +6210,7 @@
                     </div>
                 </div>
 
-                <!-- repairs tab (unchanged) -->
+                <!-- ===== TAB: REPAIRS ===== -->
                 <div id="tab-repairs" class="tab-content admin-tab">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header">
@@ -6176,7 +6235,7 @@
                     </div>
                 </div>
 
-                <!-- categories tab (unchanged) -->
+                <!-- ===== TAB: CATEGORIES ===== -->
                 <div id="tab-categories" class="tab-content admin-tab">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-tags"></i> Categories</h3><span class="badge-count">6 Categories</span></div>
@@ -6190,7 +6249,7 @@
                     </div>
                 </div>
 
-                <!-- lowstock tab (unchanged) -->
+                <!-- ===== TAB: LOW STOCK ===== -->
                 <div id="tab-lowstock" class="tab-content admin-tab">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-exclamation-triangle"></i> Low Stock Items</h3><span class="badge-count" id="lowStockCount">0</span></div>
@@ -6198,7 +6257,7 @@
                     </div>
                 </div>
 
-                <!-- suppliers tab (unchanged) -->
+                <!-- ===== TAB: SUPPLIERS ===== -->
                 <div id="tab-suppliers" class="tab-content admin-tab">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-building"></i> Suppliers</h3><span class="badge-count">8 Active</span></div>
@@ -6212,7 +6271,7 @@
                     </div>
                 </div>
 
-                <!-- reports tab (unchanged) -->
+                <!-- ===== TAB: REPORTS ===== -->
                 <div id="tab-reports" class="tab-content admin-tab">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-chart-bar"></i> Reports</h3><span class="badge-count">Live Data</span></div>
@@ -6235,7 +6294,7 @@
                     </div>
                 </div>
 
-                <!-- expenses tab (unchanged) -->
+                <!-- ===== TAB: EXPENSES ===== -->
                 <div id="tab-expenses" class="tab-content admin-tab">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-money-bill-wave"></i> Expenses</h3><span class="badge-count">This Month</span></div>
@@ -6256,7 +6315,7 @@
                     </div>
                 </div>
 
-                <!-- settings tab (unchanged) -->
+                <!-- ===== TAB: SETTINGS ===== -->
                 <div id="tab-settings" class="tab-content admin-tab">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-cog"></i> Settings</h3><span class="badge-count">Configure</span></div>
@@ -6273,7 +6332,7 @@
                     </div>
                 </div>
 
-                <!-- backup tab (unchanged) -->
+                <!-- ===== TAB: BACKUP ===== -->
                 <div id="tab-backup" class="tab-content admin-tab">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-database"></i> Backup / Restore</h3><span class="badge-count">v2.0</span></div>
@@ -6290,7 +6349,7 @@
                     </div>
                 </div>
 
-                <!-- cashiers tab (unchanged) -->
+                <!-- ===== TAB: CASHIERS ===== -->
                 <div id="tab-cashiers" class="tab-content admin-tab">
                     <div class="pos-panel cart-panel">
                         <div class="panel-header">
@@ -6304,7 +6363,7 @@
             </main>
         </div>
 
-        <!-- receipt modal (unchanged) -->
+        <!-- ===== RECEIPT MODAL ===== -->
         <div id="receiptModal" class="modal">
             <div class="receipt-wrapper">
                 <div class="receipt-content" id="receiptContent">
@@ -6369,7 +6428,7 @@
             </div>
         </div>
 
-        <!-- product preview modal (unchanged) -->
+        <!-- ===== PRODUCT PREVIEW MODAL ===== -->
         <div id="productPreviewModal" class="product-preview-modal">
             <div class="product-preview-box">
                 <button class="preview-close" onclick="closePreview()"><i class="fas fa-times"></i></button>
@@ -6386,7 +6445,7 @@
             </div>
         </div>
 
-        <!-- logo preview modal (unchanged) -->
+        <!-- ===== LOGO PREVIEW MODAL ===== -->
         <div id="logoPreviewModal" class="logo-preview-modal" onclick="closeLogoPreview(event)">
             <div class="logo-preview-box" onclick="event.stopPropagation();">
                 <button class="logo-close" onclick="closeLogoPreview()"><i class="fas fa-times"></i></button>
@@ -6395,7 +6454,7 @@
             </div>
         </div>
 
-        <!-- repair modal (unchanged) -->
+        <!-- ===== REPAIR MODAL ===== -->
         <div id="repairModal" class="modal repair-modal">
             <div class="receipt-wrapper">
                 <div class="panel-header">
@@ -6425,7 +6484,7 @@
             </div>
         </div>
 
-        <!-- settings modal (unchanged) -->
+        <!-- ===== SETTINGS MODAL ===== -->
         <div id="settingsModal" class="settings-modal">
             <div class="settings-modal-box">
                 <button class="settings-close" onclick="closeSettingsModal()"><i class="fas fa-times"></i></button>
@@ -6446,7 +6505,7 @@
             </div>
         </div>
 
-        <!-- admin create account modal (unchanged) -->
+        <!-- ===== ADMIN CREATE ACCOUNT MODAL ===== -->
         <div id="adminCreateAccountModal" class="modal reset-modal" style="z-index:6000;">
             <div class="receipt-wrapper">
                 <div class="panel-header">
@@ -6477,378 +6536,45 @@
 
     </div>
 
+    <!-- ======================================================================= -->
+    <!-- ===== JAVASCRIPT: Firebase + Full POS Logic ===== -->
+    <!-- ======================================================================= -->
     <script>
-        // ===== SCRIPT – same as original, only CSS was changed for theme support =====
-        document.addEventListener('DOMContentLoaded', function() {
-            const landing = document.getElementById('landingOverlay');
-            const menuBtn = document.getElementById('landingMenuBtn');
-            function openLandingMenu() {
-                const overlay = document.getElementById('landingMenuOverlay');
-                if (overlay) { overlay.classList.add('show');
-                    document.body.style.overflow = 'hidden'; }
-            }
-            if (menuBtn) {
-                menuBtn.addEventListener('click', function(e) { e.stopPropagation();
-                    openLandingMenu(); });
-            }
-            if (landing) {
-                landing.addEventListener('click', function(e) { if (e.target === landing) openLandingMenu(); });
-            }
-        });
-
-        function closeLandingMenu() {
-            const overlay = document.getElementById('landingMenuOverlay');
-            if (overlay) { overlay.classList.remove('show');
-                document.body.style.overflow = ''; }
-        }
-
-        function handleLandingMenuAction(action) {
-            closeLandingMenu();
-            if (action === 'login') {
-                const landingOverlay = document.getElementById('landingOverlay');
-                if (landingOverlay) landingOverlay.classList.add('hidden');
-                const loginOverlay = document.getElementById('loginOverlay');
-                if (loginOverlay) {
-                    loginOverlay.classList.remove('hidden');
-                    setTimeout(function() { const input = document.getElementById('loginUser'); if (input) input
-                            .focus(); }, 400);
-                }
-            } else if (action === 'home') {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                showMessage('Welcome to Mobile Care!', 'success');
-            } else if (action === 'about') {
-                showMessage('Mobile Care Accessories — Premium products for your devices. Quality guaranteed.',
-                'info');
-            }
-        }
-
-        function getStoredTheme() { return localStorage.getItem('posTheme') || 'light'; }
-
-        function applyTheme(theme) {
-            document.body.classList.toggle('dark-mode', theme === 'dark');
-            const toggle = document.getElementById('themeToggle');
-            if (toggle) toggle.classList.toggle('active', theme === 'dark');
-            localStorage.setItem('posTheme', theme);
-            const overlay = document.getElementById('loginOverlay');
-            if (overlay) {
-                if (theme === 'dark') overlay.classList.add('dark-mode');
-                else overlay.classList.remove('dark-mode');
-            }
-            const landingMenuBox = document.querySelector('.landing-menu-box');
-            if (landingMenuBox) {
-                if (theme === 'dark') landingMenuBox.classList.remove('light-mode');
-                else landingMenuBox.classList.add('light-mode');
-            }
-            const body = document.body;
-            if (theme === 'dark') { body.classList.add('dark-mode'); } else { body.classList.remove('dark-mode'); }
-        }
-
-        function toggleTheme() {
-            const current = getStoredTheme();
-            const next = current === 'light' ? 'dark' : 'light';
-            applyTheme(next);
-            const toggle = document.getElementById('themeToggle');
-            if (toggle) toggle.classList.toggle('active', next === 'dark');
-        }
-
-        function openSettingsModal() {
-            const modal = document.getElementById('settingsModal');
-            if (modal) {
-                const theme = getStoredTheme();
-                const toggle = document.getElementById('themeToggle');
-                if (toggle) toggle.classList.toggle('active', theme === 'dark');
-                modal.classList.add('show');
-            }
-        }
-
-        function closeSettingsModal() {
-            const modal = document.getElementById('settingsModal');
-            if (modal) modal.classList.remove('show');
-        }
-        document.getElementById('settingsModal')?.addEventListener('click', function(e) {
-            if (e.target === this) closeSettingsModal();
-        });
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') { closeSettingsModal();
-                closeAdminCreateAccount(); }
-        });
-
-        function getCashiersData() {
-            let data = localStorage.getItem('posCashiers');
-            if (!data) {
-                const initial = {};
-                for (const [email, info] of Object.entries(users)) {
-                    if (info.role === 'cashier') {
-                        initial[email] = {
-                            fullname: info.fullname || email.split('@')[0],
-                            username: email,
-                            role: 'cashier',
-                            status: 'offline',
-                            loginTime: null,
-                            lastLogout: null,
-                            lastActive: null,
-                            dateAdded: new Date().toISOString()
-                        };
-                    }
-                }
-                localStorage.setItem('posCashiers', JSON.stringify(initial));
-                return initial;
-            }
-            return JSON.parse(data);
-        }
-
-        function saveCashiersData(data) { localStorage.setItem('posCashiers', JSON.stringify(data)); }
-
-        function updateCashierStatus(username, status, loginTime = null, lastLogout = null, lastActive = null) {
-            const cashiers = getCashiersData();
-            if (cashiers[username]) {
-                cashiers[username].status = status;
-                if (loginTime !== null) cashiers[username].loginTime = loginTime;
-                if (lastLogout !== null) cashiers[username].lastLogout = lastLogout;
-                if (lastActive !== null) cashiers[username].lastActive = lastActive;
-                saveCashiersData(cashiers);
-            }
-        }
-
-        function renderCashiers() {
-            const container = document.getElementById('cashiersList');
-            const cashiers = getCashiersData();
-            const count = Object.keys(cashiers).length;
-            document.getElementById('cashierTotalCount').innerText = count;
-            document.getElementById('sidebarCashierCount').innerText = count;
-            if (count === 0) { container.innerHTML = '<div class="empty-state">No cashiers registered</div>'; return; }
-            container.innerHTML = Object.values(cashiers).map(c => {
-                const statusClass = c.status === 'online' ? 'online' : 'offline';
-                const statusText = c.status === 'online' ? 'Online' : 'Offline';
-                const statusDot = '<span class="cashier-status-dot ' + statusClass + '"></span>';
-                const loginTime = c.loginTime || '—';
-                const lastLogout = c.lastLogout || '—';
-                const lastActive = c.lastActive || '—';
-                const dateAdded = c.dateAdded ? new Date(c.dateAdded).toLocaleDateString() : '—';
-                return '<div class="list-item">' +
-                    '<div class="item-left">' +
-                    '<div class="item-title">' + c.fullname + '</div>' +
-                    '<div class="item-sub">' + c.username + ' · Added: ' + dateAdded + '</div>' +
-                    '</div>' +
-                    '<div class="item-right" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:0.85rem;">' +
-                    '<span style="display:flex;align-items:center;font-weight:600;">' + statusDot + ' ' +
-                    statusText + '</span>' +
-                    '<span style="color:rgba(0,0,0,0.35);">Login: ' + loginTime + '</span>' +
-                    '<span style="color:rgba(0,0,0,0.35);">Logout: ' + lastLogout + '</span>' +
-                    '<span style="color:rgba(0,0,0,0.35);">Last active: ' + lastActive + '</span>' +
-                    '</div>' +
-                    '</div>';
-            }).join('');
-        }
-
-        function showRegister() {
-            document.getElementById('loginScreen').classList.remove('active');
-            document.getElementById('registerScreen').classList.add('active');
-            document.getElementById('loginError').style.display = 'none';
-            document.getElementById('registerError').style.display = 'none';
-        }
-
-        function showLogin() {
-            document.getElementById('registerScreen').classList.remove('active');
-            document.getElementById('loginScreen').classList.add('active');
-            document.getElementById('loginError').style.display = 'none';
-            document.getElementById('registerError').style.display = 'none';
-        }
-
-        function toggleLoginPass() {
-            const inp = document.getElementById('loginPass');
-            const btn = document.querySelector('#loginScreen .toggle-password');
-            if (inp.type === 'password') { inp.type = 'text';
-                btn.innerHTML = '<i class="fas fa-eye-slash"></i>'; } else { inp.type = 'password';
-                btn.innerHTML = '<i class="fas fa-eye"></i>'; }
-        }
-
-        function showMessage(text, type) {
-            const err = document.getElementById('loginError');
-            if (err && (type === 'warning' || type === 'info')) {
-                err.textContent = text;
-                err.style.display = 'block';
-                err.style.color = '#e67e22';
-                err.style.background = 'rgba(243,156,18,0.08)';
-                err.style.borderColor = 'rgba(243,156,18,0.2)';
-                setTimeout(() => { if (err) err.style.display = 'none'; }, 3000);
-                return;
-            }
-            const msg = document.getElementById('message');
-            if (msg) {
-                msg.innerHTML = text;
-                msg.className = 'message ' + (type || 'info');
-                setTimeout(() => { msg.className = 'message'; }, 3000);
-            }
-        }
-
-        function selectLoginRole(role) {
-            loginRole = role;
-            document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector('.role-btn[data-role="' + role + '"]').classList.add('active');
-            document.getElementById('loginUser').value = '';
-            document.getElementById('loginPass').value = '';
-            document.getElementById('loginError').style.display = 'none';
-        }
-
-        var users = {
-            'BryanNialaAropo@gmail.com': { password: '1234567', role: 'admin', fullname: 'Bryan Niala Aropo' },
-            'RolandMaru@gmail.com': { password: '0987654', role: 'cashier', fullname: 'Roland Maru' }
+        // ================================================================
+        // 1. FIREBASE CONFIGURATION — REPLACE WITH YOUR OWN VALUES
+        // ================================================================
+        // Go to Firebase Console → Project Settings → Your apps → Config
+        // Copy your firebaseConfig object and paste it below.
+        // ================================================================
+        var firebaseConfig = {
+            apiKey: "AIzaSyDummyKeyReplaceMe",
+            authDomain: "your-project.firebaseapp.com",
+            projectId: "your-project-id",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef123456"
         };
 
-        var currentUser = '';
-        var currentUserRole = '';
-        var currentUserFullname = '';
-        var loginRole = 'cashier';
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.firestore();
 
-        function handleLogin() {
-            var user = document.getElementById('loginUser').value.trim();
-            var pass = document.getElementById('loginPass').value.trim();
-            var err = document.getElementById('loginError');
-            if (users[user] && users[user].password === pass) {
-                var role = users[user].role;
-                if (role !== loginRole) {
-                    err.textContent = 'This account is a ' + role + ', not ' + loginRole;
-                    err.style.display = 'block';
-                    err.style.color = '#e74c3c';
-                    err.style.background = 'rgba(231,76,60,0.08)';
-                    err.style.borderColor = 'rgba(231,76,60,0.12)';
-                    return;
-                }
-                err.style.display = 'none';
-                currentUser = user;
-                currentUserRole = role;
-                currentUserFullname = users[user].fullname;
+        // Enable offline persistence so data works even with spotty connection
+        db.enablePersistence({
+                synchronizeTabs: true
+            })
+            .then(function() {
+                console.log('Firestore persistence enabled (multi-tab sync).');
+            })
+            .catch(function(err) {
+                console.warn('Firestore persistence error:', err);
+                // Continue anyway — data will still work online
+            });
 
-                if (role === 'cashier') {
-                    const now = new Date().toLocaleString();
-                    updateCashierStatus(user, 'online', now, null, now);
-                }
-
-                document.getElementById('loginOverlay').classList.add('hidden');
-                document.getElementById('app').style.display = 'block';
-                const landing = document.getElementById('landingOverlay');
-                if (landing) landing.classList.add('hidden');
-                const menuOverlay = document.getElementById('landingMenuOverlay');
-                if (menuOverlay) menuOverlay.classList.remove('show');
-                var displayName = currentUserFullname || user;
-                document.getElementById('sidebarUserName').textContent = displayName;
-                document.getElementById('userAvatar').textContent = displayName.charAt(0);
-                var roleDisplay = role === 'admin' ? 'Administrator' : 'Cashier';
-                document.getElementById('sidebarUserRole').textContent = roleDisplay;
-                var isAdmin = role === 'admin';
-                document.querySelectorAll('.admin-only').forEach(function(el) {
-                    el.style.display = isAdmin ? (el.classList.contains('menu-label') ? 'block' : 'flex') :
-                        'none';
-                });
-                var addProductSection = document.getElementById('addProductSection');
-                if (addProductSection) addProductSection.style.display = isAdmin ? 'block' : 'none';
-                var adminTabs = ['dashboard', 'inventory', 'repairs', 'categories', 'lowstock', 'suppliers', 'reports',
-                    'expenses', 'settings', 'backup', 'cashiers'
-                ];
-                adminTabs.forEach(function(tabId) {
-                    var tab = document.getElementById('tab-' + tabId);
-                    if (tab) tab.style.display = isAdmin ? 'block' : 'none';
-                });
-                document.getElementById('storeSub').textContent = isAdmin ? 'ADMIN PANEL' : 'CASHIER POS';
-                showTab('pos');
-                initApp();
-                updateClock();
-                setInterval(updateClock, 60000);
-                if (isAdmin) renderCashiers();
-            } else {
-                err.textContent = 'Invalid email or password';
-                err.style.display = 'block';
-                err.style.color = '#e74c3c';
-                err.style.background = 'rgba(231,76,60,0.08)';
-                err.style.borderColor = 'rgba(231,76,60,0.12)';
-            }
-        }
-
-        function updateClock() {
-            var now = new Date();
-            document.getElementById('headerDate').textContent = now.toLocaleDateString('en-US', { month: 'short',
-                day: 'numeric', year: 'numeric' });
-            document.getElementById('settingsLastLogin').textContent = now.toLocaleString();
-            var dashDate = document.getElementById('dashDateDisplay');
-            if (dashDate) {
-                dashDate.textContent = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric',
-                    year: 'numeric' });
-            }
-            var dashUser = document.getElementById('dashUserName');
-            if (dashUser && currentUserFullname) {
-                dashUser.textContent = currentUserFullname;
-            }
-        }
-
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-
-        function showTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
-            document.querySelectorAll('.menu-item').forEach(function(m) { m.classList.remove('active'); });
-            var tab = document.getElementById('tab-' + tabName);
-            if (tab) tab.classList.add('active');
-            var allTabs = ['pos', 'dashboard', 'calendar', 'products', 'customers', 'transactions', 'inventory',
-                'repairs', 'categories', 'lowstock', 'suppliers', 'reports', 'expenses', 'settings', 'backup',
-                'cashiers'
-            ];
-            var idx = allTabs.indexOf(tabName);
-            if (idx >= 0 && document.querySelectorAll('.menu-item')[idx]) document.querySelectorAll('.menu-item')[idx]
-                .classList.add('active');
-            var titles = {
-                'pos': ['Current Sale (POS)', 'Search product by name, brand, or barcode...'],
-                'dashboard': ['Dashboard Overview', 'Welcome back, ' + (currentUserFullname || 'User') + '!'],
-                'calendar': ['Sales Calendar', 'Click on a date to view sales details'],
-                'products': ['All Products', 'View and manage products'],
-                'customers': ['Customers', 'Customer database'],
-                'transactions': ['Recent Transactions', 'Your sales history'],
-                'inventory': ['Inventory Management', 'Track and manage stock levels'],
-                'repairs': ['Repair Management', 'Manage repair orders'],
-                'categories': ['Categories', 'Browse products by category'],
-                'lowstock': ['Low Stock Items', 'Items that need restocking'],
-                'suppliers': ['Suppliers', 'Manage supplier relationships'],
-                'reports': ['Reports', 'Sales and performance analytics'],
-                'expenses': ['Expenses', 'Track business expenses'],
-                'settings': ['Settings', 'Configure system preferences'],
-                'backup': ['Backup / Restore', 'Secure your data'],
-                'cashiers': ['Cashiers', 'Manage cashier accounts and status']
-            };
-            var titleData = titles[tabName] || titles['pos'];
-            var iconMap = {
-                'pos': 'shopping-cart',
-                'dashboard': 'home',
-                'calendar': 'calendar-alt',
-                'products': 'box',
-                'customers': 'user',
-                'transactions': 'receipt',
-                'inventory': 'clipboard-list',
-                'repairs': 'tools',
-                'categories': 'tags',
-                'lowstock': 'exclamation-triangle',
-                'suppliers': 'building',
-                'reports': 'chart-bar',
-                'expenses': 'money-bill-wave',
-                'settings': 'cog',
-                'backup': 'database',
-                'cashiers': 'users'
-            };
-            document.getElementById('pageTitle').innerHTML = '<i class="fas fa-' + (iconMap[tabName] ||
-                'shopping-cart') + '"></i> ' + titleData[0];
-            document.getElementById('pageSubtitle').textContent = titleData[1];
-            if (tabName === 'pos') { document.getElementById('barcode').focus(); if (selectedPayment === 'GCash')
-                    document.getElementById('qrContainer').classList.add('show'); }
-            if (tabName === 'products') renderProducts();
-            if (tabName === 'transactions') renderTransactions();
-            if (tabName === 'dashboard') renderDashboard();
-            if (tabName === 'inventory') renderInventory();
-            if (tabName === 'repairs') renderRepairs();
-            if (tabName === 'lowstock') renderLowStock();
-            if (tabName === 'calendar') renderCalendar(currentCalendarMonth, currentCalendarYear);
-            if (tabName === 'cashiers') renderCashiers();
-            if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
-        }
-
-        var allProductsData = [
+        // ================================================================
+        // 2. SEED DATA (only used if Firestore is empty)
+        // ================================================================
+        var SEED_PRODUCTS = [
             { barcode: 'P001', name: 'iPhone 11', price: 29990.00, stock: 8, image: 'iphone.jfif',
                 category: 'phones' },
             { barcode: 'P002', name: 'Samsung Galaxy A14', price: 12990.00, stock: 15, image: 'samsung.jfif',
@@ -6911,6 +6637,9 @@
                 category: 'laptops' },
             { barcode: 'L004', name: 'HP Laptop', price: 38990.00, stock: 5, image: 'HP.jpg',
                 category: 'laptops' },
+            // Add Lenovo K13 as requested by user
+            { barcode: 'L005', name: 'Lenovo K13', price: 7990.00, stock: 5, image: 'lenovo.jpg',
+                category: 'laptops' },
             { barcode: 'E001', name: 'JBL Tune 510BT Headphone', price: 2990.00, stock: 20,
                 image: 'JBL-Tune-510BT-Headphone.jpg', category: 'earphones' },
             { barcode: 'E002', name: 'Anker Soundcore Q20i Headphone', price: 2490.00, stock: 25,
@@ -6929,10 +6658,12 @@
                 category: 'earphones' }
         ];
 
-        var products = [];
+        // ================================================================
+        // 3. GLOBAL STATE
+        // ================================================================
+        var products = []; // Will hold the current product list from Firestore
         var cart = [];
         var sales = [];
-        var currentSale = null;
         var receiptCounter = 1;
         var selectedPayment = 'Cash';
         var cameraStream = null;
@@ -6942,328 +6673,768 @@
         var currentBrandFilter = '';
         var currentCalendarMonth = new Date().getMonth();
         var currentCalendarYear = new Date().getFullYear();
-
         var repairs = [];
         var repairCounter = 1;
         var currentRepairFilter = 'all';
         var editingRepairId = null;
-
         var previewProduct = null;
         var previewQty = 1;
-
         var dashCalMonth = new Date().getMonth();
         var dashCalYear = new Date().getFullYear();
+        var currentUser = '';
+        var currentUserRole = '';
+        var currentUserFullname = '';
+        var loginRole = 'cashier';
+        var currentSale = null;
 
-        function initApp() {
-            loadData();
-            updateCategoryCounts();
-            filterByCategory('all');
-            renderCart();
+        // ================================================================
+        // 4. USERS (hardcoded for demo — can be moved to Firestore later)
+        // ================================================================
+        var users = {
+            'BryanNialaAropo@gmail.com': { password: '1234567', role: 'admin', fullname: 'Bryan Niala Aropo' },
+            'RolandMaru@gmail.com': { password: '0987654', role: 'cashier', fullname: 'Roland Maru' }
+        };
+
+        // ================================================================
+        // 5. FIREBASE CRUD FUNCTIONS
+        // ================================================================
+
+        /** Load all products from Firestore into the global `products` array. */
+        function loadProductsFromFirestore() {
+            var loading = document.getElementById('firebaseLoading');
+            if (loading) loading.classList.add('show');
+
+            return db.collection('products')
+                .get()
+                .then(function(snapshot) {
+                    var results = [];
+                    snapshot.forEach(function(doc) {
+                        results.push({ id: doc.id, ...doc.data() });
+                    });
+                    return results;
+                })
+                .then(function(firestoreProducts) {
+                    // If Firestore is empty, seed it with default products
+                    if (firestoreProducts.length === 0) {
+                        console.log('Firestore empty — seeding with default products...');
+                        return seedFirestore()
+                            .then(function() {
+                                return db.collection('products').get();
+                            })
+                            .then(function(snap) {
+                                var seeded = [];
+                                snap.forEach(function(d) { seeded.push({ id: d.id, ...d.data() }); });
+                                return seeded;
+                            });
+                    }
+                    return firestoreProducts;
+                })
+                .then(function(finalProducts) {
+                    products = finalProducts;
+                    console.log('✅ Loaded', products.length, 'products from Firestore.');
+                    if (loading) loading.classList.remove('show');
+                    // Trigger UI refresh
+                    renderAllUI();
+                    return products;
+                })
+                .catch(function(err) {
+                    console.error('❌ Error loading products from Firestore:', err);
+                    if (loading) loading.classList.remove('show');
+                    // Fallback: try localStorage
+                    var local = localStorage.getItem('posProducts');
+                    if (local) {
+                        try {
+                            products = JSON.parse(local);
+                            console.log('⚠️ Using localStorage fallback:', products.length, 'products.');
+                            renderAllUI();
+                            return products;
+                        } catch (e) {}
+                    }
+                    // Ultimate fallback: use seed data
+                    products = SEED_PRODUCTS.map(function(p) { return { ...p }; });
+                    console.warn('⚠️ Using SEED data as fallback.');
+                    renderAllUI();
+                    return products;
+                });
+        }
+
+        /** Seed Firestore with default products (only if empty). */
+        function seedFirestore() {
+            var batch = db.batch();
+            SEED_PRODUCTS.forEach(function(p) {
+                var ref = db.collection('products').doc(); // auto-ID
+                batch.set(ref, {
+                    barcode: p.barcode,
+                    name: p.name,
+                    price: p.price,
+                    stock: p.stock,
+                    image: p.image || '',
+                    category: p.category || 'others'
+                });
+            });
+            return batch.commit()
+                .then(function() {
+                    console.log('✅ Seeded Firestore with', SEED_PRODUCTS.length, 'products.');
+                })
+                .catch(function(err) {
+                    console.error('❌ Seed failed:', err);
+                });
+        }
+
+        /** Update a single product's stock in Firestore. */
+        function updateProductStockInFirestore(productId, newStock) {
+            return db.collection('products').doc(productId)
+                .update({ stock: newStock })
+                .then(function() {
+                    console.log('✅ Updated stock for', productId, '→', newStock);
+                    // Also update local array
+                    var local = products.find(function(p) { return p.id === productId; });
+                    if (local) local.stock = newStock;
+                    return true;
+                })
+                .catch(function(err) {
+                    console.error('❌ Failed to update stock:', err);
+                    return false;
+                });
+        }
+
+        /** Add a new product to Firestore. */
+        function addProductToFirestore(productData) {
+            return db.collection('products')
+                .add(productData)
+                .then(function(docRef) {
+                    var newProduct = { id: docRef.id, ...productData };
+                    products.push(newProduct);
+                    console.log('✅ Added product:', newProduct.name);
+                    return newProduct;
+                })
+                .catch(function(err) {
+                    console.error('❌ Failed to add product:', err);
+                    return null;
+                });
+        }
+
+        /** Delete a product from Firestore. */
+        function deleteProductFromFirestore(productId) {
+            return db.collection('products').doc(productId)
+                .delete()
+                .then(function() {
+                    products = products.filter(function(p) { return p.id !== productId; });
+                    console.log('✅ Deleted product:', productId);
+                    return true;
+                })
+                .catch(function(err) {
+                    console.error('❌ Failed to delete product:', err);
+                    return false;
+                });
+        }
+
+        // ================================================================
+        // 6. UI RENDER FUNCTIONS (same as before, but using Firestore data)
+        // ================================================================
+
+        function renderAllUI() {
+            renderQuickProducts();
             renderProducts();
+            renderInventory();
+            renderLowStock();
             renderTransactions();
             renderDashboard();
-            renderInventory();
             renderRepairs();
-            renderLowStock();
             updateStats();
-            document.getElementById('barcode').focus();
-            generateGCashQR();
-            updateClock();
+            updateCategoryCounts();
+            checkLowStock();
+            renderCart();
             renderCalendar(currentCalendarMonth, currentCalendarYear);
-            setTimeout(function() { checkLowStock(); }, 500);
-            applyTheme(getStoredTheme());
-            if (currentUserRole === 'admin') renderCashiers();
+            renderDashCalendar();
+            // Update sidebar counts
+            document.getElementById('sidebarProductCount').innerText = products.length;
+            document.getElementById('sidebarInventoryCount').innerText = products.length;
+            document.getElementById('sidebarRepairCount').innerText = repairs.length;
+            document.getElementById('sidebarTransCount').innerText = sales.length;
+            document.getElementById('statTotalProducts').innerText = products.length;
+            document.getElementById('dscProducts').innerText = products.length;
+            document.getElementById('productTotalCount').innerText = products.length;
+            document.getElementById('inventoryCount').innerText = products.length;
+            document.getElementById('invTotalProducts').innerText = products.length;
+            var low = products.filter(function(p) { return p.stock <= 5; }).length;
+            document.getElementById('statLowStock').innerText = low;
+            document.getElementById('sidebarLowStock').innerText = low;
+            document.getElementById('dscLowStock').innerText = low;
+            document.getElementById('lowStockCount').innerText = low;
+            var inStock = products.filter(function(p) { return p.stock > 5; }).length;
+            var lowStock = products.filter(function(p) { return p.stock > 0 && p.stock <= 5; }).length;
+            var outStock = products.filter(function(p) { return p.stock === 0; }).length;
+            document.getElementById('invInStock').innerText = inStock;
+            document.getElementById('invLowStock').innerText = lowStock;
+            document.getElementById('invOutStock').innerText = outStock;
+            // Update category counts
+            var cats = ['all', 'phones', 'chargers', 'cables', 'laptops', 'earphones'];
+            var catMap = { 'all': 'All', 'phones': 'Phones', 'chargers': 'Chargers', 'cables': 'Cables',
+                'laptops': 'Laptops', 'earphones': 'Earphones' };
+            cats.forEach(function(cat) {
+                var el = document.getElementById('catCount' + catMap[cat]);
+                if (el) {
+                    var count = cat === 'all' ? products.length : products.filter(function(p) { return p
+                            .category === cat; }).length;
+                    el.textContent = count;
+                }
+            });
+            // Update quick products sub
+            var filtered = products.filter(function(p) { return currentCategory === 'all' || p.category ===
+                    currentCategory; });
+            if (currentBrandFilter) filtered = filtered.filter(function(p) { return p.name.toLowerCase().includes(
+                    currentBrandFilter.toLowerCase()); });
+            document.getElementById('quickProductsSub').textContent = filtered.length + ' items';
+            // Update cart count badge
+            var itemCount = cart.reduce(function(sum, item) { return sum + item.quantity; }, 0);
+            document.getElementById('sidebarCartCount').innerText = itemCount;
+            document.getElementById('cartCount').innerText = itemCount;
+            // Update stats
+            var today = new Date().toDateString();
+            var todaySales = sales.filter(function(s) { return new Date(s.date).toDateString() === today; });
+            var todayTotal = todaySales.reduce(function(sum, s) { return sum + s.total; }, 0);
+            document.getElementById('headerTodaySales').innerText = todayTotal.toFixed(2);
+            document.getElementById('statTodaySales').innerText = todayTotal.toFixed(2);
+            document.getElementById('statTotalTransactions').innerText = sales.length;
+            document.getElementById('dscTodaySales').innerText = todayTotal.toFixed(2);
+            document.getElementById('dscTransactions').innerText = sales.length;
+            document.getElementById('dashHeaderToday').innerText = todayTotal.toFixed(2);
+        }
+
+        // ---- Quick Products ----
+        function renderQuickProducts() {
+            var container = document.getElementById('quickProducts');
+            var filtered = products.filter(function(p) { return currentCategory === 'all' || p.category ===
+                currentCategory; });
+            if (currentBrandFilter) filtered = filtered.filter(function(p) { return p.name.toLowerCase().includes(
+                    currentBrandFilter.toLowerCase()); });
+
+            if (currentCategory === 'all') {
+                filtered = shuffleArray(filtered);
+            } else {
+                filtered = filtered.slice().sort(function(a, b) { return b.stock - a.stock; });
+            }
+
+            var top = filtered.slice(0, 8);
+            if (top.length === 0) {
+                container.innerHTML =
+                    '<div style="grid-column:1/-1;text-align:center;color:rgba(0,0,0,0.15);font-size:0.8rem;padding:20px;">No products found</div>';
+                return;
+            }
+            container.innerHTML = top.map(function(p) {
+                var isNoStock = p.stock === 0;
+                var isLowStock = p.stock > 0 && p.stock <= 5;
+                var classes = 'quick-product-item' + (isNoStock ? ' no-stock' : '') + (isLowStock ?
+                    ' low-stock' : '');
+                var stockText = isNoStock ? 'NO STOCK' : (isLowStock ? p.stock + ' left' : p.stock +
+                ' in stock');
+                var stockClass = isNoStock ? 'out' : (isLowStock ? 'low' : '');
+                var overlay = isNoStock ? '<div class="no-stock-overlay">NO STOCK</div>' : (isLowStock ?
+                    '<div class="low-stock-overlay">LOW</div>' : '');
+                var img = p.image || '';
+                var fallbackIcon = '';
+                if (!img || img === '') {
+                    var iconMap = {
+                        'phones': 'fa-phone',
+                        'laptops': 'fa-laptop',
+                        'earphones': 'fa-headphones',
+                        'chargers': 'fa-bolt',
+                        'cables': 'fa-plug',
+                        'others': 'fa-box'
+                    };
+                    var iconClass = iconMap[p.category] || 'fa-box';
+                    fallbackIcon = '<div class="qp-icon-fallback"><i class="fas ' + iconClass + '"></i></div>';
+                }
+                return '<div class="' + classes + '" onclick="' + (isNoStock ? '' :
+                        'openPreview(products.find(function(pr){return pr.barcode===\'' + p.barcode +
+                        '\'}))') + '" title="' + (isNoStock ? 'Out of Stock' : 'Click to view') +
+                    '">\n            ' + (img ? '<img src="' + img + '" alt="' + p.name +
+                    '" class="qp-icon" onerror="this.style.display=\'none\';this.parentElement.innerHTML+=`' +
+                    fallbackIcon + '`">' : fallbackIcon) +
+                    '\n            ' + overlay +
+                    '\n            <div class="qp-name">' + (p.name.length > 18 ? p.name.substring(0, 18) +
+                        '...' : p.name) + '</div>\n            <div class="qp-price">₱' + p.price.toFixed(2) +
+                    '</div>\n            <div class="qp-stock ' + stockClass + '">' + stockText +
+                    '</div>\n        </div>';
+            }).join('');
+        }
+
+        function shuffleArray(arr) {
+            for (var i = arr.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+            return arr;
+        }
+
+        // ---- Products List ----
+        function renderProducts() {
+            var container = document.getElementById('productsList');
+            document.getElementById('productTotalCount').innerText = products.length;
+            if (products.length === 0) { container.innerHTML = '<div class="empty-state">No products available</div>';
+                return; }
+            var isAdmin = currentUserRole === 'admin';
+            container.innerHTML = products.map(function(p, index) {
+                var stockColor = p.stock === 0 ? '#e74c3c' : (p.stock <= 5 ? '#f39c12' : '#2ecc71');
+                var stockLabel = p.stock === 0 ? 'NO STOCK' : (p.stock <= 5 ? 'LOW STOCK' : 'In stock');
+                var controls = '';
+                if (isAdmin) {
+                    controls = '<div class="prod-controls">' +
+                        '<div class="prod-qty-box">' +
+                        '<button class="qty-btn" onclick="adjustStock(\'' + p.id + '\',-1)" title="Decrease"><i class="fas fa-minus"></i></button>' +
+                        '<span class="qty-num">' + p.stock + '</span>' +
+                        '<button class="qty-btn" onclick="adjustStock(\'' + p.id + '\',1)" title="Increase"><i class="fas fa-plus"></i></button>' +
+                        '</div>' +
+                        '<button class="prod-delete-btn" onclick="deleteProduct(\'' + p.id +
+                        '\')" title="Delete Product"><i class="fas fa-trash-alt"></i></button>' +
+                        '</div>';
+                } else {
+                    controls = '<span style="font-weight:700;color:' + stockColor + ';">' + p.stock + '</span>';
+                }
+                return '<div class="list-item prod-row">\n            <div class="item-left">\n                <div class="item-title">' +
+                    p.name + '</div>\n                <div class="item-sub" style="color:' + stockColor +
+                    ';font-weight:600;">' + stockLabel + ': ' + p.stock + ' left · ' + (p.category ||
+                        'Uncategorized') + '</div>\n            </div>\n            <div class="item-right">' +
+                    controls + '</div>\n        </div>';
+            }).join('');
+        }
+
+        // ---- Inventory ----
+        function renderInventory() {
+            var container = document.getElementById('inventoryList');
+            document.getElementById('inventoryCount').innerText = products.length;
+            var total = products.length;
+            var inStock = products.filter(function(p) { return p.stock > 5; }).length;
+            var lowStock = products.filter(function(p) { return p.stock > 0 && p.stock <= 5; }).length;
+            var outStock = products.filter(function(p) { return p.stock === 0; }).length;
+            document.getElementById('invTotalProducts').innerText = total;
+            document.getElementById('invInStock').innerText = inStock;
+            document.getElementById('invLowStock').innerText = lowStock;
+            document.getElementById('invOutStock').innerText = outStock;
+            if (products.length === 0) { container.innerHTML = '<div class="empty-state">No products in inventory</div>';
+                return; }
+            var isAdmin = currentUserRole === 'admin';
+            container.innerHTML = products.map(function(p) {
+                var statusColor = p.stock === 0 ? '#e74c3c' : (p.stock <= 5 ? '#f39c12' : '#2ecc71');
+                var statusLabel = p.stock === 0 ? 'OUT OF STOCK' : (p.stock <= 5 ? 'LOW STOCK' : 'In Stock');
+                var discount = '0.00';
+                var totalAmount = (p.price * p.stock).toFixed(2);
+                var controls = '';
+                if (isAdmin) {
+                    controls = '<div class="inv-controls">' +
+                        '<div class="inv-qty-box">' +
+                        '<button class="qty-btn" onclick="adjustStock(\'' + p.id + '\',-1)" title="Decrease"><i class="fas fa-minus"></i></button>' +
+                        '<span class="qty-num">' + p.stock + '</span>' +
+                        '<button class="qty-btn" onclick="adjustStock(\'' + p.id +
+                        '\',1)" title="Increase"><i class="fas fa-plus"></i></button>' +
+                        '</div>' +
+                        '<button class="inv-delete-btn" onclick="deleteProduct(\'' + p.id +
+                        '\')" title="Delete Product"><i class="fas fa-trash-alt"></i></button>' +
+                        '</div>';
+                } else {
+                    controls = '<span style="font-weight:700;color:' + statusColor + ';">' + p.stock + '</span>';
+                }
+                return '<div class="list-item inv-row">' +
+                    '<div class="item-left">' +
+                    '<div class="item-title">' + p.name + '</div>' +
+                    '<div class="item-sub">' + p.barcode + ' · <span style="color:' + statusColor +
+                    ';font-weight:600;">' + statusLabel + '</span></div>' +
+                    '</div>' +
+                    '<div class="item-right">' +
+                    '<span class="inv-discount-total"><span class="discount-label">Disc:</span> ₱' +
+                    discount + '</span>' +
+                    '<span class="inv-discount-total"><span class="total-amount">₱' + totalAmount +
+                    '</span></span>' +
+                    controls +
+                    '</div>' +
+                    '</div>';
+            }).join('');
+        }
+
+        // ---- Low Stock ----
+        function renderLowStock() {
+            var container = document.getElementById('lowStockList');
+            var low = products.filter(function(p) { return p.stock <= 5; });
+            document.getElementById('lowStockCount').innerText = low.length;
+            if (low.length === 0) { container.innerHTML =
+                '<div class="empty-state">All items are well-stocked!</div>'; return; }
+            var isAdmin = currentUserRole === 'admin';
+            container.innerHTML = low.map(function(p) {
+                var controls = '';
+                if (isAdmin) {
+                    controls = '<div class="prod-controls">' +
+                        '<div class="prod-qty-box">' +
+                        '<button class="qty-btn" onclick="adjustStock(\'' + p.id + '\',-1)" title="Decrease"><i class="fas fa-minus"></i></button>' +
+                        '<span class="qty-num">' + p.stock + '</span>' +
+                        '<button class="qty-btn" onclick="adjustStock(\'' + p.id +
+                        '\',1)" title="Increase"><i class="fas fa-plus"></i></button>' +
+                        '</div>' +
+                        '</div>';
+                } else {
+                    controls = '<span style="font-weight:700;color:#e74c3c;">' + p.stock + ' left</span>';
+                }
+                return '<div class="list-item" style="background:rgba(231,76,60,0.04);"><div class="item-left"><div class="item-title">' +
+                    p.name + '</div><div class="item-sub">' + (p.stock === 0 ? 'NO STOCK!' : 'Low stock') +
+                    '</div></div><div class="item-right" style="display:flex;align-items:center;gap:6px;">' +
+                    controls + '</div></div>';
+            }).join('');
+        }
+
+        // ---- Transactions ----
+        function renderTransactions() {
+            var container = document.getElementById('transactionsList');
+            document.getElementById('transTotalCount').innerText = sales.length;
+            if (sales.length === 0) { container.innerHTML = '<div class="empty-state">No transactions yet</div>';
+                return; }
+            container.innerHTML = sales.slice(0, 20).map(function(s) {
+                return '<div class="list-item"><div class="item-left"><div class="item-title">#' + s
+                    .receiptNumber + '</div><div class="item-sub">' + new Date(s.date).toLocaleString() +
+                    ' · ' + s.items.length + ' items · ' + (s.method || 'Cash') +
+                    '</div></div><div class="item-right">₱' + s.total.toFixed(2) + '</div></div>';
+            }).join('');
+        }
+
+        // ---- Dashboard ----
+        function renderDashboard() {
+            var today = new Date().toDateString();
+            var todaySales = sales.filter(function(s) { return new Date(s.date).toDateString() === today; });
+            var todayTotal = todaySales.reduce(function(sum, s) { return sum + s.total; }, 0);
+            var totalTrans = sales.length;
+            var totalProducts = products.length;
+            var lowStockItems = products.filter(function(p) { return p.stock <= 5; });
+            var lowCount = lowStockItems.length;
+
+            document.getElementById('dscTodaySales').innerText = todayTotal.toFixed(2);
+            document.getElementById('dscTransactions').innerText = totalTrans;
+            document.getElementById('dscProducts').innerText = totalProducts;
+            document.getElementById('dscLowStock').innerText = lowCount;
+            document.getElementById('dashHeaderToday').innerText = todayTotal.toFixed(2);
+
+            var dashUser = document.getElementById('dashUserName');
+            if (dashUser && currentUserFullname) {
+                dashUser.textContent = currentUserFullname;
+            }
+
+            var productSales = {};
+            sales.forEach(function(s) {
+                s.items.forEach(function(item) {
+                    if (!productSales[item.name]) productSales[item.name] = 0;
+                    productSales[item.name] += item.quantity;
+                });
+            });
+            var topProducts = Object.entries(productSales).sort(function(a, b) { return b[1] - a[1]; })
+            .slice(0, 5);
+            var topHTML = '';
+            if (topProducts.length === 0) {
+                topHTML = '<div style="color:rgba(255,255,255,0.15);font-size:0.8rem;padding:6px 0;">No sales data yet</div>';
+            } else {
+                topProducts.forEach(function(item) {
+                    topHTML += '<div class="top-item"><span class="tp-name">' + item[0] +
+                        '</span><span class="tp-sold">' + item[1] + ' sold</span></div>';
+                });
+            }
+            document.getElementById('dashTopProducts').innerHTML = topHTML;
+
+            var lowHTML = '';
+            if (lowStockItems.length === 0) {
+                lowHTML =
+                    '<div style="color:rgba(255,255,255,0.15);font-size:0.8rem;padding:6px 0;">All items are well-stocked</div>';
+            } else {
+                lowStockItems.slice(0, 5).forEach(function(p) {
+                    lowHTML += '<div class="low-item"><span class="ls-name">' + p.name +
+                        '</span><span class="ls-stock">' + p.stock + ' left</span></div>';
+                });
+            }
+            document.getElementById('dashLowStockItems').innerHTML = lowHTML;
+
+            var recentHTML = '';
+            var recentSales = sales.slice(0, 5);
+            if (recentSales.length === 0) {
+                recentHTML =
+                    '<div style="color:rgba(255,255,255,0.15);font-size:0.8rem;padding:6px 0;">No transactions</div>';
+            } else {
+                recentSales.forEach(function(s) {
+                    var dateStr = new Date(s.date).toLocaleString('en-US', { month: 'short', day: 'numeric',
+                        hour: '2-digit', minute: '2-digit' });
+                    var userShort = (s.user || 'Cashier').split(' ')[0] || 'C';
+                    recentHTML += '<div class="rec-item"><div class="rec-left"><span class="rec-id">#' + s
+                        .receiptNumber + ' · ' + dateStr + '</span><span class="rec-name">' + userShort +
+                        '</span></div><span class="rec-amount">₱' + s.total.toFixed(2) + '</span></div>';
+                });
+            }
+            document.getElementById('dashRecentTransactions').innerHTML = recentHTML;
+
+            var catMap = {
+                'phones': 'Phones',
+                'chargers': 'Chargers',
+                'cables': 'Cables',
+                'laptops': 'Laptops',
+                'earphones': 'Earphones'
+            };
+            var catCounts = {};
+            products.forEach(function(p) {
+                var cat = p.category || 'others';
+                if (!catCounts[cat]) catCounts[cat] = 0;
+                catCounts[cat]++;
+            });
+            var catHTML = '';
+            var catKeys = Object.keys(catMap);
+            catKeys.forEach(function(key) {
+                var label = catMap[key] || key;
+                var count = catCounts[key] || 0;
+                catHTML += '<div class="cat-box"><span class="cat-name">' + label +
+                    '</span><span class="cat-count">' + count + ' products</span></div>';
+            });
+            document.getElementById('dashCategoriesGrid').innerHTML = catHTML;
+
+            var categorySales = {};
+            sales.forEach(function(s) {
+                s.items.forEach(function(item) {
+                    var product = products.find(function(p) { return p.name === item.name; });
+                    var cat = product ? (product.category || 'others') : 'others';
+                    if (!categorySales[cat]) categorySales[cat] = 0;
+                    categorySales[cat] += item.subtotal || (item.price * item.quantity);
+                });
+            });
+            var catSalesHTML = '';
+            var sortedCats = Object.entries(categorySales).sort(function(a, b) { return b[1] - a[1]; });
+            if (sortedCats.length === 0) {
+                catSalesHTML =
+                    '<div style="color:rgba(255,255,255,0.15);font-size:0.8rem;padding:6px 0;">No sales data</div>';
+            } else {
+                sortedCats.slice(0, 6).forEach(function(item) {
+                    var label = catMap[item[0]] || item[0];
+                    catSalesHTML += '<div class="cat-sales-item"><span class="cs-name">' + label +
+                        '</span><span class="cs-amount">₱' + item[1].toFixed(2) + '</span></div>';
+                });
+            }
+            document.getElementById('dashCategorySales').innerHTML = catSalesHTML;
+
+            var totalRevenue = sales.reduce(function(sum, s) { return sum + s.total; }, 0);
+            document.getElementById('growthRevenue').innerText = '₱' + totalRevenue.toFixed(0);
+            var growthPct = 65 + Math.floor(Math.random() * 10);
+            document.getElementById('growthCommunity').innerText = growthPct + '%';
+
             renderDashCalendar();
         }
 
-        function loadData() {
-            products = allProductsData.map(function(p) { return { ...p }; });
-            var storedProducts = localStorage.getItem('posProducts');
-            if (storedProducts) {
-                var oldProducts = JSON.parse(storedProducts);
-                oldProducts.forEach(function(oldP) {
-                    if (!products.some(function(p) { return p.barcode === oldP.barcode; })) products.push({ ...oldP });
-                });
+        // ---- Repairs ----
+        function renderRepairs() {
+            var container = document.getElementById('repairsList');
+            var filtered = repairs;
+            if (currentRepairFilter !== 'all') {
+                filtered = repairs.filter(function(r) { return r.status === currentRepairFilter; });
             }
-            var storedSales = localStorage.getItem('posSales');
-            sales = storedSales ? JSON.parse(storedSales) : [];
-            var storedCounter = localStorage.getItem('posReceiptCounter');
-            receiptCounter = storedCounter ? parseInt(storedCounter) : 1;
-            var storedHistory = localStorage.getItem('posInventoryHistory');
-            inventoryHistory = storedHistory ? JSON.parse(storedHistory) : [];
-            var storedRepairs = localStorage.getItem('posRepairs');
-            if (storedRepairs) {
-                repairs = JSON.parse(storedRepairs);
-                repairCounter = repairs.length > 0 ? Math.max(...repairs.map(r => parseInt(r.id.replace('R-', '')))) +
-                    1 : 1;
+            filtered = filtered.slice().sort(function(a, b) { return b.id.localeCompare(a.id); });
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="empty-state">No repair orders found</div>';
             } else {
-                repairs = [
-                    { id: 'R-001', customer: 'Juan Dela Cruz', contact: '0917-123-4567', device: 'iPhone 14 Pro',
-                        problem: 'Broken screen', technician: 'Roland Maru', fee: 2500, downPayment: 1000,
-                        balance: 1500, dateReceived: '2026-08-28', expectedDate: '2026-09-02',
-                    status: 'Pending' },
-                    { id: 'R-002', customer: 'Maria Santos', contact: '0918-765-4321',
-                        device: 'Samsung S24 Ultra', problem: 'Battery not charging',
-                        technician: 'Bryan Aropo', fee: 1800, downPayment: 800, balance: 1000,
-                        dateReceived: '2026-08-27', expectedDate: '2026-09-01', status: 'Diagnosing' },
-                    { id: 'R-003', customer: 'Jose Reyes', contact: '0922-888-9999', device: 'Xiaomi 14',
-                        problem: 'Camera not working', technician: 'Roland Maru', fee: 3200,
-                        downPayment: 1500, balance: 1700, dateReceived: '2026-08-26',
-                        expectedDate: '2026-08-31', status: 'Repairing' }
-                ];
-                repairCounter = 4;
-                saveRepairs();
+                container.innerHTML = filtered.map(function(r) {
+                    var statusClass = r.status.toLowerCase().replace(' ', '');
+                    if (statusClass === 'readyforpickup') statusClass = 'ready';
+                    var statusMap = {
+                        'pending': 'Pending',
+                        'diagnosing': 'Diagnosing',
+                        'repairing': 'Repairing',
+                        'ready': 'Ready for Pickup',
+                        'released': 'Released'
+                    };
+                    var displayStatus = statusMap[statusClass] || r.status;
+                    return '<div class="list-item">' +
+                        '<div class="item-left">' +
+                        '<div class="item-title">' + r.id + ' - ' + r.customer + '</div>' +
+                        '<div class="item-sub">' + r.device + ' · ' + r.problem.substring(0, 30) + (r
+                            .problem.length > 30 ? '...' : '') + ' · ' + (r.technician ||
+                            'Unassigned') + '</div>' +
+                        '</div>' +
+                        '<div class="item-right" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' +
+                        '<span style="font-size:0.85rem;color:rgba(255,255,255,0.2);">₱' + r.fee.toFixed(
+                            2) + '</span>' +
+                        '<span class="status-badge ' + statusClass + '">' + displayStatus + '</span>' +
+                        '<div class="repair-actions">' +
+                        '<button class="action-btn edit" onclick="viewRepair(\'' + r.id +
+                        '\')" title="View/Edit"><i class="fas fa-eye"></i></button>' +
+                        '<button class="action-btn status" onclick="updateRepairStatus(\'' + r.id +
+                        '\')" title="Update Status"><i class="fas fa-sync-alt"></i></button>' +
+                        (r.status !== 'Released' ? '<button class="action-btn release" onclick="releaseRepair(\'' +
+                            r.id + '\')" title="Release"><i class="fas fa-check-circle"></i></button>' :
+                            '') +
+                        '<button class="action-btn delete" onclick="deleteRepair(\'' + r.id +
+                        '\')" title="Delete"><i class="fas fa-trash-alt"></i></button>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+                }).join('');
             }
-            saveData();
+
+            var total = repairs.length;
+            var pending = repairs.filter(function(r) { return r.status === 'Pending'; }).length;
+            var diagnosing = repairs.filter(function(r) { return r.status === 'Diagnosing'; }).length;
+            var repairing = repairs.filter(function(r) { return r.status === 'Repairing'; }).length;
+            var ready = repairs.filter(function(r) { return r.status === 'Ready for Pickup'; }).length;
+            var released = repairs.filter(function(r) { return r.status === 'Released'; }).length;
+
+            document.getElementById('repairTotalCount').innerText = total;
+            document.getElementById('repairPendingCount').innerText = pending + diagnosing;
+            document.getElementById('repairRepairingCount').innerText = repairing;
+            document.getElementById('repairReadyCount').innerText = ready;
+            document.getElementById('sidebarRepairCount').innerText = total;
         }
 
-        function saveData() {
-            localStorage.setItem('posProducts', JSON.stringify(products));
-            localStorage.setItem('posSales', JSON.stringify(sales));
-            localStorage.setItem('posReceiptCounter', receiptCounter.toString());
-            localStorage.setItem('posInventoryHistory', JSON.stringify(inventoryHistory));
-            saveRepairs();
-        }
-
-        function saveRepairs() { localStorage.setItem('posRepairs', JSON.stringify(repairs)); }
-
-        function generateGCashQR() {
-            var container = document.getElementById('gcashQRCode');
-            if (!container) return;
-            container.innerHTML =
-                '<img src="qr-code.jpg" alt="GCash QR Code" style="width:100px;height:100px;object-fit:contain;border-radius:12px;border:2px solid #2ecc71;padding:4px;background:rgba(255,255,255,0.03);" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<span style=\\\'color:rgba(255,255,255,0.2);font-size:0.7rem;\\\'><i class=\\\'fas fa-exclamation-circle\\\'></i> QR code not found</span>\'">';
-        }
-
-        function updateLastActive() {
-            if (currentUserRole === 'cashier' && currentUser) {
-                const cashiers = getCashiersData();
-                if (cashiers[currentUser]) {
-                    cashiers[currentUser].lastActive = new Date().toLocaleString();
-                    saveCashiersData(cashiers);
+        // ---- Calendar ----
+        function renderCalendar(month, year) {
+            var grid = document.getElementById('calendarGrid');
+            var monthYear = document.getElementById('calendarMonthYear');
+            var details = document.getElementById('calendarDetails');
+            var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
+                'October', 'November', 'December'
+            ];
+            monthYear.textContent = monthNames[month] + ' ' + year;
+            var firstDay = new Date(year, month, 1).getDay();
+            var daysInMonth = new Date(year, month + 1, 0).getDate();
+            var today = new Date();
+            var todayDate = today.getDate(),
+                todayMonth = today.getMonth(),
+                todayYear = today.getFullYear();
+            var html = '';
+            ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(function(label) { html +=
+                    '<div class="day-label">' + label + '</div>'; });
+            for (var i = 0; i < firstDay; i++) html += '<div class="day-cell empty"></div>';
+            var salesByDate = {};
+            sales.forEach(function(sale) {
+                var d = new Date(sale.date);
+                if (d.getMonth() === month && d.getFullYear() === year) {
+                    var dayKey = d.getDate();
+                    if (!salesByDate[dayKey]) salesByDate[dayKey] = [];
+                    salesByDate[dayKey].push(sale);
                 }
+            });
+            for (var d = 1; d <= daysInMonth; d++) {
+                var isToday = (d === todayDate && month === todayMonth && year === todayYear);
+                var hasSales = salesByDate[d] && salesByDate[d].length > 0;
+                var classes = 'day-cell' + (isToday ? ' today' : '') + (hasSales ? ' has-sales' : '');
+                var dot = hasSales ? '<span class="sale-dot"></span>' : '';
+                html += '<div class="' + classes + '" onclick="viewDaySales(' + year + ',' + month + ',' + d +
+                    ')">' + d + dot + '</div>';
             }
+            grid.innerHTML = html;
+            details.innerHTML =
+                '<div class="detail-empty"><i class="fas fa-calendar-day"></i> Select a date to view sales details</div>';
         }
 
-        var originalScanProduct = scanProduct;
-        scanProduct = function() { originalScanProduct();
-            updateLastActive(); };
-        var originalProcessPayment = processPayment;
-        processPayment = function() { originalProcessPayment();
-            updateLastActive(); };
-        var originalChangeQuantity = changeQuantity;
-        changeQuantity = function(index, change) { originalChangeQuantity(index, change);
-            updateLastActive(); };
-        var originalRemoveFromCart = removeFromCart;
-        removeFromCart = function(index) { originalRemoveFromCart(index);
-            updateLastActive(); };
-        var originalClearCart = clearCart;
-        clearCart = function() { originalClearCart();
-            updateLastActive(); };
-        var originalApplyDiscount = applyDiscount;
-        applyDiscount = function() { originalApplyDiscount();
-            updateLastActive(); };
-        var originalAddNote = addNote;
-        addNote = function() { originalAddNote();
-            updateLastActive(); };
-        var originalHoldSale = holdSale;
-        holdSale = function() { originalHoldSale();
-            updateLastActive(); };
-        var originalPreviewAddToCart = previewAddToCart;
-        previewAddToCart = function() { originalPreviewAddToCart();
-            updateLastActive(); };
+        function changeMonth(delta) {
+            currentCalendarMonth += delta;
+            if (currentCalendarMonth > 11) { currentCalendarMonth = 0;
+                currentCalendarYear++; } else if (currentCalendarMonth < 0) { currentCalendarMonth = 11;
+                currentCalendarYear--; }
+            renderCalendar(currentCalendarMonth, currentCalendarYear);
+        }
 
-        function confirmLogout() {
-            if (currentUserRole === 'cashier' && currentUser) {
-                const now = new Date().toLocaleString();
-                updateCashierStatus(currentUser, 'offline', null, now, null);
+        function viewDaySales(year, month, day) {
+            var details = document.getElementById('calendarDetails');
+            var dateStr = new Date(year, month, day).toLocaleDateString('en-US', { month: 'long', day: 'numeric',
+                year: 'numeric' });
+            var daySales = sales.filter(function(sale) {
+                var d = new Date(sale.date);
+                return d.getFullYear() === year && d.getMonth() === month && d.getDate() === day;
+            });
+            if (daySales.length === 0) {
+                details.innerHTML = '<div class="detail-empty">No sales on ' + dateStr + '</div>';
+                return;
             }
-            closeLogoutModal();
-            if (cameraStream) { cameraStream.getTracks().forEach(function(t) { t.stop(); });
-                cameraStream = null;
-                isCameraOn = false;
-                document.getElementById('cameraPreview').style.display = 'none'; }
-            document.getElementById('app').style.display = 'none';
-            document.getElementById('loginOverlay').classList.remove('hidden');
-            const landing = document.getElementById('landingOverlay');
-            if (landing) landing.classList.remove('hidden');
-            document.getElementById('loginError').style.display = 'none';
-            document.getElementById('loginPass').value = '';
-            document.getElementById('loginUser').value = '';
-            currentUser = '';
-            currentUserRole = '';
-            currentUserFullname = '';
-            renderLoginBrandGrid();
-            showLogin();
+            var totalSales = daySales.reduce(function(sum, s) { return sum + s.total; }, 0);
+            var totalItems = 0;
+            daySales.forEach(function(s) { s.items.forEach(function(i) { totalItems += i.quantity; }); });
+            var html = '<div style="margin-bottom:8px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;">';
+            html += '<span style="font-weight:600;color:#fff;"><i class="fas fa-calendar-day"></i> ' + dateStr +
+                '</span>';
+            html += '<span style="font-weight:600;color:#2ecc71;">Total: ₱' + totalSales.toFixed(2) + ' · ' +
+                daySales.length + ' transactions</span>';
+            html += '</div>';
+            daySales.forEach(function(sale) {
+                var saleTime = new Date(sale.date).toLocaleTimeString('en-US', { hour: '2-digit',
+                    minute: '2-digit' });
+                html += '<div class="detail-item">';
+                html += '<div class="detail-left"><div class="detail-title">#' + sale.receiptNumber + ' · ' +
+                    saleTime + ' · ' + (sale.method || 'Cash') + '</div><div class="detail-products">';
+                sale.items.forEach(function(item, idx) { html += (idx > 0 ? ', ' : '') + item.name + ' (x' + item
+                        .quantity + ')'; });
+                html += '</div></div><div class="detail-right">₱' + sale.total.toFixed(2) + '</div></div>';
+            });
+            details.innerHTML = html;
         }
 
-        function openLogoutModal() { document.getElementById('logoutModal').classList.add('show'); }
+        // ---- Dash Calendar ----
+        function renderDashCalendar() {
+            var grid = document.getElementById('dashCalGrid');
+            var monthYear = document.getElementById('dashCalMonthYear');
+            if (!grid || !monthYear) return;
 
-        function closeLogoutModal() { document.getElementById('logoutModal').classList.remove('show'); }
+            var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
+                'October', 'November', 'December'
+            ];
+            monthYear.textContent = monthNames[dashCalMonth] + ' ' + dashCalYear;
 
-        var resetCodeData = null;
-        var resetTimerInterval = null;
+            var firstDay = new Date(dashCalYear, dashCalMonth, 1).getDay();
+            var daysInMonth = new Date(dashCalYear, dashCalMonth + 1, 0).getDate();
+            var today = new Date();
+            var todayDate = today.getDate(),
+                todayMonth = today.getMonth(),
+                todayYear = today.getFullYear();
 
-        function openResetModal() {
-            document.getElementById('resetModal').classList.add('show');
-            document.getElementById('resetStep1').style.display = 'block';
-            document.getElementById('resetStep2').style.display = 'none';
-            document.getElementById('resetMessage').className = 'reset-message';
-            document.getElementById('resetMessage').style.display = 'none';
-            document.getElementById('resetEmail').value = '';
-            document.getElementById('resetCode').value = '';
-            document.getElementById('resetNewPass').value = '';
-            document.getElementById('resetConfirmPass').value = '';
-            if (resetTimerInterval) { clearInterval(resetTimerInterval);
-                resetTimerInterval = null; }
-        }
+            var salesByDate = {};
+            sales.forEach(function(sale) {
+                var d = new Date(sale.date);
+                if (d.getMonth() === dashCalMonth && d.getFullYear() === dashCalYear) {
+                    var dayKey = d.getDate();
+                    if (!salesByDate[dayKey]) salesByDate[dayKey] = [];
+                    salesByDate[dayKey].push(sale);
+                }
+            });
 
-        function closeResetModal() {
-            document.getElementById('resetModal').classList.remove('show');
-            if (resetTimerInterval) { clearInterval(resetTimerInterval);
-                resetTimerInterval = null; }
-            resetCodeData = null;
-        }
-
-        function showResetMessage(text, type) {
-            const msg = document.getElementById('resetMessage');
-            msg.textContent = text;
-            msg.className = 'reset-message ' + type;
-            msg.style.display = 'block';
-        }
-
-        function sendResetCode() {
-            const email = document.getElementById('resetEmail').value.trim();
-            if (!email) { showResetMessage('Please enter your email address.', 'error'); return; }
-            if (!users[email]) { showResetMessage('This email is not registered.', 'error'); return; }
-            const code = String(Math.floor(100000 + Math.random() * 900000));
-            const expiry = Date.now() + 5 * 60 * 1000;
-            resetCodeData = { email: email, code: code, expiry: expiry };
-            localStorage.setItem('posResetData', JSON.stringify(resetCodeData));
-
-            if (typeof emailjs !== 'undefined' && emailjs.send) {
-                const templateParams = { to_email: email, reset_code: code, expiry_minutes: '5' };
-                emailjs.send('service_your_service_id', 'template_your_template_id', templateParams,
-                    'your_public_key')
-                    .then(function(response) {
-                        showResetMessage('Reset code sent to your email! Please check your inbox.', 'success');
-                        proceedToStep2();
-                    })
-                    .catch(function(error) {
-                        console.error('EmailJS error:', error);
-                        showResetMessage(
-                            'Could not send email. Your reset code is: <strong>' + code +
-                            '</strong>. Enter it below. (Expires in 5 min)', 'info');
-                        proceedToStep2();
-                    });
-            } else {
-                showResetMessage(
-                    'Email service not configured. Your reset code is: <strong>' + code +
-                    '</strong>. Enter it below. (Expires in 5 min)', 'info');
-                proceedToStep2();
+            var html = '';
+            ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].forEach(function(label) { html +=
+                    '<div class="cal-day-label">' + label + '</div>'; });
+            for (var i = 0; i < firstDay; i++) html += '<div class="cal-day empty"></div>';
+            for (var d = 1; d <= daysInMonth; d++) {
+                var isToday = (d === todayDate && dashCalMonth === todayMonth && dashCalYear === todayYear);
+                var hasSales = salesByDate[d] && salesByDate[d].length > 0;
+                var classes = 'cal-day' + (isToday ? ' today' : '') + (hasSales ? ' has-sale' : '');
+                var dot = hasSales ? '<span class="sale-dot"></span>' : '';
+                html += '<div class="' + classes + '" onclick="dashCalViewDay(' + dashCalYear + ',' + dashCalMonth +
+                    ',' + d + ')">' + d + dot + '</div>';
             }
-
-            function proceedToStep2() {
-                document.getElementById('resetStep1').style.display = 'none';
-                document.getElementById('resetStep2').style.display = 'block';
-                document.getElementById('resetCode').value = '';
-                document.getElementById('resetNewPass').value = '';
-                document.getElementById('resetConfirmPass').value = '';
-                let secondsLeft = 300;
-                const timerDisplay = document.getElementById('resetTimerDisplay');
-                if (resetTimerInterval) clearInterval(resetTimerInterval);
-                resetTimerInterval = setInterval(function() {
-                    secondsLeft--;
-                    if (secondsLeft <= 0) {
-                        clearInterval(resetTimerInterval);
-                        resetTimerInterval = null;
-                        timerDisplay.textContent = 'Expired';
-                        showResetMessage('Code has expired. Please request a new one.', 'error');
-                        resetCodeData = null;
-                        document.getElementById('resetStep2').style.display = 'none';
-                        document.getElementById('resetStep1').style.display = 'block';
-                        return;
-                    }
-                    const mins = Math.floor(secondsLeft / 60);
-                    const secs = secondsLeft % 60;
-                    timerDisplay.textContent = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2,
-                    '0');
-                }, 1000);
-            }
+            grid.innerHTML = html;
         }
 
-        function resetPassword() {
-            const code = document.getElementById('resetCode').value.trim();
-            const newPass = document.getElementById('resetNewPass').value.trim();
-            const confirmPass = document.getElementById('resetConfirmPass').value.trim();
-
-            if (!code || !newPass || !confirmPass) { showResetMessage('Please fill in all fields.', 'error'); return; }
-            if (newPass.length < 8) { showResetMessage('Password must be at least 8 characters.', 'error'); return; }
-            if (newPass !== confirmPass) { showResetMessage('Passwords do not match.', 'error'); return; }
-
-            const stored = localStorage.getItem('posResetData');
-            let data = null;
-            if (stored) { try { data = JSON.parse(stored); } catch (e) {} }
-            if (!data || !resetCodeData) { showResetMessage('No reset request found. Please request a new code.',
-                    'error'); return; }
-            const currentData = resetCodeData || data;
-            if (Date.now() > currentData.expiry) { showResetMessage('Code has expired. Please request a new one.',
-                    'error'); return; }
-            if (code !== currentData.code) { showResetMessage('Invalid code. Please try again.', 'error'); return; }
-
-            const email = currentData.email;
-            if (users[email]) {
-                users[email].password = newPass;
-                const cashiers = getCashiersData();
-                if (cashiers[email]) {}
-                localStorage.setItem('posUsers', JSON.stringify(users));
-                showResetMessage('Password reset successfully! You can now login.', 'success');
-                localStorage.removeItem('posResetData');
-                resetCodeData = null;
-                if (resetTimerInterval) { clearInterval(resetTimerInterval);
-                    resetTimerInterval = null; }
-                setTimeout(function() {
-                    closeResetModal();
-                    document.getElementById('loginUser').value = email;
-                    document.getElementById('loginPass').value = '';
-                }, 1500);
-            } else {
-                showResetMessage('User not found. Please request a new code.', 'error');
-            }
+        function dashCalChangeMonth(delta) {
+            dashCalMonth += delta;
+            if (dashCalMonth > 11) { dashCalMonth = 0;
+                dashCalYear++; } else if (dashCalMonth < 0) { dashCalMonth = 11;
+                dashCalYear--; }
+            renderDashCalendar();
         }
 
-        function scanProduct() {
-            var input = document.getElementById('barcode');
-            var barcode = input.value.trim();
-            if (!barcode) { showMessage('Enter barcode or search!', 'error'); return; }
-            var product = products.find(function(p) { return p.barcode === barcode; });
-            if (!product) {
-                product = products.find(function(p) { return p.name.toLowerCase().includes(barcode.toLowerCase()); });
-                if (!product) { showMessage('Product not found!', 'error');
-                    input.value = '';
-                    input.focus(); return; }
+        function dashCalViewDay(year, month, day) {
+            var dateStr = new Date(year, month, day).toLocaleDateString('en-US', { month: 'long', day: 'numeric',
+                year: 'numeric' });
+            var daySales = sales.filter(function(sale) {
+                var d = new Date(sale.date);
+                return d.getFullYear() === year && d.getMonth() === month && d.getDate() === day;
+            });
+            if (daySales.length === 0) {
+                showMessage('No sales on ' + dateStr, 'info');
+                return;
             }
-            if (product.stock <= 0) { showMessage('NO STOCK! Cannot add.', 'error');
-                input.value = '';
-                input.focus(); return; }
-            if (product.stock <= 5) { showMessage('LOW STOCK! Only ' + product.stock + ' left.', 'warning');
-                input.value = '';
-                input.focus(); return; }
-            var existingItem = cart.find(function(item) { return item.barcode === product.barcode; });
-            if (existingItem) {
-                if (existingItem.quantity < product.stock) existingItem.quantity++;
-                else { showMessage('Not enough stock!', 'error'); return; }
-            } else {
-                cart.push({ barcode: product.barcode, name: product.name, price: product.price, productId: products
-                        .indexOf(product), quantity: 1 });
-            }
-            renderCart();
-            input.value = '';
-            input.focus();
-            document.getElementById('searchResults').classList.remove('show');
-            showMessage('Added: ' + product.name, 'success');
-            updateLastActive();
+            var total = daySales.reduce(function(sum, s) { return sum + s.total; }, 0);
+            showMessage(dateStr + ': ' + daySales.length + ' transactions · ₱' + total.toFixed(2), 'success');
         }
 
+        // ---- Cart ----
         function renderCart() {
             var container = document.getElementById('cartItems');
             var count = document.getElementById('cartCount');
@@ -7297,7 +7468,7 @@
 
         function changeQuantity(index, change) {
             var item = cart[index];
-            var product = products[item.productId];
+            var product = products.find(function(p) { return p.barcode === item.barcode; });
             if (!product) return;
             if (change > 0 && product.stock <= 0) { showMessage('NO STOCK! Cannot add.', 'error'); return; }
             if (change > 0 && product.stock <= 5) { showMessage('LOW STOCK! Only ' + product.stock + ' left.',
@@ -7382,6 +7553,7 @@
             processPayment();
         }
 
+        // ---- PROCESS PAYMENT (UPDATED FOR FIRESTORE) ----
         function processPayment() {
             var total = cart.reduce(function(sum, item) { return sum + (item.price * item.quantity); }, 0);
             total = Math.round(total * 100) / 100;
@@ -7395,113 +7567,128 @@
                 cashInput.value = total.toFixed(2); }
             var change = Math.round((cash - total) * 100) / 100;
             if (change < 0) change = 0;
+
+            // --- Deduct stock from Firestore for each item ---
+            var updatePromises = [];
+            var stockErrors = [];
+
             cart.forEach(function(item) {
-                var product = products[item.productId];
+                var product = products.find(function(p) { return p.barcode === item.barcode; });
                 if (product) {
-                    var oldStock = product.stock;
-                    product.stock = product.stock - item.quantity;
-                    if (product.stock < 0) product.stock = 0;
-                    inventoryHistory.push({ date: new Date().toISOString(), barcode: product.barcode,
-                        name: product.name, oldStock: oldStock, newStock: product.stock,
-                        user: currentUserFullname || currentUser, action: 'Sale' });
+                    if (product.stock < item.quantity) {
+                        stockErrors.push(product.name + ' (only ' + product.stock + ' left)');
+                        return;
+                    }
+                    var newStock = product.stock - item.quantity;
+                    if (newStock < 0) newStock = 0;
+                    updatePromises.push(
+                        updateProductStockInFirestore(product.id, newStock)
+                        .then(function(success) {
+                            if (!success) {
+                                stockErrors.push(product.name + ' (update failed)');
+                            }
+                            return success;
+                        })
+                    );
+                } else {
+                    stockErrors.push(item.name + ' (not found)');
                 }
             });
-            var receiptNum = String(receiptCounter).padStart(6, '0');
-            currentSale = {
-                id: Date.now(),
-                receiptNumber: receiptNum,
-                date: new Date().toISOString(),
-                items: cart.map(function(item) { return { name: item.name, price: item.price,
-                        quantity: item.quantity, subtotal: Math.round((item.price * item.quantity) *
-                            100) / 100 }; }),
-                total: total,
-                cash: cash,
-                change: change,
-                method: selectedPayment,
-                user: currentUserFullname || currentUser
-            };
-            receiptCounter++;
-            sales.unshift(currentSale);
-            saveData();
-            showReceipt(currentSale);
-            clearCart();
-            cashInput.value = '0';
-            result.style.display = 'none';
-            renderProducts();
-            renderQuickProducts();
-            renderTransactions();
-            renderDashboard();
-            renderInventory();
-            renderLowStock();
-            updateStats();
-            checkLowStock();
-            updateCategoryCounts();
-            document.getElementById('qrContainer').classList.remove('show');
-            closeGcashPopup();
-            renderCalendar(currentCalendarMonth, currentCalendarYear);
-            showMessage('Payment successful! Change: ₱' + change.toFixed(2), 'success');
-            updateLastActive();
+
+            if (stockErrors.length > 0) {
+                showMessage('Stock error: ' + stockErrors.join(', '), 'error');
+                return;
+            }
+
+            // Show loading state
+            var payBtn = document.getElementById('payBtn');
+            payBtn.disabled = true;
+            payBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+            Promise.all(updatePromises)
+                .then(function() {
+                    // All stock updates succeeded — now record the sale
+                    var receiptNum = String(receiptCounter).padStart(6, '0');
+                    currentSale = {
+                        id: Date.now(),
+                        receiptNumber: receiptNum,
+                        date: new Date().toISOString(),
+                        items: cart.map(function(item) {
+                            return {
+                                name: item.name,
+                                price: item.price,
+                                quantity: item.quantity,
+                                subtotal: Math.round((item.price * item.quantity) * 100) / 100
+                            };
+                        }),
+                        total: total,
+                        cash: cash,
+                        change: change,
+                        method: selectedPayment,
+                        user: currentUserFullname || currentUser
+                    };
+                    receiptCounter++;
+                    sales.unshift(currentSale);
+
+                    // Refresh product list from Firestore to get latest stock
+                    return loadProductsFromFirestore();
+                })
+                .then(function() {
+                    // Show receipt and clear cart
+                    showReceipt(currentSale);
+                    clearCart();
+                    cashInput.value = '0';
+                    result.style.display = 'none';
+                    renderAllUI();
+                    payBtn.disabled = false;
+                    payBtn.innerHTML = '<i class="fas fa-check"></i> Checkout';
+                    showMessage('Payment successful! Change: ₱' + change.toFixed(2), 'success');
+                    updateLastActive();
+                    // Update sales calendar
+                    renderCalendar(currentCalendarMonth, currentCalendarYear);
+                })
+                .catch(function(err) {
+                    console.error('❌ Payment processing error:', err);
+                    showMessage('Payment failed: ' + err.message, 'error');
+                    payBtn.disabled = false;
+                    payBtn.innerHTML = '<i class="fas fa-check"></i> Checkout';
+                });
         }
 
-        function openPreview(product) {
-            previewProduct = product;
-            previewQty = 1;
-            var modal = document.getElementById('productPreviewModal');
-            document.getElementById('previewName').textContent = product.name;
-            document.getElementById('previewPrice').textContent = '₱' + product.price.toFixed(2);
-            var stockEl = document.getElementById('previewStock');
-            var stockBadge = stockEl.querySelector('.stock-badge');
-            if (product.stock <= 0) { stockBadge.className = 'stock-badge out';
-                stockBadge.textContent = 'Out of Stock'; } else if (product.stock <= 5) { stockBadge.className =
-                    'stock-badge low';
-                stockBadge.textContent = 'Low Stock (' + product.stock + ' left)'; } else { stockBadge.className =
-                    'stock-badge in';
-                stockBadge.textContent = 'In Stock (' + product.stock + ' left)'; }
-            document.getElementById('previewQty').textContent = '1';
-            var img = document.getElementById('previewImg');
-            img.src = product.image || '';
-            img.alt = product.name;
-            img.onerror = function() { this.style.display = 'none'; };
-            var addBtn = document.getElementById('previewAddBtn');
-            addBtn.disabled = (product.stock <= 0);
-            modal.classList.add('show');
-        }
-
-        function closePreview() { document.getElementById('productPreviewModal').classList.remove('show');
-            previewProduct = null; }
-
-        function previewQtyChange(delta) {
-            var qty = parseInt(document.getElementById('previewQty').textContent) + delta;
-            if (qty < 1) qty = 1;
-            if (previewProduct && qty > previewProduct.stock) qty = previewProduct.stock;
-            document.getElementById('previewQty').textContent = qty;
-        }
-
-        function previewAddToCart() {
-            if (!previewProduct) return;
-            var qty = parseInt(document.getElementById('previewQty').textContent);
-            if (previewProduct.stock <= 0) { showMessage('NO STOCK! Cannot add.', 'error'); return; }
-            if (qty > previewProduct.stock) { showMessage('Not enough stock.', 'error'); return; }
-            var existingItem = cart.find(function(item) { return item.barcode === previewProduct.barcode; });
+        // ---- SCAN PRODUCT (uses Firestore stock) ----
+        function scanProduct() {
+            var input = document.getElementById('barcode');
+            var barcode = input.value.trim();
+            if (!barcode) { showMessage('Enter barcode or search!', 'error'); return; }
+            var product = products.find(function(p) { return p.barcode === barcode; });
+            if (!product) {
+                product = products.find(function(p) { return p.name.toLowerCase().includes(barcode.toLowerCase()); });
+                if (!product) { showMessage('Product not found!', 'error');
+                    input.value = '';
+                    input.focus(); return; }
+            }
+            if (product.stock <= 0) { showMessage('NO STOCK! Cannot add.', 'error');
+                input.value = '';
+                input.focus(); return; }
+            if (product.stock <= 5) { showMessage('LOW STOCK! Only ' + product.stock + ' left.', 'warning');
+                input.value = '';
+                input.focus(); return; }
+            var existingItem = cart.find(function(item) { return item.barcode === product.barcode; });
             if (existingItem) {
-                if (existingItem.quantity + qty <= previewProduct.stock) existingItem.quantity += qty;
-                else { showMessage('Not enough stock.', 'error'); return; }
+                if (existingItem.quantity < product.stock) existingItem.quantity++;
+                else { showMessage('Not enough stock!', 'error'); return; }
             } else {
-                cart.push({ barcode: previewProduct.barcode, name: previewProduct.name, price: previewProduct
-                        .price, productId: products.indexOf(previewProduct), quantity: qty });
+                cart.push({ barcode: product.barcode, name: product.name, price: product.price, quantity: 1 });
             }
             renderCart();
-            closePreview();
-            showMessage('Added ' + qty + 'x ' + previewProduct.name, 'success');
+            input.value = '';
+            input.focus();
+            document.getElementById('searchResults').classList.remove('show');
+            showMessage('Added: ' + product.name, 'success');
             updateLastActive();
         }
 
-        function zoomImage() {
-            var img = document.getElementById('previewImg');
-            if (img.style.transform === 'scale(1.4)') img.style.transform = 'scale(1)';
-            else img.style.transform = 'scale(1.4)';
-        }
-
+        // ---- SEARCH ----
         function searchProducts(query) {
             var resultsDiv = document.getElementById('searchResults');
             if (!query || query.trim().length === 0) { resultsDiv.classList.remove('show');
@@ -7515,7 +7702,7 @@
                     currentBrandFilter.toLowerCase()); });
             if (results.length === 0) {
                 resultsDiv.innerHTML =
-                    '<div class="no-results" style="color:rgba(255,255,255,0.3);padding:12px;">No products found for "<strong style="color:#fff;">' +
+                    '<div class="no-results" style="color:rgba(0,0,0,0.3);padding:12px;">No products found for "<strong style="color:#0b1420;">' +
                     query + '</strong>"</div>';
                 resultsDiv.classList.add('show');
                 return;
@@ -7525,7 +7712,7 @@
                 var stockText = p.stock === 0 ? 'NO STOCK' : (p.stock <= 5 ? p.stock + ' left' : p.stock +
                     ' in stock');
                 return '<div class="result-item" onclick="selectSearchResult(\'' + p.barcode + '\')">\n            <div>\n                <div class="result-name">' +
-                    p.name + '</div>\n                <div style="font-size:0.65rem;color:rgba(255,255,255,0.2);">' +
+                    p.name + '</div>\n                <div style="font-size:0.65rem;color:rgba(0,0,0,0.2);">' +
                     p.barcode + ' · ' + (p.category || '') + '</div>\n            </div>\n            <div style="text-align:right;">\n                <div class="result-price">₱' +
                     p.price.toFixed(2) + '</div>\n                <div class="result-stock ' + stockClass +
                     '">' + stockText + '</div>\n            </div>\n        </div>';
@@ -7539,6 +7726,7 @@
             scanProduct();
         }
 
+        // ---- FILTERS ----
         function filterByCategory(category) {
             currentCategory = category;
             currentBrandFilter = '';
@@ -7577,85 +7765,21 @@
             if (searchInput.value.trim().length > 0) searchProducts(searchInput.value);
         }
 
-        function shuffleArray(arr) {
-            for (let i = arr.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [arr[i], arr[j]] = [arr[j], arr[i]];
-            }
-            return arr;
-        }
-
-        function renderQuickProducts() {
-            var container = document.getElementById('quickProducts');
-            var filtered = products.filter(function(p) { return currentCategory === 'all' || p.category ===
-                currentCategory; });
-            if (currentBrandFilter) filtered = filtered.filter(function(p) { return p.name.toLowerCase().includes(
-                    currentBrandFilter.toLowerCase()); });
-
-            if (currentCategory === 'all') {
-                filtered = shuffleArray(filtered);
-            } else {
-                filtered = filtered.slice().sort(function(a, b) { return b.stock - a.stock; });
-            }
-
-            var top = filtered.slice(0, 8);
-            if (top.length === 0) {
-                container.innerHTML =
-                    '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.15);font-size:0.8rem;padding:20px;">No products found</div>';
-                return;
-            }
-            container.innerHTML = top.map(function(p) {
-                var isNoStock = p.stock === 0;
-                var isLowStock = p.stock > 0 && p.stock <= 5;
-                var classes = 'quick-product-item' + (isNoStock ? ' no-stock' : '') + (isLowStock ?
-                    ' low-stock' : '');
-                var stockText = isNoStock ? 'NO STOCK' : (isLowStock ? p.stock + ' left' : p.stock +
-                ' in stock');
-                var stockClass = isNoStock ? 'out' : (isLowStock ? 'low' : '');
-                var overlay = isNoStock ? '<div class="no-stock-overlay">NO STOCK</div>' : (isLowStock ?
-                    '<div class="low-stock-overlay">LOW</div>' : '');
-                var img = p.image || '';
-                var fallbackIcon = '';
-                if (!img || img === '') {
-                    var iconMap = {
-                        'phones': 'fa-phone',
-                        'laptops': 'fa-laptop',
-                        'earphones': 'fa-headphones',
-                        'chargers': 'fa-bolt',
-                        'cables': 'fa-plug',
-                        'others': 'fa-box'
-                    };
-                    var iconClass = iconMap[p.category] || 'fa-box';
-                    fallbackIcon = '<div class="qp-icon-fallback"><i class="fas ' + iconClass + '"></i></div>';
-                }
-                return '<div class="' + classes + '" onclick="' + (isNoStock ? '' :
-                        'openPreview(products.find(function(pr){return pr.barcode===\'' + p.barcode +
-                        '\'}))') + '" title="' + (isNoStock ? 'Out of Stock' : 'Click to view') +
-                    '">\n            ' + (img ? '<img src="' + img + '" alt="' + p.name +
-                    '" class="qp-icon" onerror="this.style.display=\'none\';this.parentElement.innerHTML+=`' +
-                    fallbackIcon + '`">' : fallbackIcon) +
-                    '\n            ' + overlay +
-                    '\n            <div class="qp-name">' + (p.name.length > 18 ? p.name.substring(0, 18) +
-                        '...' : p.name) + '</div>\n            <div class="qp-price">₱' + p.price.toFixed(2) +
-                    '</div>\n            <div class="qp-stock ' + stockClass + '">' + stockText +
-                    '</div>\n        </div>';
-            }).join('');
-        }
-
-        function getCategoryCount(cat) {
-            if (cat === 'all') return products.length;
-            return products.filter(function(p) { return p.category === cat; }).length;
-        }
-
+        // ---- CATEGORY COUNTS ----
         function updateCategoryCounts() {
             var map = { 'all': 'All', 'phones': 'Phones', 'chargers': 'Chargers', 'cables': 'Cables',
                 'laptops': 'Laptops', 'earphones': 'Earphones' };
             Object.keys(map).forEach(function(cat) {
                 var el = document.getElementById('catCount' + map[cat]);
-                if (el) el.textContent = getCategoryCount(cat);
+                if (el) {
+                    var count = cat === 'all' ? products.length : products.filter(function(p) { return p
+                            .category === cat; }).length;
+                    el.textContent = count;
+                }
             });
         }
 
+        // ---- LOW STOCK CHECK ----
         function checkLowStock() {
             var low = products.filter(function(p) { return p.stock <= 5; });
             var alertDiv = document.getElementById('lowStockAlert');
@@ -7675,6 +7799,7 @@
 
         function closeLowStockAlert() { document.getElementById('lowStockAlert').classList.remove('show'); }
 
+        // ---- UPDATE STATS ----
         function updateStats() {
             var today = new Date().toDateString();
             var todaySales = sales.filter(function(s) { return new Date(s.date).toDateString() === today; });
@@ -7696,194 +7821,81 @@
             document.getElementById('sidebarCashierCount').innerText = Object.keys(cashiers).length;
         }
 
-        function renderProducts() {
-            var container = document.getElementById('productsList');
-            document.getElementById('productTotalCount').innerText = products.length;
-            if (products.length === 0) { container.innerHTML = '<div class="empty-state">No products available</div>';
-                return; }
-            var isAdmin = currentUserRole === 'admin';
-            container.innerHTML = products.map(function(p, index) {
-                var stockColor = p.stock === 0 ? '#e74c3c' : (p.stock <= 5 ? '#f39c12' : '#2ecc71');
-                var stockLabel = p.stock === 0 ? 'NO STOCK' : (p.stock <= 5 ? 'LOW STOCK' : 'In stock');
-                var controls = '';
-                if (isAdmin) {
-                    controls = '<div class="prod-controls">' +
-                        '<div class="prod-qty-box">' +
-                        '<button class="qty-btn" onclick="adjustStock(' + index + ',-1)" title="Decrease"><i class="fas fa-minus"></i></button>' +
-                        '<span class="qty-num">' + p.stock + '</span>' +
-                        '<button class="qty-btn" onclick="adjustStock(' + index +
-                        ',1)" title="Increase"><i class="fas fa-plus"></i></button>' +
-                        '</div>' +
-                        '<button class="prod-delete-btn" onclick="deleteProduct(' + index +
-                        ')" title="Delete Product"><i class="fas fa-trash-alt"></i></button>' +
-                        '</div>';
-                } else {
-                    controls = '<span style="font-weight:700;color:' + stockColor + ';">' + p.stock + '</span>';
-                }
-                return '<div class="list-item prod-row">\n            <div class="item-left">\n                <div class="item-title">' +
-                    p.name + '</div>\n                <div class="item-sub" style="color:' + stockColor +
-                    ';font-weight:600;">' + stockLabel + ': ' + p.stock + ' left · ' + (p.category ||
-                        'Uncategorized') + '</div>\n            </div>\n            <div class="item-right">' +
-                    controls + '</div>\n        </div>';
-            }).join('');
-        }
+        // ================================================================
+        // 7. ADMIN FUNCTIONS (using Firestore)
+        // ================================================================
 
-        function renderInventory() {
-            var container = document.getElementById('inventoryList');
-            document.getElementById('inventoryCount').innerText = products.length;
-            var total = products.length;
-            var inStock = products.filter(function(p) { return p.stock > 5; }).length;
-            var lowStock = products.filter(function(p) { return p.stock > 0 && p.stock <= 5; }).length;
-            var outStock = products.filter(function(p) { return p.stock === 0; }).length;
-            document.getElementById('invTotalProducts').innerText = total;
-            document.getElementById('invInStock').innerText = inStock;
-            document.getElementById('invLowStock').innerText = lowStock;
-            document.getElementById('invOutStock').innerText = outStock;
-            if (products.length === 0) { container.innerHTML = '<div class="empty-state">No products in inventory</div>';
-                return; }
-            var isAdmin = currentUserRole === 'admin';
-            container.innerHTML = products.map(function(p, index) {
-                var statusColor = p.stock === 0 ? '#e74c3c' : (p.stock <= 5 ? '#f39c12' : '#2ecc71');
-                var statusLabel = p.stock === 0 ? 'OUT OF STOCK' : (p.stock <= 5 ? 'LOW STOCK' : 'In Stock');
-                var discount = '0.00';
-                var totalAmount = (p.price * p.stock).toFixed(2);
-                var controls = '';
-                if (isAdmin) {
-                    controls = '<div class="inv-controls">' +
-                        '<div class="inv-qty-box">' +
-                        '<button class="qty-btn" onclick="adjustStock(' + index + ',-1)" title="Decrease"><i class="fas fa-minus"></i></button>' +
-                        '<span class="qty-num">' + p.stock + '</span>' +
-                        '<button class="qty-btn" onclick="adjustStock(' + index +
-                        ',1)" title="Increase"><i class="fas fa-plus"></i></button>' +
-                        '</div>' +
-                        '<button class="inv-delete-btn" onclick="deleteProduct(' + index +
-                        ')" title="Delete Product"><i class="fas fa-trash-alt"></i></button>' +
-                        '</div>';
-                } else {
-                    controls = '<span style="font-weight:700;color:' + statusColor + ';">' + p.stock + '</span>';
-                }
-                return '<div class="list-item inv-row">' +
-                    '<div class="item-left">' +
-                    '<div class="item-title">' + p.name + '</div>' +
-                    '<div class="item-sub">' + p.barcode + ' · <span style="color:' + statusColor +
-                    ';font-weight:600;">' + statusLabel + '</span></div>' +
-                    '</div>' +
-                    '<div class="item-right">' +
-                    '<span class="inv-discount-total"><span class="discount-label">Disc:</span> ₱' +
-                    discount + '</span>' +
-                    '<span class="inv-discount-total"><span class="total-amount">₱' + totalAmount +
-                    '</span></span>' +
-                    controls +
-                    '</div>' +
-                    '</div>';
-            }).join('');
-        }
-
-        function deleteProduct(index) {
-            if (currentUserRole !== 'admin') { showMessage('Only administrators can delete products.', 'error'); return; }
-            var product = products[index];
-            if (!product) return;
-            if (confirm('Are you sure you want to delete "' + product.name + '" permanently?')) {
-                products.splice(index, 1);
-                saveData();
-                renderInventory();
-                renderProducts();
-                renderQuickProducts();
-                renderLowStock();
-                updateStats();
-                updateCategoryCounts();
-                showMessage('Product deleted: ' + product.name, 'warning');
-            }
-        }
-
-        function adjustStock(index, amount) {
+        function adjustStock(productId, amount) {
             if (currentUserRole !== 'admin') { showMessage('Only administrators can adjust stock.', 'error'); return; }
-            var product = products[index];
+            var product = products.find(function(p) { return p.id === productId; });
             if (!product) return;
             var newStock = product.stock + amount;
             if (newStock < 0) newStock = 0;
-            product.stock = newStock;
-            localStorage.setItem('posProducts', JSON.stringify(products));
-            renderInventory();
-            renderProducts();
-            renderQuickProducts();
-            renderLowStock();
-            updateStats();
-            checkLowStock();
-            updateCategoryCounts();
-            showMessage('Updated stock for ' + product.name + ': ' + newStock, 'success');
+            updateProductStockInFirestore(productId, newStock)
+                .then(function() {
+                    renderAllUI();
+                    showMessage('Updated stock for ' + product.name + ': ' + newStock, 'success');
+                })
+                .catch(function(err) {
+                    showMessage('Failed to update stock: ' + err.message, 'error');
+                });
         }
 
-        function renderRepairs() {
-            var container = document.getElementById('repairsList');
-            var filtered = repairs;
-            if (currentRepairFilter !== 'all') {
-                filtered = repairs.filter(function(r) { return r.status === currentRepairFilter; });
+        function deleteProduct(productId) {
+            if (currentUserRole !== 'admin') { showMessage('Only administrators can delete products.', 'error'); return; }
+            var product = products.find(function(p) { return p.id === productId; });
+            if (!product) return;
+            if (confirm('Are you sure you want to delete "' + product.name + '" permanently?')) {
+                deleteProductFromFirestore(productId)
+                    .then(function() {
+                        renderAllUI();
+                        showMessage('Product deleted: ' + product.name, 'warning');
+                    })
+                    .catch(function(err) {
+                        showMessage('Failed to delete product: ' + err.message, 'error');
+                    });
             }
-            filtered = filtered.slice().sort(function(a, b) { return b.id.localeCompare(a.id); });
+        }
 
-            if (filtered.length === 0) {
-                container.innerHTML = '<div class="empty-state">No repair orders found</div>';
-            } else {
-                container.innerHTML = filtered.map(function(r) {
-                    var statusClass = r.status.toLowerCase().replace(' ', '');
-                    if (statusClass === 'readyforpickup') statusClass = 'ready';
-                    var statusMap = {
-                        'pending': 'Pending',
-                        'diagnosing': 'Diagnosing',
-                        'repairing': 'Repairing',
-                        'ready': 'Ready for Pickup',
-                        'released': 'Released'
-                    };
-                    var displayStatus = statusMap[statusClass] || r.status;
-                    return '<div class="list-item">' +
-                        '<div class="item-left">' +
-                        '<div class="item-title">' + r.id + ' - ' + r.customer + '</div>' +
-                        '<div class="item-sub">' + r.device + ' · ' + r.problem.substring(0, 30) + (r
-                            .problem.length > 30 ? '...' : '') + ' · ' + (r.technician ||
-                            'Unassigned') + '</div>' +
-                        '</div>' +
-                        '<div class="item-right" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' +
-                        '<span style="font-size:0.85rem;color:rgba(255,255,255,0.2);">₱' + r.fee.toFixed(
-                            2) + '</span>' +
-                        '<span class="status-badge ' + statusClass + '">' + displayStatus + '</span>' +
-                        '<div class="repair-actions">' +
-                        '<button class="action-btn edit" onclick="viewRepair(\'' + r.id +
-                        '\')" title="View/Edit"><i class="fas fa-eye"></i></button>' +
-                        '<button class="action-btn status" onclick="updateRepairStatus(\'' + r.id +
-                        '\')" title="Update Status"><i class="fas fa-sync-alt"></i></button>' +
-                        (r.status !== 'Released' ? '<button class="action-btn release" onclick="releaseRepair(\'' +
-                            r.id + '\')" title="Release"><i class="fas fa-check-circle"></i></button>' :
-                            '') +
-                        '<button class="action-btn delete" onclick="deleteRepair(\'' + r.id +
-                        '\')" title="Delete"><i class="fas fa-trash-alt"></i></button>' +
-                        '</div>' +
-                        '</div>' +
-                        '</div>';
-                }).join('');
+        function addNewProduct() {
+            if (currentUserRole !== 'admin') { showMessage('Only administrators can add products.', 'error'); return; }
+            var barcode = document.getElementById('newBarcode').value.trim();
+            var name = document.getElementById('newName').value.trim();
+            var price = parseFloat(document.getElementById('newPrice').value);
+            var stock = parseInt(document.getElementById('newStock').value);
+            if (!barcode || !name || isNaN(price) || price <= 0 || isNaN(stock) || stock < 0) {
+                showMessage('Please fill all fields correctly! Price > 0, Stock >= 0', 'error');
+                return;
             }
-
-            var total = repairs.length;
-            var pending = repairs.filter(function(r) { return r.status === 'Pending'; }).length;
-            var diagnosing = repairs.filter(function(r) { return r.status === 'Diagnosing'; }).length;
-            var repairing = repairs.filter(function(r) { return r.status === 'Repairing'; }).length;
-            var ready = repairs.filter(function(r) { return r.status === 'Ready for Pickup'; }).length;
-            var released = repairs.filter(function(r) { return r.status === 'Released'; }).length;
-
-            document.getElementById('repairTotalCount').innerText = total;
-            document.getElementById('repairPendingCount').innerText = pending + diagnosing;
-            document.getElementById('repairRepairingCount').innerText = repairing;
-            document.getElementById('repairReadyCount').innerText = ready;
-            document.getElementById('sidebarRepairCount').innerText = total;
+            if (products.some(function(p) { return p.barcode === barcode; })) {
+                showMessage('Barcode already exists!', 'error');
+                return;
+            }
+            var newProduct = {
+                barcode: barcode,
+                name: name,
+                price: price,
+                stock: stock,
+                image: '',
+                category: 'others'
+            };
+            addProductToFirestore(newProduct)
+                .then(function() {
+                    renderAllUI();
+                    document.getElementById('newBarcode').value = '';
+                    document.getElementById('newName').value = '';
+                    document.getElementById('newPrice').value = '';
+                    document.getElementById('newStock').value = '';
+                    showMessage('Product added successfully!', 'success');
+                })
+                .catch(function(err) {
+                    showMessage('Failed to add product: ' + err.message, 'error');
+                });
         }
 
-        function filterRepairs(status) {
-            currentRepairFilter = status;
-            document.querySelectorAll('.repair-filters .filter-btn').forEach(function(btn) {
-                btn.classList.toggle('active', btn.dataset.filter === status);
-            });
-            renderRepairs();
-        }
+        // ================================================================
+        // 8. REPAIR FUNCTIONS (unchanged, kept as-is)
+        // ================================================================
 
         function openNewRepairModal() {
             editingRepairId = null;
@@ -8021,401 +8033,19 @@
             showMessage('Repair order ' + id + ' deleted.', 'warning');
         }
 
-        function renderTransactions() {
-            var container = document.getElementById('transactionsList');
-            document.getElementById('transTotalCount').innerText = sales.length;
-            if (sales.length === 0) { container.innerHTML = '<div class="empty-state">No transactions yet</div>';
-                return; }
-            container.innerHTML = sales.slice(0, 20).map(function(s) {
-                return '<div class="list-item"><div class="item-left"><div class="item-title">#' + s
-                    .receiptNumber + '</div><div class="item-sub">' + new Date(s.date).toLocaleString() +
-                    ' · ' + s.items.length + ' items · ' + (s.method || 'Cash') +
-                    '</div></div><div class="item-right">₱' + s.total.toFixed(2) + '</div></div>';
-            }).join('');
-        }
-
-        function renderDashboard() {
-            var today = new Date().toDateString();
-            var todaySales = sales.filter(function(s) { return new Date(s.date).toDateString() === today; });
-            var todayTotal = todaySales.reduce(function(sum, s) { return sum + s.total; }, 0);
-            var totalTrans = sales.length;
-            var totalProducts = products.length;
-            var lowStockItems = products.filter(function(p) { return p.stock <= 5; });
-            var lowCount = lowStockItems.length;
-
-            document.getElementById('dscTodaySales').innerText = todayTotal.toFixed(2);
-            document.getElementById('dscTransactions').innerText = totalTrans;
-            document.getElementById('dscProducts').innerText = totalProducts;
-            document.getElementById('dscLowStock').innerText = lowCount;
-            document.getElementById('dashHeaderToday').innerText = todayTotal.toFixed(2);
-
-            var dashUser = document.getElementById('dashUserName');
-            if (dashUser && currentUserFullname) {
-                dashUser.textContent = currentUserFullname;
-            }
-
-            var productSales = {};
-            sales.forEach(function(s) {
-                s.items.forEach(function(item) {
-                    if (!productSales[item.name]) productSales[item.name] = 0;
-                    productSales[item.name] += item.quantity;
-                });
+        function filterRepairs(status) {
+            currentRepairFilter = status;
+            document.querySelectorAll('.repair-filters .filter-btn').forEach(function(btn) {
+                btn.classList.toggle('active', btn.dataset.filter === status);
             });
-            var topProducts = Object.entries(productSales).sort(function(a, b) { return b[1] - a[1]; })
-            .slice(0, 5);
-            var topHTML = '';
-            if (topProducts.length === 0) {
-                topHTML = '<div style="color:rgba(255,255,255,0.15);font-size:0.8rem;padding:6px 0;">No sales data yet</div>';
-            } else {
-                topProducts.forEach(function(item) {
-                    topHTML += '<div class="top-item"><span class="tp-name">' + item[0] +
-                        '</span><span class="tp-sold">' + item[1] + ' sold</span></div>';
-                });
-            }
-            document.getElementById('dashTopProducts').innerHTML = topHTML;
-
-            var lowHTML = '';
-            if (lowStockItems.length === 0) {
-                lowHTML =
-                    '<div style="color:rgba(255,255,255,0.15);font-size:0.8rem;padding:6px 0;">All items are well-stocked</div>';
-            } else {
-                lowStockItems.slice(0, 5).forEach(function(p) {
-                    lowHTML += '<div class="low-item"><span class="ls-name">' + p.name +
-                        '</span><span class="ls-stock">' + p.stock + ' left</span></div>';
-                });
-            }
-            document.getElementById('dashLowStockItems').innerHTML = lowHTML;
-
-            var recentHTML = '';
-            var recentSales = sales.slice(0, 5);
-            if (recentSales.length === 0) {
-                recentHTML =
-                    '<div style="color:rgba(255,255,255,0.15);font-size:0.8rem;padding:6px 0;">No transactions</div>';
-            } else {
-                recentSales.forEach(function(s) {
-                    var dateStr = new Date(s.date).toLocaleString('en-US', { month: 'short', day: 'numeric',
-                        hour: '2-digit', minute: '2-digit' });
-                    var userShort = (s.user || 'Cashier').split(' ')[0] || 'C';
-                    recentHTML += '<div class="rec-item"><div class="rec-left"><span class="rec-id">#' + s
-                        .receiptNumber + ' · ' + dateStr + '</span><span class="rec-name">' + userShort +
-                        '</span></div><span class="rec-amount">₱' + s.total.toFixed(2) + '</span></div>';
-                });
-            }
-            document.getElementById('dashRecentTransactions').innerHTML = recentHTML;
-
-            var catMap = {
-                'phones': 'Phones',
-                'chargers': 'Chargers',
-                'cables': 'Cables',
-                'laptops': 'Laptops',
-                'earphones': 'Earphones'
-            };
-            var catCounts = {};
-            products.forEach(function(p) {
-                var cat = p.category || 'others';
-                if (!catCounts[cat]) catCounts[cat] = 0;
-                catCounts[cat]++;
-            });
-            var catHTML = '';
-            var catKeys = Object.keys(catMap);
-            catKeys.forEach(function(key) {
-                var label = catMap[key] || key;
-                var count = catCounts[key] || 0;
-                catHTML += '<div class="cat-box"><span class="cat-name">' + label +
-                    '</span><span class="cat-count">' + count + ' products</span></div>';
-            });
-            document.getElementById('dashCategoriesGrid').innerHTML = catHTML;
-
-            var categorySales = {};
-            sales.forEach(function(s) {
-                s.items.forEach(function(item) {
-                    var product = products.find(function(p) { return p.name === item.name; });
-                    var cat = product ? (product.category || 'others') : 'others';
-                    if (!categorySales[cat]) categorySales[cat] = 0;
-                    categorySales[cat] += item.subtotal || (item.price * item.quantity);
-                });
-            });
-            var catSalesHTML = '';
-            var sortedCats = Object.entries(categorySales).sort(function(a, b) { return b[1] - a[1]; });
-            if (sortedCats.length === 0) {
-                catSalesHTML =
-                    '<div style="color:rgba(255,255,255,0.15);font-size:0.8rem;padding:6px 0;">No sales data</div>';
-            } else {
-                sortedCats.slice(0, 6).forEach(function(item) {
-                    var label = catMap[item[0]] || item[0];
-                    catSalesHTML += '<div class="cat-sales-item"><span class="cs-name">' + label +
-                        '</span><span class="cs-amount">₱' + item[1].toFixed(2) + '</span></div>';
-                });
-            }
-            document.getElementById('dashCategorySales').innerHTML = catSalesHTML;
-
-            var totalRevenue = sales.reduce(function(sum, s) { return sum + s.total; }, 0);
-            document.getElementById('growthRevenue').innerText = '₱' + totalRevenue.toFixed(0);
-            var growthPct = 65 + Math.floor(Math.random() * 10);
-            document.getElementById('growthCommunity').innerText = growthPct + '%';
-
-            renderDashCalendar();
+            renderRepairs();
         }
 
-        function renderDashCalendar() {
-            var grid = document.getElementById('dashCalGrid');
-            var monthYear = document.getElementById('dashCalMonthYear');
-            if (!grid || !monthYear) return;
+        function saveRepairs() { localStorage.setItem('posRepairs', JSON.stringify(repairs)); }
 
-            var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
-                'October', 'November', 'December'
-            ];
-            monthYear.textContent = monthNames[dashCalMonth] + ' ' + dashCalYear;
-
-            var firstDay = new Date(dashCalYear, dashCalMonth, 1).getDay();
-            var daysInMonth = new Date(dashCalYear, dashCalMonth + 1, 0).getDate();
-            var today = new Date();
-            var todayDate = today.getDate(),
-                todayMonth = today.getMonth(),
-                todayYear = today.getFullYear();
-
-            var salesByDate = {};
-            sales.forEach(function(sale) {
-                var d = new Date(sale.date);
-                if (d.getMonth() === dashCalMonth && d.getFullYear() === dashCalYear) {
-                    var dayKey = d.getDate();
-                    if (!salesByDate[dayKey]) salesByDate[dayKey] = [];
-                    salesByDate[dayKey].push(sale);
-                }
-            });
-
-            var html = '';
-            ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].forEach(function(label) { html +=
-                    '<div class="cal-day-label">' + label + '</div>'; });
-            for (var i = 0; i < firstDay; i++) html += '<div class="cal-day empty"></div>';
-            for (var d = 1; d <= daysInMonth; d++) {
-                var isToday = (d === todayDate && dashCalMonth === todayMonth && dashCalYear === todayYear);
-                var hasSales = salesByDate[d] && salesByDate[d].length > 0;
-                var classes = 'cal-day' + (isToday ? ' today' : '') + (hasSales ? ' has-sale' : '');
-                var dot = hasSales ? '<span class="sale-dot"></span>' : '';
-                html += '<div class="' + classes + '" onclick="dashCalViewDay(' + dashCalYear + ',' + dashCalMonth +
-                    ',' + d + ')">' + d + dot + '</div>';
-            }
-            grid.innerHTML = html;
-        }
-
-        function dashCalChangeMonth(delta) {
-            dashCalMonth += delta;
-            if (dashCalMonth > 11) { dashCalMonth = 0;
-                dashCalYear++; } else if (dashCalMonth < 0) { dashCalMonth = 11;
-                dashCalYear--; }
-            renderDashCalendar();
-        }
-
-        function dashCalViewDay(year, month, day) {
-            var dateStr = new Date(year, month, day).toLocaleDateString('en-US', { month: 'long', day: 'numeric',
-                year: 'numeric' });
-            var daySales = sales.filter(function(sale) {
-                var d = new Date(sale.date);
-                return d.getFullYear() === year && d.getMonth() === month && d.getDate() === day;
-            });
-            if (daySales.length === 0) {
-                showMessage('No sales on ' + dateStr, 'info');
-                return;
-            }
-            var total = daySales.reduce(function(sum, s) { return sum + s.total; }, 0);
-            showMessage(dateStr + ': ' + daySales.length + ' transactions · ₱' + total.toFixed(2), 'success');
-        }
-
-        function renderLowStock() {
-            var container = document.getElementById('lowStockList');
-            var low = products.filter(function(p) { return p.stock <= 5; });
-            document.getElementById('lowStockCount').innerText = low.length;
-            if (low.length === 0) { container.innerHTML =
-                '<div class="empty-state">All items are well-stocked!</div>'; return; }
-            var isAdmin = currentUserRole === 'admin';
-            container.innerHTML = low.map(function(p) {
-                var index = products.indexOf(p);
-                var controls = '';
-                if (isAdmin) {
-                    controls = '<div class="prod-controls">' +
-                        '<div class="prod-qty-box">' +
-                        '<button class="qty-btn" onclick="adjustStock(' + index + ',-1)" title="Decrease"><i class="fas fa-minus"></i></button>' +
-                        '<span class="qty-num">' + p.stock + '</span>' +
-                        '<button class="qty-btn" onclick="adjustStock(' + index +
-                        ',1)" title="Increase"><i class="fas fa-plus"></i></button>' +
-                        '</div>' +
-                        '</div>';
-                } else {
-                    controls = '<span style="font-weight:700;color:#e74c3c;">' + p.stock + ' left</span>';
-                }
-                return '<div class="list-item" style="background:rgba(231,76,60,0.04);"><div class="item-left"><div class="item-title">' +
-                    p.name + '</div><div class="item-sub">' + (p.stock === 0 ? 'NO STOCK!' : 'Low stock') +
-                    '</div></div><div class="item-right" style="display:flex;align-items:center;gap:6px;">' +
-                    controls + '</div></div>';
-            }).join('');
-        }
-
-        function changeMonth(delta) {
-            currentCalendarMonth += delta;
-            if (currentCalendarMonth > 11) { currentCalendarMonth = 0;
-                currentCalendarYear++; } else if (currentCalendarMonth < 0) { currentCalendarMonth = 11;
-                currentCalendarYear--; }
-            renderCalendar(currentCalendarMonth, currentCalendarYear);
-        }
-
-        function renderCalendar(month, year) {
-            var grid = document.getElementById('calendarGrid');
-            var monthYear = document.getElementById('calendarMonthYear');
-            var details = document.getElementById('calendarDetails');
-            var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
-                'October', 'November', 'December'
-            ];
-            monthYear.textContent = monthNames[month] + ' ' + year;
-            var firstDay = new Date(year, month, 1).getDay();
-            var daysInMonth = new Date(year, month + 1, 0).getDate();
-            var today = new Date();
-            var todayDate = today.getDate(),
-                todayMonth = today.getMonth(),
-                todayYear = today.getFullYear();
-            var html = '';
-            ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(function(label) { html +=
-                    '<div class="day-label">' + label + '</div>'; });
-            for (var i = 0; i < firstDay; i++) html += '<div class="day-cell empty"></div>';
-            var salesByDate = {};
-            sales.forEach(function(sale) {
-                var d = new Date(sale.date);
-                if (d.getMonth() === month && d.getFullYear() === year) {
-                    var dayKey = d.getDate();
-                    if (!salesByDate[dayKey]) salesByDate[dayKey] = [];
-                    salesByDate[dayKey].push(sale);
-                }
-            });
-            for (var d = 1; d <= daysInMonth; d++) {
-                var isToday = (d === todayDate && month === todayMonth && year === todayYear);
-                var hasSales = salesByDate[d] && salesByDate[d].length > 0;
-                var classes = 'day-cell' + (isToday ? ' today' : '') + (hasSales ? ' has-sales' : '');
-                var dot = hasSales ? '<span class="sale-dot"></span>' : '';
-                html += '<div class="' + classes + '" onclick="viewDaySales(' + year + ',' + month + ',' + d +
-                    ')">' + d + dot + '</div>';
-            }
-            grid.innerHTML = html;
-            details.innerHTML =
-                '<div class="detail-empty"><i class="fas fa-calendar-day"></i> Select a date to view sales details</div>';
-        }
-
-        function viewDaySales(year, month, day) {
-            var details = document.getElementById('calendarDetails');
-            var dateStr = new Date(year, month, day).toLocaleDateString('en-US', { month: 'long', day: 'numeric',
-                year: 'numeric' });
-            var daySales = sales.filter(function(sale) {
-                var d = new Date(sale.date);
-                return d.getFullYear() === year && d.getMonth() === month && d.getDate() === day;
-            });
-            if (daySales.length === 0) {
-                details.innerHTML = '<div class="detail-empty">No sales on ' + dateStr + '</div>';
-                return;
-            }
-            var totalSales = daySales.reduce(function(sum, s) { return sum + s.total; }, 0);
-            var totalItems = 0;
-            daySales.forEach(function(s) { s.items.forEach(function(i) { totalItems += i.quantity; }); });
-            var html = '<div style="margin-bottom:8px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;">';
-            html += '<span style="font-weight:600;color:#fff;"><i class="fas fa-calendar-day"></i> ' + dateStr +
-                '</span>';
-            html += '<span style="font-weight:600;color:#2ecc71;">Total: ₱' + totalSales.toFixed(2) + ' · ' +
-                daySales.length + ' transactions</span>';
-            html += '</div>';
-            daySales.forEach(function(sale) {
-                var saleTime = new Date(sale.date).toLocaleTimeString('en-US', { hour: '2-digit',
-                    minute: '2-digit' });
-                html += '<div class="detail-item">';
-                html += '<div class="detail-left"><div class="detail-title">#' + sale.receiptNumber + ' · ' +
-                    saleTime + ' · ' + (sale.method || 'Cash') + '</div><div class="detail-products">';
-                sale.items.forEach(function(item, idx) { html += (idx > 0 ? ', ' : '') + item.name + ' (x' + item
-                        .quantity + ')'; });
-                html += '</div></div><div class="detail-right">₱' + sale.total.toFixed(2) + '</div></div>';
-            });
-            details.innerHTML = html;
-        }
-
-        function addNewProduct() {
-            if (currentUserRole !== 'admin') { showMessage('Only administrators can add products.', 'error'); return; }
-            var barcode = document.getElementById('newBarcode').value.trim();
-            var name = document.getElementById('newName').value.trim();
-            var price = parseFloat(document.getElementById('newPrice').value);
-            var stock = parseInt(document.getElementById('newStock').value);
-            if (!barcode || !name || isNaN(price) || price <= 0 || isNaN(stock) || stock < 0) {
-                showMessage('Please fill all fields correctly! Price > 0, Stock >= 0', 'error');
-                return;
-            }
-            if (products.some(function(p) { return p.barcode === barcode; })) {
-                showMessage('Barcode already exists!', 'error');
-                return;
-            }
-            products.push({ barcode: barcode, name: name, price: price, stock: stock, image: '',
-                category: 'others' });
-            saveData();
-            renderProducts();
-            renderQuickProducts();
-            renderInventory();
-            renderLowStock();
-            updateStats();
-            checkLowStock();
-            updateCategoryCounts();
-            document.getElementById('newBarcode').value = '';
-            document.getElementById('newName').value = '';
-            document.getElementById('newPrice').value = '';
-            document.getElementById('newStock').value = '';
-            showMessage('Product added successfully!', 'success');
-        }
-
-        function toggleCamera() {
-            var video = document.getElementById('cameraPreview');
-            if (isCameraOn) {
-                if (cameraStream) { cameraStream.getTracks().forEach(function(t) { t.stop(); });
-                    cameraStream = null; }
-                video.style.display = 'none';
-                isCameraOn = false;
-                return;
-            }
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-                    .then(function(stream) { cameraStream = stream;
-                        video.srcObject = stream;
-                        video.style.display = 'block';
-                        isCameraOn = true; })
-                    .catch(function(err) { showMessage('Camera access denied', 'error'); });
-            } else showMessage('Camera not supported', 'error');
-        }
-
-        function renderLoginBrandGrid() {
-            var grid = document.getElementById('loginBrandGrid');
-            var items = [
-                { name: 'iPhone', image: 'iphone.jfif' },
-                { name: 'Samsung', image: 'samsung.jfif' },
-                { name: 'OPPO', image: 'oppo.jfif' },
-                { name: 'Vivo', image: 'vivo.jfif' },
-                { name: 'Xiaomi', image: 'xiaomi.jfif' },
-                { name: 'Realme', image: 'realme.jfif' },
-                { name: 'Infinix', image: 'infinix.jfif' },
-                { name: 'TECNO', image: 'tecno.jfif' },
-                { name: 'Acer', image: 'acer.jpg' },
-                { name: 'ASUS', image: 'asus.jpg' },
-                { name: 'Lenovo', image: 'lenovo.jpg' },
-                { name: 'HP', image: 'HP.jpg' },
-                { name: 'Charger', image: 'charger.jpg' },
-                { name: 'Cable', image: 'cables.png' },
-                { name: 'JBL', image: 'JBL-Tune-510BT-Headphone.jpg' },
-                { name: 'Anker', image: 'Anker-Soundcore-Q20i-Headphone.jpg' },
-                { name: 'Baseus', image: 'Baseus-Headphone.jpg' },
-                { name: 'SoundPEATS', image: 'SoundPEATS-Air3-Deluxe.jpg' },
-                { name: 'OPPO Buds', image: 'OPPO-Enco-Buds-2.jpg' },
-                { name: 'Sony', image: 'earphones.jpg' },
-                { name: 'Nokia', image: 'nokia.jfif' },
-                { name: 'Huawei', image: 'huawei.jfif' }
-            ];
-            var shuffled = items.slice().sort(function() { return Math.random() - 0.5; });
-            grid.innerHTML = shuffled.map(function(item) {
-                return '<div class="login-brand-item"><img src="' + item.image + '" alt="' + item.name +
-                    '" class="brand-logo" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<span style=\\\'font-size:1.8rem;\\\'><i class=\\\'fas fa-mobile-alt\\\'></i></span><span class=\\\'brand-name\\\'>' +
-                    item.name + '</span>\'"><span class="brand-name">' + item.name + '</span></div>';
-            }).join('');
-        }
+        // ================================================================
+        // 9. RECEIPT & PREVIEW
+        // ================================================================
 
         function showReceipt(sale) {
             var modal = document.getElementById('receiptModal');
@@ -8467,16 +8097,275 @@
             window.print();
         }
 
-        function validateAmount(input) {
-            if (parseFloat(input.value) < 0) input.value = '0';
-            if (input.value === '' || input.value === '-') input.value = '0';
+        function openPreview(product) {
+            previewProduct = product;
+            previewQty = 1;
+            var modal = document.getElementById('productPreviewModal');
+            document.getElementById('previewName').textContent = product.name;
+            document.getElementById('previewPrice').textContent = '₱' + product.price.toFixed(2);
+            var stockEl = document.getElementById('previewStock');
+            var stockBadge = stockEl.querySelector('.stock-badge');
+            if (product.stock <= 0) { stockBadge.className = 'stock-badge out';
+                stockBadge.textContent = 'Out of Stock'; } else if (product.stock <= 5) { stockBadge.className =
+                    'stock-badge low';
+                stockBadge.textContent = 'Low Stock (' + product.stock + ' left)'; } else { stockBadge.className =
+                    'stock-badge in';
+                stockBadge.textContent = 'In Stock (' + product.stock + ' left)'; }
+            document.getElementById('previewQty').textContent = '1';
+            var img = document.getElementById('previewImg');
+            img.src = product.image || '';
+            img.alt = product.name;
+            img.onerror = function() { this.style.display = 'none'; };
+            var addBtn = document.getElementById('previewAddBtn');
+            addBtn.disabled = (product.stock <= 0);
+            modal.classList.add('show');
         }
 
-        function openLogoPreview() { document.getElementById('logoPreviewModal').classList.add('show'); }
+        function closePreview() { document.getElementById('productPreviewModal').classList.remove('show');
+            previewProduct = null; }
 
-        function closeLogoPreview(e) {
-            if (e && e.target !== e.currentTarget) return;
-            document.getElementById('logoPreviewModal').classList.remove('show');
+        function previewQtyChange(delta) {
+            var qty = parseInt(document.getElementById('previewQty').textContent) + delta;
+            if (qty < 1) qty = 1;
+            if (previewProduct && qty > previewProduct.stock) qty = previewProduct.stock;
+            document.getElementById('previewQty').textContent = qty;
+        }
+
+        function previewAddToCart() {
+            if (!previewProduct) return;
+            var qty = parseInt(document.getElementById('previewQty').textContent);
+            if (previewProduct.stock <= 0) { showMessage('NO STOCK! Cannot add.', 'error'); return; }
+            if (qty > previewProduct.stock) { showMessage('Not enough stock.', 'error'); return; }
+            var existingItem = cart.find(function(item) { return item.barcode === previewProduct.barcode; });
+            if (existingItem) {
+                if (existingItem.quantity + qty <= previewProduct.stock) existingItem.quantity += qty;
+                else { showMessage('Not enough stock.', 'error'); return; }
+            } else {
+                cart.push({ barcode: previewProduct.barcode, name: previewProduct.name, price: previewProduct
+                        .price, quantity: qty });
+            }
+            renderCart();
+            closePreview();
+            showMessage('Added ' + qty + 'x ' + previewProduct.name, 'success');
+            updateLastActive();
+        }
+
+        function zoomImage() {
+            var img = document.getElementById('previewImg');
+            if (img.style.transform === 'scale(1.4)') img.style.transform = 'scale(1)';
+            else img.style.transform = 'scale(1.4)';
+        }
+
+        // ================================================================
+        // 10. AUTH / LOGIN / LOGOUT
+        // ================================================================
+
+        var loginRole = 'cashier';
+
+        function selectLoginRole(role) {
+            loginRole = role;
+            document.querySelectorAll('.role-btn').forEach(function(b) { b.classList.remove('active'); });
+            document.querySelector('.role-btn[data-role="' + role + '"]').classList.add('active');
+            document.getElementById('loginUser').value = '';
+            document.getElementById('loginPass').value = '';
+            document.getElementById('loginError').style.display = 'none';
+        }
+
+        function handleLogin() {
+            var user = document.getElementById('loginUser').value.trim();
+            var pass = document.getElementById('loginPass').value.trim();
+            var err = document.getElementById('loginError');
+            if (users[user] && users[user].password === pass) {
+                var role = users[user].role;
+                if (role !== loginRole) {
+                    err.textContent = 'This account is a ' + role + ', not ' + loginRole;
+                    err.style.display = 'block';
+                    err.style.color = '#e74c3c';
+                    err.style.background = 'rgba(231,76,60,0.08)';
+                    err.style.borderColor = 'rgba(231,76,60,0.12)';
+                    return;
+                }
+                err.style.display = 'none';
+                currentUser = user;
+                currentUserRole = role;
+                currentUserFullname = users[user].fullname;
+
+                if (role === 'cashier') {
+                    var now = new Date().toLocaleString();
+                    updateCashierStatus(user, 'online', now, null, now);
+                }
+
+                document.getElementById('loginOverlay').classList.add('hidden');
+                document.getElementById('app').style.display = 'block';
+                var landing = document.getElementById('landingOverlay');
+                if (landing) landing.classList.add('hidden');
+                var menuOverlay = document.getElementById('landingMenuOverlay');
+                if (menuOverlay) menuOverlay.classList.remove('show');
+
+                var displayName = currentUserFullname || user;
+                document.getElementById('sidebarUserName').textContent = displayName;
+                document.getElementById('userAvatar').textContent = displayName.charAt(0);
+                var roleDisplay = role === 'admin' ? 'Administrator' : 'Cashier';
+                document.getElementById('sidebarUserRole').textContent = roleDisplay;
+
+                var isAdmin = role === 'admin';
+                document.querySelectorAll('.admin-only').forEach(function(el) {
+                    el.style.display = isAdmin ? (el.classList.contains('menu-label') ? 'block' : 'flex') :
+                        'none';
+                });
+                var addProductSection = document.getElementById('addProductSection');
+                if (addProductSection) addProductSection.style.display = isAdmin ? 'block' : 'none';
+                var adminTabs = ['dashboard', 'inventory', 'repairs', 'categories', 'lowstock', 'suppliers', 'reports',
+                    'expenses', 'settings', 'backup', 'cashiers'
+                ];
+                adminTabs.forEach(function(tabId) {
+                    var tab = document.getElementById('tab-' + tabId);
+                    if (tab) tab.style.display = isAdmin ? 'block' : 'none';
+                });
+                document.getElementById('storeSub').textContent = isAdmin ? 'ADMIN PANEL' : 'CASHIER POS';
+
+                // Load products from Firestore FIRST, then init app
+                loadProductsFromFirestore()
+                    .then(function() {
+                        // Load sales and repairs from localStorage
+                        var storedSales = localStorage.getItem('posSales');
+                        sales = storedSales ? JSON.parse(storedSales) : [];
+                        var storedCounter = localStorage.getItem('posReceiptCounter');
+                        receiptCounter = storedCounter ? parseInt(storedCounter) : 1;
+                        var storedRepairs = localStorage.getItem('posRepairs');
+                        if (storedRepairs) {
+                            repairs = JSON.parse(storedRepairs);
+                            repairCounter = repairs.length > 0 ? Math.max(...repairs.map(function(r) { return parseInt(r
+                                    .id.replace('R-', '')); })) + 1 : 1;
+                        } else {
+                            repairs = [];
+                            repairCounter = 1;
+                        }
+                        // Initialize UI
+                        showTab('pos');
+                        renderAllUI();
+                        updateClock();
+                        setInterval(updateClock, 60000);
+                        if (isAdmin) renderCashiers();
+                        // Generate GCash QR
+                        generateGCashQR();
+                        // Check low stock after a moment
+                        setTimeout(function() { checkLowStock(); }, 500);
+                        // Apply theme
+                        applyTheme(getStoredTheme());
+                    })
+                    .catch(function(err) {
+                        console.error('Failed to load products:', err);
+                        showMessage('Error loading inventory. Please refresh.', 'error');
+                    });
+
+            } else {
+                err.textContent = 'Invalid email or password';
+                err.style.display = 'block';
+                err.style.color = '#e74c3c';
+                err.style.background = 'rgba(231,76,60,0.08)';
+                err.style.borderColor = 'rgba(231,76,60,0.12)';
+            }
+        }
+
+        function confirmLogout() {
+            if (currentUserRole === 'cashier' && currentUser) {
+                var now = new Date().toLocaleString();
+                updateCashierStatus(currentUser, 'offline', null, now, null);
+            }
+            closeLogoutModal();
+            if (cameraStream) { cameraStream.getTracks().forEach(function(t) { t.stop(); });
+                cameraStream = null;
+                isCameraOn = false;
+                document.getElementById('cameraPreview').style.display = 'none'; }
+            document.getElementById('app').style.display = 'none';
+            document.getElementById('loginOverlay').classList.remove('hidden');
+            var landing = document.getElementById('landingOverlay');
+            if (landing) landing.classList.remove('hidden');
+            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('loginPass').value = '';
+            document.getElementById('loginUser').value = '';
+            currentUser = '';
+            currentUserRole = '';
+            currentUserFullname = '';
+            renderLoginBrandGrid();
+            showLogin();
+        }
+
+        function openLogoutModal() { document.getElementById('logoutModal').classList.add('show'); }
+
+        function closeLogoutModal() { document.getElementById('logoutModal').classList.remove('show'); }
+
+        // ================================================================
+        // 11. CASHIERS MANAGEMENT (unchanged)
+        // ================================================================
+
+        function getCashiersData() {
+            var data = localStorage.getItem('posCashiers');
+            if (!data) {
+                var initial = {};
+                for (var email in users) {
+                    if (users[email].role === 'cashier') {
+                        initial[email] = {
+                            fullname: users[email].fullname || email.split('@')[0],
+                            username: email,
+                            role: 'cashier',
+                            status: 'offline',
+                            loginTime: null,
+                            lastLogout: null,
+                            lastActive: null,
+                            dateAdded: new Date().toISOString()
+                        };
+                    }
+                }
+                localStorage.setItem('posCashiers', JSON.stringify(initial));
+                return initial;
+            }
+            return JSON.parse(data);
+        }
+
+        function saveCashiersData(data) { localStorage.setItem('posCashiers', JSON.stringify(data)); }
+
+        function updateCashierStatus(username, status, loginTime, lastLogout, lastActive) {
+            var cashiers = getCashiersData();
+            if (cashiers[username]) {
+                cashiers[username].status = status;
+                if (loginTime !== null && loginTime !== undefined) cashiers[username].loginTime = loginTime;
+                if (lastLogout !== null && lastLogout !== undefined) cashiers[username].lastLogout = lastLogout;
+                if (lastActive !== null && lastActive !== undefined) cashiers[username].lastActive = lastActive;
+                saveCashiersData(cashiers);
+            }
+        }
+
+        function renderCashiers() {
+            var container = document.getElementById('cashiersList');
+            var cashiers = getCashiersData();
+            var count = Object.keys(cashiers).length;
+            document.getElementById('cashierTotalCount').innerText = count;
+            document.getElementById('sidebarCashierCount').innerText = count;
+            if (count === 0) { container.innerHTML = '<div class="empty-state">No cashiers registered</div>'; return; }
+            container.innerHTML = Object.values(cashiers).map(function(c) {
+                var statusClass = c.status === 'online' ? 'online' : 'offline';
+                var statusText = c.status === 'online' ? 'Online' : 'Offline';
+                var statusDot = '<span class="cashier-status-dot ' + statusClass + '"></span>';
+                var loginTime = c.loginTime || '—';
+                var lastLogout = c.lastLogout || '—';
+                var lastActive = c.lastActive || '—';
+                var dateAdded = c.dateAdded ? new Date(c.dateAdded).toLocaleDateString() : '—';
+                return '<div class="list-item">' +
+                    '<div class="item-left">' +
+                    '<div class="item-title">' + c.fullname + '</div>' +
+                    '<div class="item-sub">' + c.username + ' · Added: ' + dateAdded + '</div>' +
+                    '</div>' +
+                    '<div class="item-right" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:0.85rem;">' +
+                    '<span style="display:flex;align-items:center;font-weight:600;">' + statusDot + ' ' +
+                    statusText + '</span>' +
+                    '<span style="color:rgba(0,0,0,0.35);">Login: ' + loginTime + '</span>' +
+                    '<span style="color:rgba(0,0,0,0.35);">Logout: ' + lastLogout + '</span>' +
+                    '<span style="color:rgba(0,0,0,0.35);">Last active: ' + lastActive + '</span>' +
+                    '</div>' +
+                    '</div>';
+            }).join('');
         }
 
         function openAdminCreateAccount() {
@@ -8493,11 +8382,11 @@
         function closeAdminCreateAccount() { document.getElementById('adminCreateAccountModal').classList.remove('show'); }
 
         function adminCreateAccount() {
-            const fullname = document.getElementById('adminRegFullName').value.trim();
-            const user = document.getElementById('adminRegUser').value.trim();
-            const pass = document.getElementById('adminRegPass').value.trim();
-            const confirm = document.getElementById('adminRegConfirmPass').value.trim();
-            const msg = document.getElementById('adminCreateMessage');
+            var fullname = document.getElementById('adminRegFullName').value.trim();
+            var user = document.getElementById('adminRegUser').value.trim();
+            var pass = document.getElementById('adminRegPass').value.trim();
+            var confirm = document.getElementById('adminRegConfirmPass').value.trim();
+            var msg = document.getElementById('adminCreateMessage');
             msg.className = 'reset-message';
             msg.style.display = 'none';
 
@@ -8526,7 +8415,7 @@
                 return;
             }
             users[user] = { password: pass, role: 'cashier', fullname: fullname };
-            const cashiers = getCashiersData();
+            var cashiers = getCashiersData();
             cashiers[user] = {
                 fullname: fullname,
                 username: user,
@@ -8545,13 +8434,437 @@
             setTimeout(function() { closeAdminCreateAccount(); }, 1500);
         }
 
+        // ================================================================
+        // 12. UI HELPERS
+        // ================================================================
+
+        function showMessage(text, type) {
+            var msg = document.getElementById('message');
+            if (msg) {
+                msg.innerHTML = text;
+                msg.className = 'message ' + (type || 'info');
+                setTimeout(function() { msg.className = 'message'; }, 4000);
+            }
+        }
+
+        function toggleLoginPass() {
+            var inp = document.getElementById('loginPass');
+            var btn = document.querySelector('#loginScreen .toggle-password');
+            if (inp.type === 'password') { inp.type = 'text';
+                btn.innerHTML = '<i class="fas fa-eye-slash"></i>'; } else { inp.type = 'password';
+                btn.innerHTML = '<i class="fas fa-eye"></i>'; }
+        }
+
+        function showLogin() {
+            document.getElementById('loginScreen').classList.add('active');
+        }
+
+        function updateClock() {
+            var now = new Date();
+            document.getElementById('headerDate').textContent = now.toLocaleDateString('en-US', { month: 'short',
+                day: 'numeric', year: 'numeric' });
+            document.getElementById('settingsLastLogin').textContent = now.toLocaleString();
+            var dashDate = document.getElementById('dashDateDisplay');
+            if (dashDate) {
+                dashDate.textContent = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric',
+                    year: 'numeric' });
+            }
+            var dashUser = document.getElementById('dashUserName');
+            if (dashUser && currentUserFullname) {
+                dashUser.textContent = currentUserFullname;
+            }
+        }
+
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+            document.querySelectorAll('.menu-item').forEach(function(m) { m.classList.remove('active'); });
+            var tab = document.getElementById('tab-' + tabName);
+            if (tab) tab.classList.add('active');
+            var allTabs = ['pos', 'dashboard', 'calendar', 'products', 'customers', 'transactions', 'inventory',
+                'repairs', 'categories', 'lowstock', 'suppliers', 'reports', 'expenses', 'settings', 'backup',
+                'cashiers'
+            ];
+            var idx = allTabs.indexOf(tabName);
+            if (idx >= 0 && document.querySelectorAll('.menu-item')[idx]) document.querySelectorAll('.menu-item')[idx]
+                .classList.add('active');
+            var titles = {
+                'pos': ['Current Sale (POS)', 'Search product by name, brand, or barcode...'],
+                'dashboard': ['Dashboard Overview', 'Welcome back, ' + (currentUserFullname || 'User') + '!'],
+                'calendar': ['Sales Calendar', 'Click on a date to view sales details'],
+                'products': ['All Products', 'View and manage products'],
+                'customers': ['Customers', 'Customer database'],
+                'transactions': ['Recent Transactions', 'Your sales history'],
+                'inventory': ['Inventory Management', 'Track and manage stock levels'],
+                'repairs': ['Repair Management', 'Manage repair orders'],
+                'categories': ['Categories', 'Browse products by category'],
+                'lowstock': ['Low Stock Items', 'Items that need restocking'],
+                'suppliers': ['Suppliers', 'Manage supplier relationships'],
+                'reports': ['Reports', 'Sales and performance analytics'],
+                'expenses': ['Expenses', 'Track business expenses'],
+                'settings': ['Settings', 'Configure system preferences'],
+                'backup': ['Backup / Restore', 'Secure your data'],
+                'cashiers': ['Cashiers', 'Manage cashier accounts and status']
+            };
+            var titleData = titles[tabName] || titles['pos'];
+            var iconMap = {
+                'pos': 'shopping-cart',
+                'dashboard': 'home',
+                'calendar': 'calendar-alt',
+                'products': 'box',
+                'customers': 'user',
+                'transactions': 'receipt',
+                'inventory': 'clipboard-list',
+                'repairs': 'tools',
+                'categories': 'tags',
+                'lowstock': 'exclamation-triangle',
+                'suppliers': 'building',
+                'reports': 'chart-bar',
+                'expenses': 'money-bill-wave',
+                'settings': 'cog',
+                'backup': 'database',
+                'cashiers': 'users'
+            };
+            document.getElementById('pageTitle').innerHTML = '<i class="fas fa-' + (iconMap[tabName] ||
+                'shopping-cart') + '"></i> ' + titleData[0];
+            document.getElementById('pageSubtitle').textContent = titleData[1];
+            if (tabName === 'pos') { document.getElementById('barcode').focus(); if (selectedPayment === 'GCash')
+                    document.getElementById('qrContainer').classList.add('show'); }
+            if (tabName === 'products') renderProducts();
+            if (tabName === 'transactions') renderTransactions();
+            if (tabName === 'dashboard') renderDashboard();
+            if (tabName === 'inventory') renderInventory();
+            if (tabName === 'repairs') renderRepairs();
+            if (tabName === 'lowstock') renderLowStock();
+            if (tabName === 'calendar') renderCalendar(currentCalendarMonth, currentCalendarYear);
+            if (tabName === 'cashiers') renderCashiers();
+            if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
+        }
+
+        function toggleCamera() {
+            var video = document.getElementById('cameraPreview');
+            if (isCameraOn) {
+                if (cameraStream) { cameraStream.getTracks().forEach(function(t) { t.stop(); });
+                    cameraStream = null; }
+                video.style.display = 'none';
+                isCameraOn = false;
+                return;
+            }
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                    .then(function(stream) { cameraStream = stream;
+                        video.srcObject = stream;
+                        video.style.display = 'block';
+                        isCameraOn = true; })
+                    .catch(function(err) { showMessage('Camera access denied', 'error'); });
+            } else showMessage('Camera not supported', 'error');
+        }
+
+        function validateAmount(input) {
+            if (parseFloat(input.value) < 0) input.value = '0';
+            if (input.value === '' || input.value === '-') input.value = '0';
+        }
+
+        function openLogoPreview() { document.getElementById('logoPreviewModal').classList.add('show'); }
+
+        function closeLogoPreview(e) {
+            if (e && e.target !== e.currentTarget) return;
+            document.getElementById('logoPreviewModal').classList.remove('show');
+        }
+
+        function generateGCashQR() {
+            var container = document.getElementById('gcashQRCode');
+            if (!container) return;
+            container.innerHTML =
+                '<img src="qr-code.jpg" alt="GCash QR Code" style="width:100px;height:100px;object-fit:contain;border-radius:12px;border:2px solid #2ecc71;padding:4px;background:rgba(255,255,255,0.03);" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<span style=\\\'color:rgba(255,255,255,0.2);font-size:0.7rem;\\\'><i class=\\\'fas fa-exclamation-circle\\\'></i> QR code not found</span>\'">';
+        }
+
+        function renderLoginBrandGrid() {
+            var grid = document.getElementById('loginBrandGrid');
+            var items = [
+                { name: 'iPhone', image: 'iphone.jfif' },
+                { name: 'Samsung', image: 'samsung.jfif' },
+                { name: 'OPPO', image: 'oppo.jfif' },
+                { name: 'Vivo', image: 'vivo.jfif' },
+                { name: 'Xiaomi', image: 'xiaomi.jfif' },
+                { name: 'Realme', image: 'realme.jfif' },
+                { name: 'Infinix', image: 'infinix.jfif' },
+                { name: 'TECNO', image: 'tecno.jfif' },
+                { name: 'Acer', image: 'acer.jpg' },
+                { name: 'ASUS', image: 'asus.jpg' },
+                { name: 'Lenovo', image: 'lenovo.jpg' },
+                { name: 'HP', image: 'HP.jpg' },
+                { name: 'Charger', image: 'charger.jpg' },
+                { name: 'Cable', image: 'cables.png' },
+                { name: 'JBL', image: 'JBL-Tune-510BT-Headphone.jpg' },
+                { name: 'Anker', image: 'Anker-Soundcore-Q20i-Headphone.jpg' },
+                { name: 'Baseus', image: 'Baseus-Headphone.jpg' },
+                { name: 'SoundPEATS', image: 'SoundPEATS-Air3-Deluxe.jpg' },
+                { name: 'OPPO Buds', image: 'OPPO-Enco-Buds-2.jpg' },
+                { name: 'Sony', image: 'earphones.jpg' },
+                { name: 'Nokia', image: 'nokia.jfif' },
+                { name: 'Huawei', image: 'huawei.jfif' }
+            ];
+            var shuffled = items.slice().sort(function() { return Math.random() - 0.5; });
+            grid.innerHTML = shuffled.map(function(item) {
+                return '<div class="login-brand-item"><img src="' + item.image + '" alt="' + item.name +
+                    '" class="brand-logo" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<span style=\\\'font-size:1.8rem;\\\'><i class=\\\'fas fa-mobile-alt\\\'></i></span><span class=\\\'brand-name\\\'>' +
+                    item.name + '</span>\'"><span class="brand-name">' + item.name + '</span></div>';
+            }).join('');
+        }
+
+        // ---- Theme ----
+        function getStoredTheme() { return localStorage.getItem('posTheme') || 'light'; }
+
+        function applyTheme(theme) {
+            document.body.classList.toggle('dark-mode', theme === 'dark');
+            var toggle = document.getElementById('themeToggle');
+            if (toggle) toggle.classList.toggle('active', theme === 'dark');
+            localStorage.setItem('posTheme', theme);
+            var overlay = document.getElementById('loginOverlay');
+            if (overlay) {
+                if (theme === 'dark') overlay.classList.add('dark-mode');
+                else overlay.classList.remove('dark-mode');
+            }
+            var landingMenuBox = document.querySelector('.landing-menu-box');
+            if (landingMenuBox) {
+                if (theme === 'dark') landingMenuBox.classList.remove('light-mode');
+                else landingMenuBox.classList.add('light-mode');
+            }
+        }
+
+        function toggleTheme() {
+            var current = getStoredTheme();
+            var next = current === 'light' ? 'dark' : 'light';
+            applyTheme(next);
+            var toggle = document.getElementById('themeToggle');
+            if (toggle) toggle.classList.toggle('active', next === 'dark');
+        }
+
+        function openSettingsModal() {
+            var modal = document.getElementById('settingsModal');
+            if (modal) {
+                var theme = getStoredTheme();
+                var toggle = document.getElementById('themeToggle');
+                if (toggle) toggle.classList.toggle('active', theme === 'dark');
+                modal.classList.add('show');
+            }
+        }
+
+        function closeSettingsModal() {
+            var modal = document.getElementById('settingsModal');
+            if (modal) modal.classList.remove('show');
+        }
+
+        // ---- Reset Password ----
+        var resetCodeData = null;
+        var resetTimerInterval = null;
+
+        function openResetModal() {
+            document.getElementById('resetModal').classList.add('show');
+            document.getElementById('resetStep1').style.display = 'block';
+            document.getElementById('resetStep2').style.display = 'none';
+            document.getElementById('resetMessage').className = 'reset-message';
+            document.getElementById('resetMessage').style.display = 'none';
+            document.getElementById('resetEmail').value = '';
+            document.getElementById('resetCode').value = '';
+            document.getElementById('resetNewPass').value = '';
+            document.getElementById('resetConfirmPass').value = '';
+            if (resetTimerInterval) { clearInterval(resetTimerInterval);
+                resetTimerInterval = null; }
+        }
+
+        function closeResetModal() {
+            document.getElementById('resetModal').classList.remove('show');
+            if (resetTimerInterval) { clearInterval(resetTimerInterval);
+                resetTimerInterval = null; }
+            resetCodeData = null;
+        }
+
+        function showResetMessage(text, type) {
+            var msg = document.getElementById('resetMessage');
+            msg.textContent = text;
+            msg.className = 'reset-message ' + type;
+            msg.style.display = 'block';
+        }
+
+        function sendResetCode() {
+            var email = document.getElementById('resetEmail').value.trim();
+            if (!email) { showResetMessage('Please enter your email address.', 'error'); return; }
+            if (!users[email]) { showResetMessage('This email is not registered.', 'error'); return; }
+            var code = String(Math.floor(100000 + Math.random() * 900000));
+            var expiry = Date.now() + 5 * 60 * 1000;
+            resetCodeData = { email: email, code: code, expiry: expiry };
+            localStorage.setItem('posResetData', JSON.stringify(resetCodeData));
+
+            // EmailJS fallback (if configured)
+            if (typeof emailjs !== 'undefined' && emailjs.send) {
+                var templateParams = { to_email: email, reset_code: code, expiry_minutes: '5' };
+                emailjs.send('service_your_service_id', 'template_your_template_id', templateParams,
+                        'your_public_key')
+                    .then(function(response) {
+                        showResetMessage('Reset code sent to your email! Please check your inbox.', 'success');
+                        proceedToStep2();
+                    })
+                    .catch(function(error) {
+                        console.error('EmailJS error:', error);
+                        showResetMessage(
+                            'Could not send email. Your reset code is: <strong>' + code +
+                            '</strong>. Enter it below. (Expires in 5 min)', 'info');
+                        proceedToStep2();
+                    });
+            } else {
+                showResetMessage(
+                    'Email service not configured. Your reset code is: <strong>' + code +
+                    '</strong>. Enter it below. (Expires in 5 min)', 'info');
+                proceedToStep2();
+            }
+
+            function proceedToStep2() {
+                document.getElementById('resetStep1').style.display = 'none';
+                document.getElementById('resetStep2').style.display = 'block';
+                document.getElementById('resetCode').value = '';
+                document.getElementById('resetNewPass').value = '';
+                document.getElementById('resetConfirmPass').value = '';
+                var secondsLeft = 300;
+                var timerDisplay = document.getElementById('resetTimerDisplay');
+                if (resetTimerInterval) clearInterval(resetTimerInterval);
+                resetTimerInterval = setInterval(function() {
+                    secondsLeft--;
+                    if (secondsLeft <= 0) {
+                        clearInterval(resetTimerInterval);
+                        resetTimerInterval = null;
+                        timerDisplay.textContent = 'Expired';
+                        showResetMessage('Code has expired. Please request a new one.', 'error');
+                        resetCodeData = null;
+                        document.getElementById('resetStep2').style.display = 'none';
+                        document.getElementById('resetStep1').style.display = 'block';
+                        return;
+                    }
+                    var mins = Math.floor(secondsLeft / 60);
+                    var secs = secondsLeft % 60;
+                    timerDisplay.textContent = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2,
+                        '0');
+                }, 1000);
+            }
+        }
+
+        function resetPassword() {
+            var code = document.getElementById('resetCode').value.trim();
+            var newPass = document.getElementById('resetNewPass').value.trim();
+            var confirmPass = document.getElementById('resetConfirmPass').value.trim();
+
+            if (!code || !newPass || !confirmPass) { showResetMessage('Please fill in all fields.', 'error'); return; }
+            if (newPass.length < 8) { showResetMessage('Password must be at least 8 characters.', 'error'); return; }
+            if (newPass !== confirmPass) { showResetMessage('Passwords do not match.', 'error'); return; }
+
+            var stored = localStorage.getItem('posResetData');
+            var data = null;
+            if (stored) { try { data = JSON.parse(stored); } catch (e) {} }
+            if (!data || !resetCodeData) { showResetMessage('No reset request found. Please request a new code.',
+                    'error'); return; }
+            var currentData = resetCodeData || data;
+            if (Date.now() > currentData.expiry) { showResetMessage('Code has expired. Please request a new one.',
+                    'error'); return; }
+            if (code !== currentData.code) { showResetMessage('Invalid code. Please try again.', 'error'); return; }
+
+            var email = currentData.email;
+            if (users[email]) {
+                users[email].password = newPass;
+                var cashiers = getCashiersData();
+                if (cashiers[email]) {}
+                localStorage.setItem('posUsers', JSON.stringify(users));
+                showResetMessage('Password reset successfully! You can now login.', 'success');
+                localStorage.removeItem('posResetData');
+                resetCodeData = null;
+                if (resetTimerInterval) { clearInterval(resetTimerInterval);
+                    resetTimerInterval = null; }
+                setTimeout(function() {
+                    closeResetModal();
+                    document.getElementById('loginUser').value = email;
+                    document.getElementById('loginPass').value = '';
+                }, 1500);
+            } else {
+                showResetMessage('User not found. Please request a new code.', 'error');
+            }
+        }
+
+        // ---- Landing menu ----
+        function closeLandingMenu() {
+            var overlay = document.getElementById('landingMenuOverlay');
+            if (overlay) { overlay.classList.remove('show');
+                document.body.style.overflow = ''; }
+        }
+
+        function handleLandingMenuAction(action) {
+            closeLandingMenu();
+            if (action === 'login') {
+                var landingOverlay = document.getElementById('landingOverlay');
+                if (landingOverlay) landingOverlay.classList.add('hidden');
+                var loginOverlay = document.getElementById('loginOverlay');
+                if (loginOverlay) {
+                    loginOverlay.classList.remove('hidden');
+                    setTimeout(function() { var input = document.getElementById('loginUser'); if (input) input
+                            .focus(); }, 400);
+                }
+            } else if (action === 'home') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                showMessage('Welcome to Mobile Care!', 'success');
+            } else if (action === 'about') {
+                showMessage('Mobile Care Accessories — Premium products for your devices. Quality guaranteed.',
+                    'info');
+            }
+        }
+
+        function updateLastActive() {
+            if (currentUserRole === 'cashier' && currentUser) {
+                var cashiers = getCashiersData();
+                if (cashiers[currentUser]) {
+                    cashiers[currentUser].lastActive = new Date().toLocaleString();
+                    saveCashiersData(cashiers);
+                }
+            }
+        }
+
+        // ---- Wrap certain functions to update last active ----
+        var originalScanProduct = scanProduct;
+        scanProduct = function() { originalScanProduct();
+            updateLastActive(); };
+        var originalProcessPayment = processPayment;
+        processPayment = function() { originalProcessPayment();
+            updateLastActive(); };
+        var originalChangeQuantity = changeQuantity;
+        changeQuantity = function(index, change) { originalChangeQuantity(index, change);
+            updateLastActive(); };
+        var originalRemoveFromCart = removeFromCart;
+        removeFromCart = function(index) { originalRemoveFromCart(index);
+            updateLastActive(); };
+        var originalClearCart = clearCart;
+        clearCart = function() { originalClearCart();
+            updateLastActive(); };
+        var originalApplyDiscount = applyDiscount;
+        applyDiscount = function() { originalApplyDiscount();
+            updateLastActive(); };
+        var originalAddNote = addNote;
+        addNote = function() { originalAddNote();
+            updateLastActive(); };
+        var originalHoldSale = holdSale;
+        holdSale = function() { originalHoldSale();
+            updateLastActive(); };
+        var originalPreviewAddToCart = previewAddToCart;
+        previewAddToCart = function() { originalPreviewAddToCart();
+            updateLastActive(); };
+
+        // ---- Event listeners ----
         document.getElementById('logoutModal').addEventListener('click', function(e) { if (e.target === this)
                 closeLogoutModal(); });
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') { closeLogoutModal();
                 closeLogoPreview();
                 closeGcashPopup();
-                closeAdminCreateAccount(); }
+                closeAdminCreateAccount();
+                closeSettingsModal(); }
         });
         document.getElementById('barcode').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
@@ -8576,13 +8889,46 @@
             if (!input.contains(e.target) && !results.contains(e.target)) results.classList.remove('show');
         });
 
+        document.getElementById('landingMenuOverlay')?.addEventListener('click', function(e) {
+            if (e.target === this) closeLandingMenu();
+        });
+        document.getElementById('landingMenuBtn')?.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var overlay = document.getElementById('landingMenuOverlay');
+            if (overlay) { overlay.classList.add('show');
+                document.body.style.overflow = 'hidden'; }
+        });
+        document.getElementById('landingOverlay')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                var overlay = document.getElementById('landingMenuOverlay');
+                if (overlay) { overlay.classList.add('show');
+                    document.body.style.overflow = 'hidden'; }
+            }
+        });
+
+        // ================================================================
+        // 13. BOOT
+        // ================================================================
+
+        // Show login overlay by default
         renderLoginBrandGrid();
         selectLoginRole('cashier');
         showLogin();
 
-        document.getElementById('landingMenuOverlay')?.addEventListener('click', function(e) {
-            if (e.target === this) closeLandingMenu();
-        });
+        // Load theme
+        applyTheme(getStoredTheme());
+
+        // Preload products in background (so they're ready when user logs in)
+        // But we'll load them properly on login.
+        console.log('✅ Mobile Care POS ready. Waiting for login...');
+
+        // If Firebase config is not replaced, show a friendly warning in console.
+        if (firebaseConfig.apiKey === 'AIzaSyDummyKeyReplaceMe') {
+            console.warn('⚠️ Firebase not configured. Please replace firebaseConfig with your own values.');
+            console.warn(
+                '⚠️ Until then, the system will use localStorage fallback. Stock will NOT persist across devices/refreshes.'
+                );
+        }
     </script>
 </body>
 </html>
