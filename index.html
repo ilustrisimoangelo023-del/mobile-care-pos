@@ -6,6 +6,7 @@
     <title>Mobile Care - POS System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f5f7fc; min-height: 100vh; color: #0b1420; line-height: 1.6; transition: background 0.25s, color 0.25s; font-size: 16px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
@@ -77,6 +78,7 @@
         .auth-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #e74c3c, #c0392b); color: #fff !important; border: none; border-radius: 14px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.25s; box-shadow: 0 4px 20px rgba(231, 76, 60, 0.30); margin-top: 6px; display: flex; align-items: center; justify-content: center; gap: 10px; letter-spacing: 0.3px; }
         .auth-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(231, 76, 60, 0.40); }
         .auth-btn:active { transform: scale(0.98); }
+        .auth-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
         .auth-footer { text-align: center; margin-top: 16px; font-size: 0.85rem; color: rgba(0, 0, 0, 0.3); }
         body.dark-mode .auth-footer { color: rgba(255, 255, 255, 0.3); }
         .auth-error { color: #e74c3c; font-weight: 600; font-size: 0.9rem; background: rgba(231, 76, 60, 0.08); padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(231, 76, 60, 0.12); display: none; margin-bottom: 12px; text-align: center; }
@@ -86,6 +88,22 @@
         .auth-card .secure-badge i { color: #2ecc71; font-size: 0.8rem; }
         .auth-card .secure-badge span { font-weight: 500; color: rgba(0, 0, 0, 0.3); }
         body.dark-mode .auth-card .secure-badge span { color: rgba(255, 255, 255, 0.3); }
+
+        .recaptcha-box { display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: #f9f9f9; border: 1px solid #d3d3d3; border-radius: 8px; margin: 12px 0 4px; cursor: pointer; max-width: 100%; user-select: none; transition: 0.2s; }
+        body.dark-mode .recaptcha-box { background: rgba(255, 255, 255, 0.03); border-color: rgba(255, 255, 255, 0.08); }
+        .recaptcha-check { width: 28px; height: 28px; border: 2px solid #c1c1c1; border-radius: 4px; background: #fff; display: flex; align-items: center; justify-content: center; transition: 0.2s; flex-shrink: 0; }
+        body.dark-mode .recaptcha-check { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.2); }
+        .recaptcha-check.checked { background: #4285f4; border-color: #4285f4; }
+        body.dark-mode .recaptcha-check.checked { background: #4285f4; border-color: #4285f4; }
+        .recaptcha-check.checked::after { content: '\2713'; color: #fff; font-size: 18px; font-weight: 700; line-height: 1; }
+        .recaptcha-check.loading { border-color: #4285f4; }
+        .recaptcha-check.loading::after { content: ''; width: 14px; height: 14px; border: 2px solid #4285f4; border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; }
+        .recaptcha-text { font-size: 0.9rem; color: #555; font-weight: 500; flex: 1; }
+        body.dark-mode .recaptcha-text { color: rgba(255, 255, 255, 0.7); }
+        .recaptcha-logo { font-size: 0.6rem; color: #999; text-align: right; line-height: 1.2; }
+        .recaptcha-logo strong { display: block; font-size: 0.7rem; color: #666; }
+        body.dark-mode .recaptcha-logo { color: rgba(255, 255, 255, 0.3); }
+        body.dark-mode .recaptcha-logo strong { color: rgba(255, 255, 255, 0.5); }
 
         .role-selector { display: flex; gap: 10px; margin-bottom: 14px; justify-content: center; flex-wrap: wrap; }
         .role-btn { padding: 10px 28px; border: 2px solid #dce4ec; border-radius: 40px; background: #fff; cursor: pointer; font-weight: 600; font-size: 0.95rem; transition: all 0.2s; color: #5a6a7a; font-family: inherit; display: flex; align-items: center; gap: 8px; }
@@ -194,6 +212,7 @@
         body.dark-mode .message.error { background: rgba(231, 76, 60, 0.15); }
         .message.warning { background: rgba(243, 156, 18, 0.12); color: #f39c12 !important; display: block; border: 1px solid rgba(243, 156, 18, 0.08); }
         body.dark-mode .message.warning { background: rgba(243, 156, 18, 0.15); }
+        .message.info { background: rgba(52, 152, 219, 0.12); color: #3498db !important; display: block; border: 1px solid rgba(52, 152, 219, 0.08); }
 
         .tab-content { display: none !important; }
         .tab-content.active { display: block !important; }
@@ -722,10 +741,37 @@
         body.dark-mode #tab-dashboard .dash-category-sales .cat-sales-item .cs-name { color: rgba(255, 255, 255, 0.5); }
         #tab-dashboard .dash-category-sales .cat-sales-item .cs-amount { color: #f39c12 !important; font-weight: 600; }
 
+        .dash-charts-row { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; margin-bottom: 20px; }
+        .dash-chart-card { background: rgba(255, 255, 255, 0.6); border-radius: 16px; padding: 18px 20px; border: 1px solid rgba(0, 0, 0, 0.04); }
+        body.dark-mode .dash-chart-card { background: rgba(255, 255, 255, 0.03); border-color: rgba(255, 255, 255, 0.04); }
+        .dash-chart-card h4 { font-size: 0.95rem; font-weight: 600; color: #0b1420; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        body.dark-mode .dash-chart-card h4 { color: #fff; }
+        .dash-chart-card canvas { max-height: 220px; }
+
+        .report-charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .chart-card { background: rgba(255, 255, 255, 0.6); border-radius: 16px; padding: 18px 20px 20px; border: 1px solid rgba(0, 0, 0, 0.04); }
+        body.dark-mode .chart-card { background: rgba(255, 255, 255, 0.03); border-color: rgba(255, 255, 255, 0.04); }
+        .chart-card h4 { font-size: 0.95rem; font-weight: 600; color: #0b1420; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+        body.dark-mode .chart-card h4 { color: #fff; }
+        .chart-card canvas { max-height: 260px; }
+        .report-table-card { background: rgba(255, 255, 255, 0.6); border-radius: 16px; padding: 18px 20px 20px; border: 1px solid rgba(0, 0, 0, 0.04); margin-bottom: 16px; overflow-x: auto; }
+        body.dark-mode .report-table-card { background: rgba(255, 255, 255, 0.03); border-color: rgba(255, 255, 255, 0.04); }
+        .report-table-card h4 { font-size: 0.95rem; font-weight: 600; color: #0b1420; margin-bottom: 14px; }
+        body.dark-mode .report-table-card h4 { color: #fff; }
+        .report-table-card table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 500px; }
+        .report-table-card th { text-align: left; padding: 10px 12px; background: rgba(0, 0, 0, 0.03); font-weight: 600; color: rgba(0, 0, 0, 0.5); text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.5px; }
+        body.dark-mode .report-table-card th { background: rgba(255, 255, 255, 0.04); color: rgba(255, 255, 255, 0.5); }
+        .report-table-card td { padding: 10px 12px; border-bottom: 1px solid rgba(0, 0, 0, 0.04); color: #0b1420; font-weight: 500; }
+        body.dark-mode .report-table-card td { border-bottom-color: rgba(255, 255, 255, 0.04); color: #eef2f6; }
+        .report-table-card .pos-pill { display: inline-block; padding: 2px 10px; background: rgba(46, 204, 113, 0.15); color: #2ecc71 !important; border-radius: 40px; font-weight: 600; font-size: 0.75rem; }
+        .report-table-card .neg-pill { display: inline-block; padding: 2px 10px; background: rgba(231, 76, 60, 0.15); color: #e74c3c !important; border-radius: 40px; font-weight: 600; font-size: 0.75rem; }
+
         @media (max-width: 1024px) {
             #tab-dashboard .dash-stats-grid { grid-template-columns: 1fr 1fr; }
             #tab-dashboard .dash-main-grid { grid-template-columns: 1fr; }
             .dash-growth-stats { grid-template-columns: 1fr 1fr; }
+            .dash-charts-row { grid-template-columns: 1fr; }
+            .report-charts-grid { grid-template-columns: 1fr; }
         }
         @media (max-width: 768px) {
             .dash-revenue-table .rev-table { font-size: 0.85rem; }
@@ -865,6 +911,69 @@
         .logout-modal-box .logout-actions .btn-logout { background: #e74c3c; color: #fff !important; }
         .logout-modal-box .logout-actions .btn-logout:hover { background: #c0392b; transform: translateY(-2px); box-shadow: 0 4px 20px rgba(231, 76, 60, 0.3); }
 
+        #otpModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 20, 32, 0.75); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; animation: fadeIn 0.3s ease; }
+        #otpModal.show { display: flex; }
+        .otp-box { background: #ffffff; border-radius: 28px; padding: 40px 40px 32px; width: 460px; max-width: 96vw; text-align: center; box-shadow: 0 40px 100px rgba(0, 0, 0, 0.3); border: 1px solid rgba(0, 0, 0, 0.04); animation: slideDown 0.35s ease; position: relative; overflow: hidden; }
+        body.dark-mode .otp-box { background: #1a2634; border-color: rgba(255, 255, 255, 0.05); box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6); }
+        .otp-box::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; background: linear-gradient(90deg, #2ecc71, #3498db, #9b59b6, #e74c3c); }
+        .otp-icon-wrap { width: 84px; height: 84px; margin: 0 auto 18px; border-radius: 50%; background: linear-gradient(135deg, rgba(46, 204, 113, 0.15), rgba(52, 152, 219, 0.15)); display: flex; align-items: center; justify-content: center; position: relative; }
+        .otp-icon-wrap::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; border: 2px dashed rgba(46, 204, 113, 0.25); animation: spin 12s linear infinite; }
+        .otp-icon-wrap i { font-size: 2.2rem; color: #2ecc71; }
+        .otp-box h2 { font-size: 1.6rem; font-weight: 700; color: #0b1420; margin-bottom: 8px; letter-spacing: -0.3px; }
+        body.dark-mode .otp-box h2 { color: #fff; }
+        .otp-box .otp-sub { font-size: 0.95rem; color: rgba(0, 0, 0, 0.4); margin-bottom: 6px; line-height: 1.6; }
+        body.dark-mode .otp-box .otp-sub { color: rgba(255, 255, 255, 0.4); }
+        .otp-box .otp-email { display: inline-block; padding: 6px 18px; background: rgba(46, 204, 113, 0.1); color: #2ecc71 !important; border-radius: 40px; font-weight: 600; font-size: 0.9rem; margin-bottom: 22px; letter-spacing: 0.3px; }
+        .otp-inputs { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+        .otp-inputs input { width: 52px; height: 64px; text-align: center; font-size: 1.7rem; font-weight: 700; border: 2px solid rgba(0, 0, 0, 0.08); border-radius: 14px; background: #f8fafc; color: #0b1420; transition: 0.2s; outline: none; font-family: inherit; }
+        body.dark-mode .otp-inputs input { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.08); color: #fff; }
+        .otp-inputs input:focus { border-color: #2ecc71; background: #ffffff; box-shadow: 0 0 0 4px rgba(46, 204, 113, 0.15); transform: translateY(-2px); }
+        body.dark-mode .otp-inputs input:focus { background: rgba(255, 255, 255, 0.08); box-shadow: 0 0 0 4px rgba(46, 204, 113, 0.2); }
+        .otp-inputs input.filled { border-color: #2ecc71; background: rgba(46, 204, 113, 0.08); }
+        .otp-timer { font-size: 0.9rem; color: rgba(0, 0, 0, 0.35); margin-bottom: 20px; }
+        body.dark-mode .otp-timer { color: rgba(255, 255, 255, 0.35); }
+        .otp-timer span { font-weight: 700; color: #e74c3c !important; }
+        .otp-verify-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #2ecc71, #27ae60); color: #0b1420 !important; border: none; border-radius: 14px; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: 0.25s; box-shadow: 0 6px 24px rgba(46, 204, 113, 0.25); display: flex; align-items: center; justify-content: center; gap: 10px; letter-spacing: 0.3px; }
+        .otp-verify-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(46, 204, 113, 0.35); }
+        .otp-verify-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+        .otp-resend-btn { background: none; border: none; color: #3498db; font-weight: 600; font-size: 0.9rem; cursor: pointer; margin-top: 14px; padding: 6px 12px; border-radius: 8px; transition: 0.2s; font-family: inherit; }
+        .otp-resend-btn:hover { background: rgba(52, 152, 219, 0.08); }
+        .otp-resend-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .otp-close-btn { position: absolute; top: 14px; right: 18px; background: none; border: none; font-size: 1.4rem; color: rgba(0, 0, 0, 0.3); cursor: pointer; padding: 6px 10px; border-radius: 10px; transition: 0.2s; }
+        body.dark-mode .otp-close-btn { color: rgba(255, 255, 255, 0.3); }
+        .otp-close-btn:hover { background: rgba(0, 0, 0, 0.05); color: #0b1420; }
+        body.dark-mode .otp-close-btn:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
+        .otp-footer-note { font-size: 0.8rem; color: rgba(0, 0, 0, 0.2); margin-top: 16px; line-height: 1.5; }
+        body.dark-mode .otp-footer-note { color: rgba(255, 255, 255, 0.2); }
+        .otp-status { padding: 10px 14px; border-radius: 10px; font-size: 0.88rem; font-weight: 600; margin-bottom: 16px; display: none; text-align: center; }
+        .otp-status.info { background: rgba(52, 152, 219, 0.12); color: #3498db; display: block; }
+        .otp-status.success { background: rgba(46, 204, 113, 0.12); color: #2ecc71; display: block; }
+        .otp-status.error { background: rgba(231, 76, 60, 0.12); color: #e74c3c; display: block; }
+        .otp-hint { font-size: 0.75rem; color: rgba(0, 0, 0, 0.2); margin-top: 6px; }
+        body.dark-mode .otp-hint { color: rgba(255, 255, 255, 0.2); }
+
+        #clearCartModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 20, 32, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 9998; justify-content: center; align-items: center; padding: 20px; animation: fadeIn 0.25s ease; }
+        #clearCartModal.show { display: flex; }
+        .confirm-box { background: #ffffff; border-radius: 24px; padding: 36px 38px 28px; width: 440px; max-width: 96vw; text-align: center; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25); border: 1px solid rgba(0, 0, 0, 0.04); animation: slideDown 0.3s ease; }
+        body.dark-mode .confirm-box { background: #1a2634; border-color: rgba(255, 255, 255, 0.05); box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6); }
+        .confirm-icon { width: 76px; height: 76px; margin: 0 auto 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .confirm-icon.warn { background: rgba(243, 156, 18, 0.15); }
+        .confirm-icon.warn i { font-size: 2.1rem; color: #f39c12; }
+        .confirm-icon.danger { background: rgba(231, 76, 60, 0.15); }
+        .confirm-icon.danger i { font-size: 2.1rem; color: #e74c3c; }
+        .confirm-box h3 { font-size: 1.4rem; font-weight: 700; color: #0b1420; margin-bottom: 10px; }
+        body.dark-mode .confirm-box h3 { color: #fff; }
+        .confirm-box p { font-size: 0.95rem; color: rgba(0, 0, 0, 0.45); margin-bottom: 24px; line-height: 1.6; }
+        body.dark-mode .confirm-box p { color: rgba(255, 255, 255, 0.45); }
+        .confirm-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .confirm-actions button { padding: 12px 30px; border: none; border-radius: 12px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: 0.2s; font-family: inherit; }
+        .confirm-actions .btn-cancel { background: rgba(0, 0, 0, 0.06); color: rgba(0, 0, 0, 0.6); }
+        body.dark-mode .confirm-actions .btn-cancel { background: rgba(255, 255, 255, 0.06); color: rgba(255, 255, 255, 0.6); }
+        .confirm-actions .btn-cancel:hover { background: rgba(0, 0, 0, 0.1); color: #0b1420; }
+        body.dark-mode .confirm-actions .btn-cancel:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+        .confirm-actions .btn-confirm { background: #e74c3c; color: #fff !important; }
+        .confirm-actions .btn-confirm:hover { background: #c0392b; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3); }
+
         .gcash-popup-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9998; justify-content: center; align-items: center; padding: 20px; animation: fadeIn 0.25s ease; }
         .gcash-popup-overlay.show { display: flex; }
         .gcash-popup-box { background: #ffffff; border-radius: 24px; padding: 34px 32px 28px; max-width: 440px; width: 100%; text-align: center; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25); position: relative; border: 1px solid rgba(0, 0, 0, 0.04); animation: slideDown 0.3s ease; }
@@ -971,7 +1080,7 @@
         body.dark-mode .reset-modal .reset-timer { color: rgba(255, 255, 255, 0.3); }
         .reset-modal .reset-timer span { font-weight: 700; color: #e74c3c !important; }
 
-        #landingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000; background: linear-gradient(145deg, #0b1a2a 0%, #162b3a 40%, #1a2f3f 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; padding: 30px 20px; transition: opacity 0.6s ease, transform 0.6s ease; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        #landingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000; background: linear-gradient(145deg, rgba(11, 26, 42, 0.88) 0%, rgba(22, 43, 58, 0.85) 40%, rgba(26, 47, 63, 0.9) 100%), url('store.jpg') center/cover no-repeat; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; padding: 30px 20px; transition: opacity 0.6s ease, transform 0.6s ease; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
         #landingOverlay.hidden { opacity: 0; transform: scale(1.02); pointer-events: none; }
         #landingOverlay .landing-glow { position: absolute; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0; }
         #landingOverlay .landing-glow.g1 { width: 600px; height: 600px; background: rgba(46, 204, 113, 0.08); top: -200px; right: -200px; }
@@ -1221,6 +1330,11 @@
                         <button type="button" class="toggle-password" onclick="toggleLoginPass()"><i class="fas fa-eye"></i></button>
                     </div>
                 </div>
+                <div class="recaptcha-box" id="recaptchaBox" onclick="toggleRecaptcha()">
+                    <div class="recaptcha-check" id="recaptchaCheck"></div>
+                    <div class="recaptcha-text">I'm not a robot</div>
+                    <div class="recaptcha-logo"><strong>reCAPTCHA</strong>Privacy · Terms</div>
+                </div>
                 <div class="auth-options">
                     <label class="remember-me">
                         <input type="checkbox" id="rememberMe" checked /> Remember me
@@ -1240,16 +1354,38 @@
         </div>
     </div>
 
-    <div id="otpModal" class="modal reset-modal" style="z-index: 9999;">
-        <div class="receipt-wrapper">
-            <div class="panel-header">
-                <h3><i class="fas fa-shield-alt" style="color:#2ecc71;"></i> OTP Verification</h3>
+    <div id="otpModal">
+        <div class="otp-box">
+            <button class="otp-close-btn" onclick="closeOtpModal()"><i class="fas fa-times"></i></button>
+            <div class="otp-icon-wrap"><i class="fas fa-shield-halved"></i></div>
+            <h2>Verify Your Identity</h2>
+            <p class="otp-sub">We've sent a 6-digit verification code to</p>
+            <div class="otp-email" id="otpEmailDisplay">user@example.com</div>
+            <div id="otpStatus" class="otp-status"></div>
+            <div class="otp-inputs" id="otpInputs">
+                <input type="text" maxlength="1" inputmode="numeric" />
+                <input type="text" maxlength="1" inputmode="numeric" />
+                <input type="text" maxlength="1" inputmode="numeric" />
+                <input type="text" maxlength="1" inputmode="numeric" />
+                <input type="text" maxlength="1" inputmode="numeric" />
+                <input type="text" maxlength="1" inputmode="numeric" />
             </div>
-            <div class="form-group">
-                <label>Enter 6-digit OTP sent to your email/phone</label>
-                <input type="text" id="otpInput" maxlength="6" placeholder="123456" style="text-align:center; font-size:1.5rem; letter-spacing:5px;" />
+            <div class="otp-timer">Code expires in <span id="otpTimer">05:00</span></div>
+            <button class="otp-verify-btn" id="otpVerifyBtn" onclick="verifyOtp()"><i class="fas fa-check"></i> Verify &amp; Sign In</button>
+            <button class="otp-resend-btn" id="otpResendBtn" onclick="resendOtp()">Resend Code</button>
+            <div class="otp-footer-note">Didn't receive the code? Check your spam folder or contact support.</div>
+        </div>
+    </div>
+
+    <div id="clearCartModal">
+        <div class="confirm-box">
+            <div class="confirm-icon danger"><i class="fas fa-trash-alt"></i></div>
+            <h3>Clear Cart?</h3>
+            <p>All items in your cart will be removed. This action cannot be undone.</p>
+            <div class="confirm-actions">
+                <button class="btn-cancel" onclick="closeClearCartModal()">Cancel</button>
+                <button class="btn-confirm" onclick="confirmClearCart()"><i class="fas fa-check"></i> Yes, Clear Cart</button>
             </div>
-            <button class="btn-reset" onclick="verifyOtp()"><i class="fas fa-check"></i> Verify &amp; Login</button>
         </div>
     </div>
 
@@ -1500,7 +1636,7 @@
                             </div>
                             <div class="action-bar">
                                 <button class="btn-action" onclick="holdSale()"><i class="fas fa-pause"></i> Hold Sale</button>
-                                <button class="btn-action warning" onclick="clearCart()"><i class="fas fa-trash-alt"></i> Clear Cart</button>
+                                <button class="btn-action warning" onclick="openClearCartModal()"><i class="fas fa-trash-alt"></i> Clear Cart</button>
                                 <button class="btn-action" onclick="addNote()"><i class="fas fa-pen"></i> Add Note</button>
                                 <button class="btn-action primary" onclick="applyDiscount()"><i class="fas fa-percent"></i> Discount</button>
                             </div>
@@ -1544,6 +1680,16 @@
                             <div class="dash-stat-card"><div class="dsc-top"><span class="dsc-label">Products</span><span class="dsc-icon"><i class="fas fa-boxes"></i></span></div><div class="dsc-number orange"><span id="dscProducts">0</span></div><span class="dsc-change">Active products</span></div>
                             <div class="dash-stat-card"><div class="dsc-top"><span class="dsc-label">Low Stock Items</span><span class="dsc-icon"><i class="fas fa-exclamation-circle"></i></span></div><div class="dsc-number red"><span id="dscLowStock">0</span></div><span class="dsc-change down"><i class="fas fa-arrow-down"></i> Need restocking</span></div>
                         </div>
+                        <div class="dash-charts-row">
+                            <div class="dash-chart-card">
+                                <h4><i class="fas fa-chart-line" style="color:#2ecc71;"></i> Revenue & AOV Trend</h4>
+                                <canvas id="dashRevenueChart"></canvas>
+                            </div>
+                            <div class="dash-chart-card">
+                                <h4><i class="fas fa-chart-pie" style="color:#f39c12;"></i> Sales by Category</h4>
+                                <canvas id="dashCategoryChart"></canvas>
+                            </div>
+                        </div>
                         <div class="dash-growth-stats">
                             <div class="growth-card"><div class="growth-number" id="growthCommunity">65%</div><div class="growth-label">Community growth from last month</div></div>
                             <div class="growth-card"><div class="growth-number" style="color:#3498db !important;" id="growthRevenue">₱240,500</div><div class="growth-label">Total revenue this month</div></div>
@@ -1553,7 +1699,7 @@
                             <div class="rev-table-wrap">
                                 <table class="rev-table">
                                     <thead><tr><th>Month</th><th style="text-align:right;">Total Revenue</th></tr></thead>
-                                    <tbody><tr><td class="rev-month">Jan</td><td class="rev-amount">₱7,200</td></tr><tr><td class="rev-month">Feb</td><td class="rev-amount">₱5,000</td></tr><tr><td class="rev-month">Mar</td><td class="rev-amount">₱8,600</td></tr><tr><td class="rev-month">Apr</td><td class="rev-amount">₱4,500</td></tr><tr><td class="rev-month">May</td><td class="rev-amount">₱8,300</td></tr><tr><td class="rev-month">Jun</td><td class="rev-amount">₱2,500</td></tr></tbody>
+                                    <tbody id="dashRevTableBody"></tbody>
                                 </table>
                             </div>
                         </div>
@@ -1670,13 +1816,13 @@
 
                 <div id="tab-categories" class="tab-content admin-tab">
                     <div class="pos-panel cart-panel">
-                        <div class="panel-header"><h3><i class="fas fa-tags"></i> Categories</h3><span class="badge-count">6 Categories</span></div>
+                        <div class="panel-header"><h3><i class="fas fa-tags"></i> Categories</h3><span class="badge-count">5 Categories</span></div>
                         <div id="categoriesList">
-                            <div class="list-item"><div class="item-left"><div class="item-title"><i class="fas fa-phone"></i> Phones</div><div class="item-sub">10 products · Best seller</div></div><div class="item-right orange">₱66,990.00</div></div>
-                            <div class="list-item"><div class="item-left"><div class="item-title"><i class="fas fa-bolt"></i> Chargers</div><div class="item-sub">8 products · Fast moving</div></div><div class="item-right orange">₱1,290.00</div></div>
-                            <div class="list-item"><div class="item-left"><div class="item-title"><i class="fas fa-plug"></i> Cables</div><div class="item-sub">7 products · Essential</div></div><div class="item-right orange">₱550.00</div></div>
+                            <div class="list-item"><div class="item-left"><div class="item-title"><i class="fas fa-phone"></i> Phones</div><div class="item-sub">8 products · Best seller</div></div><div class="item-right orange">₱66,990.00</div></div>
+                            <div class="list-item"><div class="item-left"><div class="item-title"><i class="fas fa-bolt"></i> Chargers</div><div class="item-sub">7 products · Fast moving</div></div><div class="item-right orange">₱1,290.00</div></div>
+                            <div class="list-item"><div class="item-left"><div class="item-title"><i class="fas fa-plug"></i> Cables</div><div class="item-sub">5 products · Essential</div></div><div class="item-right orange">₱550.00</div></div>
                             <div class="list-item"><div class="item-left"><div class="item-title"><i class="fas fa-laptop"></i> Laptops</div><div class="item-sub">4 products · High value</div></div><div class="item-right orange">₱45,990.00</div></div>
-                            <div class="list-item"><div class="item-left"><div class="item-title"><i class="fas fa-headphones"></i> Earphones</div><div class="item-sub">6 products · Trending</div></div><div class="item-right orange">₱1,890.00</div></div>
+                            <div class="list-item"><div class="item-left"><div class="item-title"><i class="fas fa-headphones"></i> Earphones</div><div class="item-sub">5 products · Trending</div></div><div class="item-right orange">₱1,890.00</div></div>
                         </div>
                     </div>
                 </div>
@@ -1703,21 +1849,34 @@
 
                 <div id="tab-reports" class="tab-content admin-tab">
                     <div class="pos-panel cart-panel">
-                        <div class="panel-header"><h3><i class="fas fa-chart-bar"></i> Reports</h3><span class="badge-count">Live Data</span></div>
-                        <div id="reportsContent">
-                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
-                                <div style="background:rgba(255,255,255,0.4);padding:14px;border-radius:12px;border:1px solid rgba(0,0,0,0.04);"><div style="font-size:0.8rem;color:rgba(0,0,0,0.2);">Daily Sales Average</div><div style="font-size:1.4rem;font-weight:700;color:#2ecc71;">₱5,430.00</div><div style="font-size:0.75rem;color:rgba(0,0,0,0.15);">Last 30 days</div></div>
-                                <div style="background:rgba(255,255,255,0.4);padding:14px;border-radius:12px;border:1px solid rgba(0,0,0,0.04);"><div style="font-size:0.8rem;color:rgba(0,0,0,0.2);">Monthly Revenue</div><div style="font-size:1.4rem;font-weight:700;color:#3498db;">₱162,900.00</div><div style="font-size:0.75rem;color:rgba(0,0,0,0.15);">This month</div></div>
-                                <div style="background:rgba(255,255,255,0.4);padding:14px;border-radius:12px;border:1px solid rgba(0,0,0,0.04);"><div style="font-size:0.8rem;color:rgba(0,0,0,0.2);">Best Selling Category</div><div style="font-size:1.4rem;font-weight:700;color:#f39c12;">Phones</div><div style="font-size:0.75rem;color:rgba(0,0,0,0.15);">₱66,990.00</div></div>
-                                <div style="background:rgba(255,255,255,0.4);padding:14px;border-radius:12px;border:1px solid rgba(0,0,0,0.04);"><div style="font-size:0.8rem;color:rgba(0,0,0,0.2);">Total Profit</div><div style="font-size:1.4rem;font-weight:700;color:#e74c3c;">₱45,670.00</div><div style="font-size:0.75rem;color:rgba(0,0,0,0.15);"><i class="fas fa-arrow-up"></i> 15% vs last month</div></div>
+                        <div class="panel-header"><h3><i class="fas fa-chart-bar"></i> Business Reports</h3><span class="badge-count">Live Data</span></div>
+                        <div class="report-charts-grid">
+                            <div class="chart-card">
+                                <h4><i class="fas fa-chart-line" style="color:#2ecc71;"></i> Revenue & AOV Trend</h4>
+                                <canvas id="revenueAovChart"></canvas>
                             </div>
-                            <div style="border-top:1px solid rgba(0,0,0,0.04);padding-top:14px;">
-                                <div style="font-weight:600;color:rgba(0,0,0,0.5);margin-bottom:10px;"><i class="fas fa-chart-line"></i> Top Selling Products</div>
-                                <div class="list-item"><span style="color:rgba(0,0,0,0.6);">Samsung Galaxy S24 Ultra 256GB</span><span class="item-right">45 sold</span></div>
-                                <div class="list-item"><span style="color:rgba(0,0,0,0.6);">iPhone 15 Silicone Case</span><span class="item-right">38 sold</span></div>
-                                <div class="list-item"><span style="color:rgba(0,0,0,0.6);">20W USB-C Power Adapter</span><span class="item-right">32 sold</span></div>
-                                <div class="list-item"><span style="color:rgba(0,0,0,0.6);">Baseus Fast Charging Cable</span><span class="item-right">28 sold</span></div>
-                                <div class="list-item"><span style="color:rgba(0,0,0,0.6);">JBL Tune 510BT Headphone</span><span class="item-right">22 sold</span></div>
+                            <div class="chart-card">
+                                <h4><i class="fas fa-chart-bar" style="color:#3498db;"></i> Monthly Revenue & Orders</h4>
+                                <canvas id="monthlyRevOrdersChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="report-table-card">
+                            <h4><i class="fas fa-table" style="color:#f39c12;"></i> Business Performance Summary</h4>
+                            <table id="bizPerformanceTable">
+                                <thead>
+                                    <tr><th>Year</th><th>Quarter</th><th>Net Revenue</th><th>AOV</th><th>Orders</th><th>New Customers</th><th>Return %</th><th>Active Customers</th></tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <div class="report-charts-grid">
+                            <div class="chart-card">
+                                <h4><i class="fas fa-hand-pointer" style="color:#9b59b6;"></i> Last Touch</h4>
+                                <canvas id="lastTouchChart"></canvas>
+                            </div>
+                            <div class="chart-card">
+                                <h4><i class="fas fa-bullseye" style="color:#e74c3c;"></i> First Touch</h4>
+                                <canvas id="firstTouchChart"></canvas>
                             </div>
                         </div>
                     </div>
@@ -1747,10 +1906,10 @@
                     <div class="pos-panel cart-panel">
                         <div class="panel-header"><h3><i class="fas fa-cog"></i> Settings</h3><span class="badge-count">Configure</span></div>
                         <div class="settings-grid">
-                            <div class="settings-card"><h4><i class="fas fa-store"></i> Store Information</h4><div class="setting-row"><span class="label">Store Name</span><span class="value">Mobile Care</span></div><div class="setting-row"><span class="label">Address</span><span class="value">123 Main St, Manila</span></div><div class="setting-row"><span class="label">Contact</span><span class="value">(02) 8123-4567</span></div><div class="setting-row"><span class="label">Email</span><span class="value">info@mobilecare.ph</span></div><div class="setting-row"><span class="label">Store Hours</span><span class="value">Mon-Sat 9AM-8PM</span></div><button class="btn-setting" onclick="showMessage('Edit store info feature coming soon!', 'warning')"><i class="fas fa-edit"></i> Edit Store Info</button></div>
-                            <div class="settings-card"><h4><i class="fas fa-lock"></i> Security Settings</h4><div class="setting-row"><span class="label">Two-Factor Auth</span><div class="toggle active" onclick="this.classList.toggle('active')"></div></div><div class="setting-row"><span class="label">Session Timeout</span><span class="value">30 minutes</span></div><div class="setting-row"><span class="label">Login Attempts</span><span class="value">5 attempts</span></div><div class="setting-row"><span class="label">Last Login</span><span class="value" id="settingsLastLogin">Today, 2:30 PM</span></div><button class="btn-setting" onclick="showMessage('Change password feature coming soon!', 'warning')"><i class="fas fa-key"></i> Change Password</button></div>
-                            <div class="settings-card"><h4><i class="fas fa-percent"></i> Tax & Invoice</h4><div class="setting-row"><span class="label">Tax Rate</span><span class="value">0%</span></div><div class="setting-row"><span class="label">Currency</span><span class="value">PHP (₱)</span></div><div class="setting-row"><span class="label">Receipt Footer</span><span class="value">Thank you!</span></div><div class="setting-row"><span class="label">Invoice Prefix</span><span class="value">INV-</span></div><button class="btn-setting" onclick="showMessage('Edit receipt template feature coming soon!', 'warning')"><i class="fas fa-file-invoice"></i> Edit Template</button></div>
-                            <div class="settings-card"><h4><i class="fas fa-bell"></i> Notifications</h4><div class="setting-row"><span class="label">Low Stock Alerts</span><div class="toggle active" onclick="this.classList.toggle('active')"></div></div><div class="setting-row"><span class="label">Daily Sales Report</span><div class="toggle active" onclick="this.classList.toggle('active')"></div></div><div class="setting-row"><span class="label">System Updates</span><div class="toggle" onclick="this.classList.toggle('active')"></div></div><div class="setting-row"><span class="label">Email Reports</span><div class="toggle" onclick="this.classList.toggle('active')"></div></div><button class="btn-setting" onclick="showMessage('Email settings feature coming soon!', 'warning')"><i class="fas fa-envelope"></i> Email Settings</button></div>
+                            <div class="settings-card"><h4><i class="fas fa-store"></i> Store Information</h4><div class="setting-row"><span class="label">Store Name</span><span class="value">Mobile Care</span></div><div class="setting-row"><span class="label">Address</span><span class="value">123 Main St, Manila</span></div><div class="setting-row"><span class="label">Contact</span><span class="value">(02) 8123-4567</span></div><div class="setting-row"><span class="label">Email</span><span class="value">info@mobilecare.ph</span></div><div class="setting-row"><span class="label">Store Hours</span><span class="value">Mon-Sat 9AM-8PM</span></div></div>
+                            <div class="settings-card"><h4><i class="fas fa-lock"></i> Security Settings</h4><div class="setting-row"><span class="label">Two-Factor Auth</span><div class="toggle active" onclick="this.classList.toggle('active')"></div></div><div class="setting-row"><span class="label">Session Timeout</span><span class="value">30 minutes</span></div><div class="setting-row"><span class="label">Login Attempts</span><span class="value">5 attempts</span></div><div class="setting-row"><span class="label">Last Login</span><span class="value" id="settingsLastLogin">Today, 2:30 PM</span></div></div>
+                            <div class="settings-card"><h4><i class="fas fa-percent"></i> Tax & Invoice</h4><div class="setting-row"><span class="label">Tax Rate</span><span class="value">0%</span></div><div class="setting-row"><span class="label">Currency</span><span class="value">PHP (₱)</span></div><div class="setting-row"><span class="label">Receipt Footer</span><span class="value">Thank you!</span></div><div class="setting-row"><span class="label">Invoice Prefix</span><span class="value">INV-</span></div></div>
+                            <div class="settings-card"><h4><i class="fas fa-envelope-open-text"></i> OTP Email Settings</h4><div class="setting-row"><span class="label">Service ID</span><input type="text" id="emailjsServiceId" placeholder="service_xxx" style="width:120px;padding:4px 8px;border:1px solid rgba(0,0,0,0.1);border-radius:6px;font-size:0.8rem;" /></div><div class="setting-row"><span class="label">Template ID</span><input type="text" id="emailjsTemplateId" placeholder="template_xxx" style="width:120px;padding:4px 8px;border:1px solid rgba(0,0,0,0.1);border-radius:6px;font-size:0.8rem;" /></div><div class="setting-row"><span class="label">Public Key</span><input type="text" id="emailjsPublicKey" placeholder="xxxxxxxxxx" style="width:120px;padding:4px 8px;border:1px solid rgba(0,0,0,0.1);border-radius:6px;font-size:0.8rem;" /></div><button class="btn-setting green" onclick="saveEmailjsConfig()"><i class="fas fa-save"></i> Save Email Settings</button></div>
                         </div>
                         <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(0,0,0,0.04);">
                             <div style="font-weight:600;color:rgba(0,0,0,0.3);margin-bottom:8px;">Admin Tools</div>
@@ -1816,7 +1975,7 @@
                     <div class="receipt-payment" id="receiptPaymentDetails">
                         <div class="pay-row">
                             <span class="label">Payment Method:</span>
-                            <span class="value method-value" id="receiptMethod">GCASH</span>
+                            <span class="value method-value" id="receiptMethod">CASH</span>
                         </div>
                         <div class="pay-row" id="receiptCashRow" style="display:none;">
                             <span class="label">Cash Tendered:</span>
@@ -1830,7 +1989,7 @@
                     <div class="receipt-divider"></div>
                     <div class="receipt-cashier">
                         <span class="cashier-label">Cashier: </span>
-                        <span class="cashier-name" id="receiptCashier">Admin: Bryan Niala Aropo</span>
+                        <span class="cashier-name" id="receiptCashier">Admin</span>
                     </div>
                     <div class="receipt-footer">
                         <div class="thanks">Thank you for your purchase!</div>
@@ -1956,6 +2115,15 @@
     </div>
 
     <script>
+        var EMAILJS_DEFAULTS = {
+            publicKey: localStorage.getItem('emailjsPublicKey') || '',
+            serviceId: localStorage.getItem('emailjsServiceId') || '',
+            templateId: localStorage.getItem('emailjsTemplateId') || ''
+        };
+        if (EMAILJS_DEFAULTS.publicKey && window.emailjs) {
+            try { emailjs.init(EMAILJS_DEFAULTS.publicKey); } catch (e) {}
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const landing = document.getElementById('landingOverlay');
             const menuBtn = document.getElementById('landingMenuBtn');
@@ -2003,6 +2171,7 @@
             if (landingMenuBox) { if (theme === 'dark') landingMenuBox.classList.remove('light-mode'); else landingMenuBox.classList.add('light-mode'); }
             const body = document.body;
             if (theme === 'dark') { body.classList.add('dark-mode'); } else { body.classList.remove('dark-mode'); }
+            updateChartThemes();
         }
 
         function toggleTheme() {
@@ -2019,6 +2188,12 @@
                 const theme = getStoredTheme();
                 const toggle = document.getElementById('themeToggle');
                 if (toggle) toggle.classList.toggle('active', theme === 'dark');
+                const s = document.getElementById('emailjsServiceId');
+                const t = document.getElementById('emailjsTemplateId');
+                const p = document.getElementById('emailjsPublicKey');
+                if (s) s.value = localStorage.getItem('emailjsServiceId') || '';
+                if (t) t.value = localStorage.getItem('emailjsTemplateId') || '';
+                if (p) p.value = localStorage.getItem('emailjsPublicKey') || '';
                 modal.classList.add('show');
             }
         }
@@ -2027,8 +2202,23 @@
             const modal = document.getElementById('settingsModal');
             if (modal) modal.classList.remove('show');
         }
+
+        function saveEmailjsConfig() {
+            const s = document.getElementById('emailjsServiceId').value.trim();
+            const t = document.getElementById('emailjsTemplateId').value.trim();
+            const p = document.getElementById('emailjsPublicKey').value.trim();
+            localStorage.setItem('emailjsServiceId', s);
+            localStorage.setItem('emailjsTemplateId', t);
+            localStorage.setItem('emailjsPublicKey', p);
+            EMAILJS_DEFAULTS.serviceId = s;
+            EMAILJS_DEFAULTS.templateId = t;
+            EMAILJS_DEFAULTS.publicKey = p;
+            if (p && window.emailjs) { try { emailjs.init(p); } catch (e) {} }
+            showMessage('Email settings saved!', 'success');
+        }
+
         document.getElementById('settingsModal')?.addEventListener('click', function(e) { if (e.target === this) closeSettingsModal(); });
-        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { closeSettingsModal(); closeAdminCreateAccount(); closeOtpModal(); } });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { closeSettingsModal(); closeAdminCreateAccount(); closeOtpModal(); closeClearCartModal(); } });
 
         function getCashiersData() {
             let data = localStorage.getItem('posCashiers');
@@ -2088,24 +2278,38 @@
             }).join('');
         }
 
-        function showRegister() {
-            document.getElementById('loginScreen').classList.remove('active');
-            document.getElementById('registerScreen').classList.add('active');
-            document.getElementById('loginError').style.display = 'none';
-            document.getElementById('registerError').style.display = 'none';
-        }
-
         function showLogin() {
-            document.getElementById('registerScreen').classList.remove('active');
             document.getElementById('loginScreen').classList.add('active');
             document.getElementById('loginError').style.display = 'none';
-            document.getElementById('registerError').style.display = 'none';
         }
 
         function toggleLoginPass() {
             const inp = document.getElementById('loginPass');
             const btn = document.querySelector('#loginScreen .toggle-password');
             if (inp.type === 'password') { inp.type = 'text'; btn.innerHTML = '<i class="fas fa-eye-slash"></i>'; } else { inp.type = 'password'; btn.innerHTML = '<i class="fas fa-eye"></i>'; }
+        }
+
+        var recaptchaVerified = false;
+        var recaptchaLoading = false;
+
+        function toggleRecaptcha() {
+            if (recaptchaLoading || recaptchaVerified) return;
+            recaptchaLoading = true;
+            const check = document.getElementById('recaptchaCheck');
+            check.classList.add('loading');
+            setTimeout(function() {
+                check.classList.remove('loading');
+                check.classList.add('checked');
+                recaptchaVerified = true;
+                recaptchaLoading = false;
+            }, 900);
+        }
+
+        function resetRecaptcha() {
+            recaptchaVerified = false;
+            recaptchaLoading = false;
+            const check = document.getElementById('recaptchaCheck');
+            if (check) { check.classList.remove('checked'); check.classList.remove('loading'); }
         }
 
         function showMessage(text, type) {
@@ -2149,6 +2353,8 @@
         var tempUser = '';
         var tempRole = '';
         var tempFullname = '';
+        var otpTimerInterval = null;
+        var otpSecondsLeft = 300;
 
         function checkSession() {
             var activeUser = localStorage.getItem('activeUser');
@@ -2183,6 +2389,16 @@
                 setInterval(updateClock, 60000);
                 if (isAdmin) renderCashiers();
             }
+        }
+
+        var DATA_VERSION = '4.0';
+        if (localStorage.getItem('posDataVersion') !== DATA_VERSION) {
+            localStorage.removeItem('posProducts');
+            localStorage.removeItem('posSales');
+            localStorage.removeItem('posReceiptCounter');
+            localStorage.removeItem('posInventoryHistory');
+            localStorage.removeItem('posRepairs');
+            localStorage.setItem('posDataVersion', DATA_VERSION);
         }
 
         function loadData() {
@@ -2252,8 +2468,6 @@
         changeQuantity = function(index, change) { originalChangeQuantity(index, change); updateLastActive(); };
         var originalRemoveFromCart = removeFromCart;
         removeFromCart = function(index) { originalRemoveFromCart(index); updateLastActive(); };
-        var originalClearCart = clearCart;
-        clearCart = function() { originalClearCart(); updateLastActive(); };
         var originalApplyDiscount = applyDiscount;
         applyDiscount = function() { originalApplyDiscount(); updateLastActive(); };
         var originalAddNote = addNote;
@@ -2274,12 +2488,13 @@
             localStorage.removeItem('activeRole');
             localStorage.removeItem('activeTab');
             document.getElementById('app').style.display = 'none';
-            document.getElementById('loginOverlay').classList.add('hidden');
+            document.getElementById('loginOverlay').classList.remove('hidden');
             const landing = document.getElementById('landingOverlay');
-            if (landing) landing.classList.remove('hidden');
+            if (landing) landing.classList.add('hidden');
             document.getElementById('loginError').style.display = 'none';
             document.getElementById('loginPass').value = '';
             document.getElementById('loginUser').value = '';
+            resetRecaptcha();
             currentUser = '';
             currentUserRole = '';
             currentUserFullname = '';
@@ -2289,6 +2504,22 @@
 
         function openLogoutModal() { document.getElementById('logoutModal').classList.add('show'); }
         function closeLogoutModal() { document.getElementById('logoutModal').classList.remove('show'); }
+
+        function openClearCartModal() {
+            if (cart.length === 0) { showMessage('Cart is already empty.', 'warning'); return; }
+            document.getElementById('clearCartModal').classList.add('show');
+        }
+        function closeClearCartModal() { document.getElementById('clearCartModal').classList.remove('show'); }
+        function confirmClearCart() {
+            closeClearCartModal();
+            cart = [];
+            renderCart();
+            document.getElementById('cashTendered').value = '0';
+            document.getElementById('paymentResult').style.display = 'none';
+            document.getElementById('qrContainer').classList.remove('show');
+            showMessage('Cart cleared.', 'warning');
+            updateLastActive();
+        }
 
         var resetCodeData = null;
         var resetTimerInterval = null;
@@ -2327,6 +2558,16 @@
             const expiry = Date.now() + 5 * 60 * 1000;
             resetCodeData = { email: email, code: code, expiry: expiry };
             localStorage.setItem('posResetData', JSON.stringify(resetCodeData));
+            if (EMAILJS_DEFAULTS.serviceId && EMAILJS_DEFAULTS.templateId && EMAILJS_DEFAULTS.publicKey && window.emailjs) {
+                try {
+                    emailjs.send(EMAILJS_DEFAULTS.serviceId, EMAILJS_DEFAULTS.templateId, {
+                        to_email: email,
+                        otp_code: code,
+                        message: 'Your password reset code is: ' + code,
+                        store_name: 'Mobile Care'
+                    });
+                } catch (e) {}
+            }
             showResetMessage('Reset code sent to your email! Please check your inbox.', 'success');
             document.getElementById('resetStep1').style.display = 'none';
             document.getElementById('resetStep2').style.display = 'block';
@@ -2383,10 +2624,8 @@
         var allProductsData = [
             { barcode: 'P001', name: 'iPhone 11', price: 29990.00, stock: 8, image: 'iphone.jfif', category: 'phones' },
             { barcode: 'P002', name: 'Samsung Galaxy A14', price: 12990.00, stock: 15, image: 'samsung.jfif', category: 'phones' },
-            { barcode: 'P003', name: 'Samsung Galaxy A54', price: 18990.00, stock: 10, image: 'samsung.jfif', category: 'phones' },
             { barcode: 'P004', name: 'Samsung Galaxy S23', price: 38990.00, stock: 6, image: 'samsung.jfif', category: 'phones' },
             { barcode: 'P005', name: 'Oppo A17', price: 8990.00, stock: 20, image: 'oppo.jfif', category: 'phones' },
-            { barcode: 'P006', name: 'Oppo Reno8 T', price: 18990.00, stock: 12, image: 'oppo.jfif', category: 'phones' },
             { barcode: 'P007', name: 'Vivo Y27', price: 9990.00, stock: 18, image: 'vivo.jfif', category: 'phones' },
             { barcode: 'P008', name: 'Vivo V25e', price: 16990.00, stock: 10, image: 'vivo.jfif', category: 'phones' },
             { barcode: 'P009', name: 'Xiaomi Redmi 12', price: 8990.00, stock: 25, image: 'xiaomi.jfif', category: 'phones' },
@@ -2394,7 +2633,6 @@
             { barcode: 'C001', name: 'Original Charger Samsung', price: 890.00, stock: 30, image: 'charger.jpg', category: 'chargers' },
             { barcode: 'C002', name: 'Original Charger Oppo', price: 790.00, stock: 28, image: 'charger.jpg', category: 'chargers' },
             { barcode: 'C003', name: 'Original Charger Vivo', price: 790.00, stock: 25, image: 'charger.jpg', category: 'chargers' },
-            { barcode: 'C004', name: 'Original Charger Huawei', price: 850.00, stock: 20, image: 'charger.jpg', category: 'chargers' },
             { barcode: 'C005', name: 'Fast Charger 20W', price: 490.00, stock: 45, image: 'charger.jpg', category: 'chargers' },
             { barcode: 'C006', name: 'Fast Charger 25W', price: 590.00, stock: 40, image: 'charger.jpg', category: 'chargers' },
             { barcode: 'C007', name: 'Fast Charger 33W', price: 690.00, stock: 35, image: 'charger.jpg', category: 'chargers' },
@@ -2404,8 +2642,6 @@
             { barcode: 'CB003', name: 'Type-C to Type-C Cable', price: 320.00, stock: 55, image: 'cables.png', category: 'cables' },
             { barcode: 'CB004', name: 'Micro USB Cable', price: 250.00, stock: 80, image: 'cables.png', category: 'cables' },
             { barcode: 'CB005', name: 'Nylon Braided Cable', price: 450.00, stock: 40, image: 'cables.png', category: 'cables' },
-            { barcode: 'CB006', name: '3 in 1 Charging Cable', price: 550.00, stock: 35, image: 'cables.png', category: 'cables' },
-            { barcode: 'CB007', name: 'Magnetic Charging Cable', price: 490.00, stock: 30, image: 'cables.png', category: 'cables' },
             { barcode: 'L001', name: 'Acer Laptop', price: 39990.00, stock: 5, image: 'acer.jpg', category: 'laptops' },
             { barcode: 'L002', name: 'ASUS Laptop', price: 45990.00, stock: 5, image: 'asus.jpg', category: 'laptops' },
             { barcode: 'L003', name: 'Lenovo Laptop', price: 42990.00, stock: 5, image: 'lenovo.jpg', category: 'laptops' },
@@ -2414,8 +2650,7 @@
             { barcode: 'E002', name: 'Anker Soundcore Q20i Headphone', price: 2490.00, stock: 25, image: 'Anker-Soundcore-Q20i-Headphone.jpg', category: 'earphones' },
             { barcode: 'E003', name: 'Baseus Headphone', price: 1290.00, stock: 30, image: 'Baseus-Headphone.jpg', category: 'earphones' },
             { barcode: 'E004', name: 'Xiaomi Redmi Buds 4', price: 2490.00, stock: 25, image: 'Xiaomi-Redmi-Buds-4.jpg', category: 'earphones' },
-            { barcode: 'E005', name: 'SoundPEATS Air3 Deluxe', price: 1990.00, stock: 30, image: 'SoundPEATS-Air3-Deluxe.jpg', category: 'earphones' },
-            { barcode: 'E006', name: 'OPPO Enco Buds 2', price: 1590.00, stock: 35, image: 'OPPO-Enco-Buds-2.jpg', category: 'earphones' }
+            { barcode: 'E005', name: 'SoundPEATS Air3 Deluxe', price: 1990.00, stock: 30, image: 'SoundPEATS-Air3-Deluxe.jpg', category: 'earphones' }
         ];
 
         var products = [];
@@ -2439,11 +2674,20 @@
         var previewQty = 1;
         var dashCalMonth = new Date().getMonth();
         var dashCalYear = new Date().getFullYear();
+        var chartInstances = {};
 
         function handleLogin() {
             var user = document.getElementById('loginUser').value.trim();
             var pass = document.getElementById('loginPass').value.trim();
             var err = document.getElementById('loginError');
+            if (!recaptchaVerified) {
+                err.textContent = 'Please verify that you are not a robot.';
+                err.style.display = 'block';
+                err.style.color = '#e74c3c';
+                err.style.background = 'rgba(231,76,60,0.08)';
+                err.style.borderColor = 'rgba(231,76,60,0.12)';
+                return;
+            }
             if (users[user] && users[user].password === pass) {
                 var role = users[user].role;
                 if (role !== loginRole) {
@@ -2459,10 +2703,7 @@
                     tempUser = user;
                     tempRole = role;
                     tempFullname = users[user].fullname;
-                    alert("Simulated OTP sent to " + user + "\nYour OTP is: " + generatedOtp);
-                    document.getElementById('otpModal').classList.add('show');
-                    document.getElementById('otpInput').value = '';
-                    document.getElementById('otpInput').focus();
+                    openOtpModal(user);
                     return;
                 }
                 completeLogin(user, role, users[user].fullname);
@@ -2475,17 +2716,117 @@
             }
         }
 
+        function sendOtpEmail(email, otp) {
+            if (EMAILJS_DEFAULTS.serviceId && EMAILJS_DEFAULTS.templateId && EMAILJS_DEFAULTS.publicKey && window.emailjs) {
+                try {
+                    emailjs.send(EMAILJS_DEFAULTS.serviceId, EMAILJS_DEFAULTS.templateId, {
+                        to_email: email,
+                        otp_code: otp,
+                        message: 'Your verification code is: ' + otp,
+                        store_name: 'Mobile Care'
+                    }).then(function() {
+                        setOtpStatus('Verification code sent to your email.', 'success');
+                    }).catch(function() {
+                        setOtpStatus('Email service unavailable. Please use the code shown by your administrator.', 'info');
+                    });
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        function setOtpStatus(text, type) {
+            const s = document.getElementById('otpStatus');
+            if (!s) return;
+            s.textContent = text;
+            s.className = 'otp-status ' + type;
+        }
+
+        function openOtpModal(email) {
+            const modal = document.getElementById('otpModal');
+            const emailEl = document.getElementById('otpEmailDisplay');
+            const inputs = document.querySelectorAll('#otpInputs input');
+            inputs.forEach(function(i) { i.value = ''; i.classList.remove('filled'); });
+            const masked = email.replace(/^(.{2})(.*)(@.*)$/, function(m, a, b, c) { return a + '*'.repeat(Math.max(1, b.length)) + c; });
+            emailEl.textContent = masked;
+            setOtpStatus('', '');
+            document.getElementById('otpStatus').style.display = 'none';
+            modal.classList.add('show');
+            setTimeout(function() { inputs[0].focus(); }, 300);
+            otpSecondsLeft = 300;
+            updateOtpTimerDisplay();
+            if (otpTimerInterval) clearInterval(otpTimerInterval);
+            otpTimerInterval = setInterval(function() {
+                otpSecondsLeft--;
+                if (otpSecondsLeft <= 0) {
+                    clearInterval(otpTimerInterval);
+                    otpTimerInterval = null;
+                    document.getElementById('otpTimer').textContent = 'Expired';
+                    setOtpStatus('Code expired. Please resend.', 'error');
+                } else {
+                    updateOtpTimerDisplay();
+                }
+            }, 1000);
+            const sent = sendOtpEmail(email, generatedOtp);
+            if (sent) {
+                setOtpStatus('Verification code sent to your email.', 'success');
+            } else {
+                setOtpStatus('Demo mode: Your OTP is ' + generatedOtp, 'info');
+            }
+            const resendBtn = document.getElementById('otpResendBtn');
+            resendBtn.disabled = true;
+            setTimeout(function() { resendBtn.disabled = false; }, 30000);
+        }
+
+        function updateOtpTimerDisplay() {
+            const mins = Math.floor(otpSecondsLeft / 60);
+            const secs = otpSecondsLeft % 60;
+            document.getElementById('otpTimer').textContent = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+        }
+
+        function getOtpValue() {
+            return Array.from(document.querySelectorAll('#otpInputs input')).map(function(i) { return i.value; }).join('');
+        }
+
         function verifyOtp() {
-            var enteredOtp = document.getElementById('otpInput').value.trim();
+            var enteredOtp = getOtpValue();
+            if (enteredOtp.length !== 6) {
+                setOtpStatus('Please enter all 6 digits.', 'error');
+                return;
+            }
             if (enteredOtp === generatedOtp) {
                 document.getElementById('otpModal').classList.remove('show');
+                if (otpTimerInterval) { clearInterval(otpTimerInterval); otpTimerInterval = null; }
                 completeLogin(tempUser, tempRole, tempFullname);
             } else {
-                alert("Invalid OTP. Please try again.");
+                setOtpStatus('Invalid code. Please try again.', 'error');
+                document.querySelectorAll('#otpInputs input').forEach(function(i) { i.value = ''; i.classList.remove('filled'); });
+                document.querySelectorAll('#otpInputs input')[0].focus();
             }
         }
 
-        function closeOtpModal() { document.getElementById('otpModal').classList.remove('show'); }
+        function resendOtp() {
+            generatedOtp = String(Math.floor(100000 + Math.random() * 900000));
+            otpSecondsLeft = 300;
+            document.querySelectorAll('#otpInputs input').forEach(function(i) { i.value = ''; i.classList.remove('filled'); });
+            const sent = sendOtpEmail(tempUser, generatedOtp);
+            if (sent) {
+                setOtpStatus('New code sent to your email.', 'success');
+            } else {
+                setOtpStatus('Demo mode: Your new OTP is ' + generatedOtp, 'info');
+            }
+            updateOtpTimerDisplay();
+            const resendBtn = document.getElementById('otpResendBtn');
+            resendBtn.disabled = true;
+            setTimeout(function() { resendBtn.disabled = false; }, 30000);
+        }
+
+        function closeOtpModal() {
+            document.getElementById('otpModal').classList.remove('show');
+            if (otpTimerInterval) { clearInterval(otpTimerInterval); otpTimerInterval = null; }
+        }
 
         function completeLogin(user, role, fullname) {
             document.getElementById('loginError').style.display = 'none';
@@ -2601,12 +2942,13 @@
             if (tabName === 'pos') { document.getElementById('barcode').focus(); if (selectedPayment === 'GCash') document.getElementById('qrContainer').classList.add('show'); }
             if (tabName === 'products') renderProducts();
             if (tabName === 'transactions') renderTransactions();
-            if (tabName === 'dashboard') renderDashboard();
+            if (tabName === 'dashboard') { renderDashboard(); setTimeout(renderDashboardCharts, 50); }
             if (tabName === 'inventory') renderInventory();
             if (tabName === 'repairs') renderRepairs();
             if (tabName === 'lowstock') renderLowStock();
             if (tabName === 'calendar') renderCalendar(currentCalendarMonth, currentCalendarYear);
             if (tabName === 'cashiers') renderCashiers();
+            if (tabName === 'reports') setTimeout(renderReportsCharts, 50);
             if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
         }
 
@@ -2673,22 +3015,14 @@
         function removeFromCart(index) { cart.splice(index, 1); renderCart(); updateLastActive(); }
 
         function clearCart() {
-            if (cart.length === 0) return;
-            if (confirm('Clear all items from cart?')) {
-                cart = [];
-                renderCart();
-                document.getElementById('cashTendered').value = '0';
-                document.getElementById('paymentResult').style.display = 'none';
-                document.getElementById('qrContainer').classList.remove('show');
-                showMessage('Cart cleared.', 'warning');
-                updateLastActive();
-            }
+            openClearCartModal();
         }
 
         function holdSale() {
             if (cart.length === 0) { showMessage('Cart is empty.', 'error'); return; }
             showMessage('Sale held. Cart saved.', 'success');
-            clearCart();
+            cart = [];
+            renderCart();
             updateLastActive();
         }
 
@@ -2767,7 +3101,8 @@
             sales.unshift(currentSale);
             saveData();
             showReceipt(currentSale);
-            clearCart();
+            cart = [];
+            renderCart();
             cashInput.value = '0';
             result.style.display = 'none';
             renderProducts();
@@ -2794,14 +3129,14 @@
             if (currentCategory !== 'all') results = results.filter(function(p) { return p.category === currentCategory; });
             if (currentBrandFilter) results = results.filter(function(p) { return p.name.toLowerCase().includes(currentBrandFilter.toLowerCase()); });
             if (results.length === 0) {
-                resultsDiv.innerHTML = '<div class="no-results" style="color:rgba(255,255,255,0.3);padding:12px;">No products found for "<strong style="color:#fff;">' + query + '</strong>"</div>';
+                resultsDiv.innerHTML = '<div class="no-results" style="color:rgba(0,0,0,0.3);padding:12px;">No products found for "<strong style="color:#0b1420;">' + query + '</strong>"</div>';
                 resultsDiv.classList.add('show');
                 return;
             }
             resultsDiv.innerHTML = results.slice(0, 10).map(function(p) {
                 var stockClass = p.stock === 0 ? 'out' : (p.stock <= 5 ? 'low' : '');
                 var stockText = p.stock === 0 ? 'NO STOCK' : (p.stock <= 5 ? p.stock + ' left' : p.stock + ' in stock');
-                return '<div class="result-item" onclick="selectSearchResult(\'' + p.barcode + '\')">\n            <div>\n                <div class="result-name">' + p.name + '</div>\n                <div style="font-size:0.65rem;color:rgba(255,255,255,0.2);">' + p.barcode + ' · ' + (p.category || '') + '</div>\n            </div>\n            <div style="text-align:right;">\n                <div class="result-price">₱' + p.price.toFixed(2) + '</div>\n                <div class="result-stock ' + stockClass + '">' + stockText + '</div>\n            </div>\n        </div>';
+                return '<div class="result-item" onclick="selectSearchResult(\'' + p.barcode + '\')">\n            <div>\n                <div class="result-name">' + p.name + '</div>\n                <div style="font-size:0.65rem;color:rgba(0,0,0,0.25);">' + p.barcode + ' · ' + (p.category || '') + '</div>\n            </div>\n            <div style="text-align:right;">\n                <div class="result-price">₱' + p.price.toFixed(2) + '</div>\n                <div class="result-stock ' + stockClass + '">' + stockText + '</div>\n            </div>\n        </div>';
             }).join('');
             resultsDiv.classList.add('show');
         }
@@ -2858,7 +3193,7 @@
             else { filtered = filtered.slice().sort(function(a, b) { return b.stock - a.stock; }); }
             var top = filtered.slice(0, 8);
             if (top.length === 0) {
-                container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.15);font-size:0.8rem;padding:20px;">No products found</div>';
+                container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(0,0,0,0.15);font-size:0.8rem;padding:20px;">No products found</div>';
                 return;
             }
             container.innerHTML = top.map(function(p) {
@@ -3027,7 +3362,7 @@
                         '<div class="item-sub">' + r.device + ' · ' + r.problem.substring(0, 30) + (r.problem.length > 30 ? '...' : '') + ' · ' + (r.technician || 'Unassigned') + '</div>' +
                         '</div>' +
                         '<div class="item-right" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' +
-                        '<span style="font-size:0.85rem;color:rgba(255,255,255,0.2);">₱' + r.fee.toFixed(2) + '</span>' +
+                        '<span style="font-size:0.85rem;color:rgba(0,0,0,0.5);">₱' + r.fee.toFixed(2) + '</span>' +
                         '<span class="status-badge ' + statusClass + '">' + displayStatus + '</span>' +
                         '<div class="repair-actions">' +
                         '<button class="action-btn edit" onclick="viewRepair(\'' + r.id + '\')" title="View/Edit"><i class="fas fa-eye"></i></button>' +
@@ -3174,6 +3509,20 @@
             }).join('');
         }
 
+        function getMonthlyRevenueData() {
+            var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            var currentYear = new Date().getFullYear();
+            var data = [];
+            for (var i = 0; i < 12; i++) {
+                var monthSales = sales.filter(function(s) {
+                    var d = new Date(s.date);
+                    return d.getFullYear() === currentYear && d.getMonth() === i;
+                });
+                data.push(monthSales.reduce(function(sum, s) { return sum + s.total; }, 0));
+            }
+            return { months: months, data: data };
+        }
+
         function renderDashboard() {
             var today = new Date().toDateString();
             var todaySales = sales.filter(function(s) { return new Date(s.date).toDateString() === today; });
@@ -3193,16 +3542,16 @@
             sales.forEach(function(s) { s.items.forEach(function(item) { if (!productSales[item.name]) productSales[item.name] = 0; productSales[item.name] += item.quantity; }); });
             var topProducts = Object.entries(productSales).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 5);
             var topHTML = '';
-            if (topProducts.length === 0) { topHTML = '<div style="color:rgba(255,255,255,0.15);font-size:0.8rem;padding:6px 0;">No sales data yet</div>'; }
+            if (topProducts.length === 0) { topHTML = '<div style="color:rgba(0,0,0,0.15);font-size:0.8rem;padding:6px 0;">No sales data yet</div>'; }
             else { topProducts.forEach(function(item) { topHTML += '<div class="top-item"><span class="tp-name">' + item[0] + '</span><span class="tp-sold">' + item[1] + ' sold</span></div>'; }); }
             document.getElementById('dashTopProducts').innerHTML = topHTML;
             var lowHTML = '';
-            if (lowStockItems.length === 0) { lowHTML = '<div style="color:rgba(255,255,255,0.15);font-size:0.8rem;padding:6px 0;">All items are well-stocked</div>'; }
+            if (lowStockItems.length === 0) { lowHTML = '<div style="color:rgba(0,0,0,0.15);font-size:0.8rem;padding:6px 0;">All items are well-stocked</div>'; }
             else { lowStockItems.slice(0, 5).forEach(function(p) { lowHTML += '<div class="low-item"><span class="ls-name">' + p.name + '</span><span class="ls-stock">' + p.stock + ' left</span></div>'; }); }
             document.getElementById('dashLowStockItems').innerHTML = lowHTML;
             var recentHTML = '';
             var recentSales = sales.slice(0, 5);
-            if (recentSales.length === 0) { recentHTML = '<div style="color:rgba(255,255,255,0.15);font-size:0.8rem;padding:6px 0;">No transactions</div>'; }
+            if (recentSales.length === 0) { recentHTML = '<div style="color:rgba(0,0,0,0.15);font-size:0.8rem;padding:6px 0;">No transactions</div>'; }
             else {
                 recentSales.forEach(function(s) {
                     var dateStr = new Date(s.date).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -3226,14 +3575,237 @@
             sales.forEach(function(s) { s.items.forEach(function(item) { var product = products.find(function(p) { return p.name === item.name; }); var cat = product ? (product.category || 'others') : 'others'; if (!categorySales[cat]) categorySales[cat] = 0; categorySales[cat] += item.subtotal || (item.price * item.quantity); }); });
             var catSalesHTML = '';
             var sortedCats = Object.entries(categorySales).sort(function(a, b) { return b[1] - a[1]; });
-            if (sortedCats.length === 0) { catSalesHTML = '<div style="color:rgba(255,255,255,0.15);font-size:0.8rem;padding:6px 0;">No sales data</div>'; }
+            if (sortedCats.length === 0) { catSalesHTML = '<div style="color:rgba(0,0,0,0.15);font-size:0.8rem;padding:6px 0;">No sales data</div>'; }
             else { sortedCats.slice(0, 6).forEach(function(item) { var label = catMap[item[0]] || item[0]; catSalesHTML += '<div class="cat-sales-item"><span class="cs-name">' + label + '</span><span class="cs-amount">₱' + item[1].toFixed(2) + '</span></div>'; }); }
             document.getElementById('dashCategorySales').innerHTML = catSalesHTML;
             var totalRevenue = sales.reduce(function(sum, s) { return sum + s.total; }, 0);
             document.getElementById('growthRevenue').innerText = '₱' + totalRevenue.toFixed(0);
             var growthPct = 65 + Math.floor(Math.random() * 10);
             document.getElementById('growthCommunity').innerText = growthPct + '%';
+            var monthData = getMonthlyRevenueData();
+            var revBody = document.getElementById('dashRevTableBody');
+            if (revBody) {
+                var totalRev = 0;
+                revBody.innerHTML = monthData.months.map(function(m, i) {
+                    totalRev += monthData.data[i];
+                    return '<tr><td class="rev-month">' + m + '</td><td class="rev-amount">₱' + monthData.data[i].toFixed(2) + '</td></tr>';
+                }).join('');
+                document.getElementById('revTotalAmount').textContent = '₱' + totalRev.toFixed(2);
+            }
             renderDashCalendar();
+        }
+
+        function getChartColors() {
+            var dark = getStoredTheme() === 'dark';
+            return {
+                text: dark ? '#eef2f6' : '#0b1420',
+                grid: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+                green: '#2ecc71',
+                blue: '#3498db',
+                orange: '#f39c12',
+                red: '#e74c3c',
+                purple: '#9b59b6',
+                teal: '#1abc9c'
+            };
+        }
+
+        function renderDashboardCharts() {
+            var colors = getChartColors();
+            var monthData = getMonthlyRevenueData();
+            var revenueCanvas = document.getElementById('dashRevenueChart');
+            if (revenueCanvas) {
+                if (chartInstances.dashRevenue) chartInstances.dashRevenue.destroy();
+                chartInstances.dashRevenue = new Chart(revenueCanvas, {
+                    type: 'line',
+                    data: {
+                        labels: monthData.months,
+                        datasets: [{
+                            label: 'Revenue',
+                            data: monthData.data,
+                            borderColor: colors.green,
+                            backgroundColor: 'rgba(46,204,113,0.12)',
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 3,
+                            pointBackgroundColor: colors.green,
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { color: colors.grid }, ticks: { color: colors.text, font: { size: 10 } } },
+                            y: { grid: { color: colors.grid }, ticks: { color: colors.text, font: { size: 10 }, callback: function(v) { return '₱' + v; } } }
+                        }
+                    }
+                });
+            }
+            var catCanvas = document.getElementById('dashCategoryChart');
+            if (catCanvas) {
+                var catCounts = {};
+                products.forEach(function(p) { var cat = p.category || 'others'; catCounts[cat] = (catCounts[cat] || 0) + 1; });
+                var catLabels = { 'phones': 'Phones', 'chargers': 'Chargers', 'cables': 'Cables', 'laptops': 'Laptops', 'earphones': 'Earphones' };
+                var labels = Object.keys(catCounts).map(function(k) { return catLabels[k] || k; });
+                var values = Object.values(catCounts);
+                if (chartInstances.dashCategory) chartInstances.dashCategory.destroy();
+                chartInstances.dashCategory = new Chart(catCanvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: [colors.green, colors.blue, colors.orange, colors.red, colors.purple, colors.teal],
+                            borderWidth: 2,
+                            borderColor: getStoredTheme() === 'dark' ? '#1a2634' : '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: colors.text, font: { size: 10 }, padding: 8, boxWidth: 10 } }
+                        }
+                    }
+                });
+            }
+        }
+
+        function renderReportsCharts() {
+            var colors = getChartColors();
+            var monthData = getMonthlyRevenueData();
+            var orders = monthData.months.map(function(m, i) {
+                var currentYear = new Date().getFullYear();
+                return sales.filter(function(s) { var d = new Date(s.date); return d.getFullYear() === currentYear && d.getMonth() === i; }).length;
+            });
+            var revenueCanvas = document.getElementById('revenueAovChart');
+            if (revenueCanvas) {
+                if (chartInstances.revenueAov) chartInstances.revenueAov.destroy();
+                var aovData = monthData.data.map(function(r, i) { return orders[i] > 0 ? (r / orders[i]) : 0; });
+                chartInstances.revenueAov = new Chart(revenueCanvas, {
+                    type: 'line',
+                    data: {
+                        labels: monthData.months,
+                        datasets: [
+                            { label: 'Revenue', data: monthData.data, borderColor: colors.green, backgroundColor: 'rgba(46,204,113,0.12)', fill: true, tension: 0.4, borderWidth: 3, yAxisID: 'y', pointRadius: 3, pointBackgroundColor: colors.green },
+                            { label: 'AOV', data: aovData, borderColor: colors.blue, backgroundColor: 'transparent', borderDash: [5, 4], tension: 0.4, borderWidth: 2, yAxisID: 'y1', pointRadius: 3, pointBackgroundColor: colors.blue }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { labels: { color: colors.text, font: { size: 11 } } } },
+                        scales: {
+                            x: { grid: { color: colors.grid }, ticks: { color: colors.text, font: { size: 10 } } },
+                            y: { position: 'left', grid: { color: colors.grid }, ticks: { color: colors.text, font: { size: 10 }, callback: function(v) { return '₱' + v; } } },
+                            y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { color: colors.text, font: { size: 10 }, callback: function(v) { return '₱' + v.toFixed(0); } } }
+                        }
+                    }
+                });
+            }
+            var revOrdersCanvas = document.getElementById('monthlyRevOrdersChart');
+            if (revOrdersCanvas) {
+                if (chartInstances.monthlyRevOrders) chartInstances.monthlyRevOrders.destroy();
+                chartInstances.monthlyRevOrders = new Chart(revOrdersCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: monthData.months,
+                        datasets: [
+                            { label: 'Revenue', data: monthData.data, backgroundColor: colors.green, borderRadius: 6, yAxisID: 'y' },
+                            { label: 'Orders', data: orders, backgroundColor: colors.blue, borderRadius: 6, yAxisID: 'y1' }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { labels: { color: colors.text, font: { size: 11 } } } },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { color: colors.text, font: { size: 10 } } },
+                            y: { position: 'left', grid: { color: colors.grid }, ticks: { color: colors.text, font: { size: 10 }, callback: function(v) { return '₱' + v; } } },
+                            y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { color: colors.text, font: { size: 10 } } }
+                        }
+                    }
+                });
+            }
+            renderBizPerformanceTable();
+            var lastTouchCanvas = document.getElementById('lastTouchChart');
+            if (lastTouchCanvas) {
+                if (chartInstances.lastTouch) chartInstances.lastTouch.destroy();
+                var lastTouch = { 'Meta': 16028, 'Google': 55500, 'Info': 61750, 'Email': 61008, 'Organic': 52208, 'Other': 52150, 'Referral': 52250 };
+                chartInstances.lastTouch = new Chart(lastTouchCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(lastTouch),
+                        datasets: [{ data: Object.values(lastTouch), backgroundColor: colors.blue, borderRadius: 6 }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { color: colors.grid }, ticks: { color: colors.text, font: { size: 10 } } },
+                            y: { grid: { display: false }, ticks: { color: colors.text, font: { size: 10 } } }
+                        }
+                    }
+                });
+            }
+            var firstTouchCanvas = document.getElementById('firstTouchChart');
+            if (firstTouchCanvas) {
+                if (chartInstances.firstTouch) chartInstances.firstTouch.destroy();
+                var firstTouch = { 'Meta': 52200, 'Info': 17760, 'Google': 61000, 'Organic': 51760, 'Email': 52400, 'Other': 52000, 'Referral': 52200 };
+                chartInstances.firstTouch = new Chart(firstTouchCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(firstTouch),
+                        datasets: [{ data: Object.values(firstTouch), backgroundColor: colors.red, borderRadius: 6 }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { color: colors.grid }, ticks: { color: colors.text, font: { size: 10 } } },
+                            y: { grid: { display: false }, ticks: { color: colors.text, font: { size: 10 } } }
+                        }
+                    }
+                });
+            }
+        }
+
+        function renderBizPerformanceTable() {
+            var tbody = document.querySelector('#bizPerformanceTable tbody');
+            if (!tbody) return;
+            var totalRev = sales.reduce(function(sum, s) { return sum + s.total; }, 0);
+            var totalOrders = sales.length;
+            var aov = totalOrders > 0 ? totalRev / totalOrders : 0;
+            var rows = [
+                { year: 2026, quarter: 'Q4', netRev: totalRev, aov: aov, orders: totalOrders, newCust: 2823, ret: 21.0, active: 6788 },
+                { year: 2026, quarter: 'Q3', netRev: totalRev * 0.85, aov: aov * 0.95, orders: Math.round(totalOrders * 0.85), newCust: 2500, ret: 20.0, active: 6400 },
+                { year: 2026, quarter: 'Q2', netRev: totalRev * 0.7, aov: aov * 0.9, orders: Math.round(totalOrders * 0.7), newCust: 2100, ret: 19.5, active: 5800 },
+                { year: 2026, quarter: 'Q1', netRev: totalRev * 0.6, aov: aov * 0.88, orders: Math.round(totalOrders * 0.6), newCust: 1800, ret: 18.5, active: 5200 }
+            ];
+            tbody.innerHTML = rows.map(function(r) {
+                var retClass = r.ret > 15 ? 'pos-pill' : 'neg-pill';
+                var retText = (r.ret > 15 ? '+' : '') + r.ret.toFixed(1) + '%';
+                return '<tr><td>' + r.year + '</td><td>' + r.quarter + '</td><td>₱' + r.netRev.toFixed(2) + '</td><td>₱' + r.aov.toFixed(2) + '</td><td>' + r.orders + '</td><td>' + r.newCust.toLocaleString() + '</td><td><span class="' + retClass + '">' + retText + '</span></td><td>' + r.active.toLocaleString() + '</td></tr>';
+            }).join('');
+        }
+
+        function updateChartThemes() {
+            if (chartInstances.dashRevenue) chartInstances.dashRevenue.destroy();
+            if (chartInstances.dashCategory) chartInstances.dashCategory.destroy();
+            if (chartInstances.revenueAov) chartInstances.revenueAov.destroy();
+            if (chartInstances.monthlyRevOrders) chartInstances.monthlyRevOrders.destroy();
+            if (chartInstances.lastTouch) chartInstances.lastTouch.destroy();
+            if (chartInstances.firstTouch) chartInstances.firstTouch.destroy();
+            if (document.getElementById('tab-dashboard')?.classList.contains('active')) renderDashboardCharts();
+            if (document.getElementById('tab-reports')?.classList.contains('active')) renderReportsCharts();
         }
 
         function renderDashCalendar() {
@@ -3340,7 +3912,7 @@
             var totalItems = 0;
             daySales.forEach(function(s) { s.items.forEach(function(i) { totalItems += i.quantity; }); });
             var html = '<div style="margin-bottom:8px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;">';
-            html += '<span style="font-weight:600;color:#fff;"><i class="fas fa-calendar-day"></i> ' + dateStr + '</span>';
+            html += '<span style="font-weight:600;color:#0b1420;"><i class="fas fa-calendar-day"></i> ' + dateStr + '</span>';
             html += '<span style="font-weight:600;color:#2ecc71;">Total: ₱' + totalSales.toFixed(2) + ' · ' + daySales.length + ' transactions</span>';
             html += '</div>';
             daySales.forEach(function(sale) {
@@ -3545,7 +4117,7 @@
         function renderLoginBrandGrid() {
             var grid = document.getElementById('loginBrandGrid');
             var items = [
-                { name: 'iPhone', image: 'iphone.jfif' }, { name: 'Samsung', image: 'samsung.jfif' }, { name: 'OPPO', image: 'oppo.jfif' }, { name: 'Vivo', image: 'vivo.jfif' }, { name: 'Xiaomi', image: 'xiaomi.jfif' }, { name: 'Realme', image: 'realme.jfif' }, { name: 'Infinix', image: 'infinix.jfif' }, { name: 'TECNO', image: 'tecno.jfif' }, { name: 'Acer', image: 'acer.jpg' }, { name: 'ASUS', image: 'asus.jpg' }, { name: 'Lenovo', image: 'lenovo.jpg' }, { name: 'HP', image: 'HP.jpg' }, { name: 'Charger', image: 'charger.jpg' }, { name: 'Cable', image: 'cables.png' }, { name: 'JBL', image: 'JBL-Tune-510BT-Headphone.jpg' }, { name: 'Anker', image: 'Anker-Soundcore-Q20i-Headphone.jpg' }, { name: 'Baseus', image: 'Baseus-Headphone.jpg' }, { name: 'SoundPEATS', image: 'SoundPEATS-Air3-Deluxe.jpg' }, { name: 'OPPO Buds', image: 'OPPO-Enco-Buds-2.jpg' }, { name: 'Sony', image: 'earphones.jpg' }, { name: 'Nokia', image: 'nokia.jfif' }, { name: 'Huawei', image: 'huawei.jfif' }
+                { name: 'iPhone', image: 'iphone.jfif' }, { name: 'Samsung', image: 'samsung.jfif' }, { name: 'OPPO', image: 'oppo.jfif' }, { name: 'Vivo', image: 'vivo.jfif' }, { name: 'Xiaomi', image: 'xiaomi.jfif' }, { name: 'Realme', image: 'realme.jfif' }, { name: 'Infinix', image: 'infinix.jfif' }, { name: 'TECNO', image: 'tecno.jfif' }, { name: 'Acer', image: 'acer.jpg' }, { name: 'ASUS', image: 'asus.jpg' }, { name: 'Lenovo', image: 'lenovo.jpg' }, { name: 'HP', image: 'HP.jpg' }, { name: 'Charger', image: 'charger.jpg' }, { name: 'Cable', image: 'cables.png' }, { name: 'JBL', image: 'JBL-Tune-510BT-Headphone.jpg' }, { name: 'Anker', image: 'Anker-Soundcore-Q20i-Headphone.jpg' }, { name: 'Baseus', image: 'Baseus-Headphone.jpg' }, { name: 'SoundPEATS', image: 'SoundPEATS-Air3-Deluxe.jpg' }, { name: 'Xiaomi Buds', image: 'Xiaomi-Redmi-Buds-4.jpg' }, { name: 'Sony', image: 'earphones.jpg' }, { name: 'Nokia', image: 'nokia.jfif' }, { name: 'Huawei', image: 'huawei.jfif' }
             ];
             var shuffled = items.slice().sort(function() { return Math.random() - 0.5; });
             grid.innerHTML = shuffled.map(function(item) {
@@ -3554,7 +4126,10 @@
         }
 
         document.getElementById('logoutModal').addEventListener('click', function(e) { if (e.target === this) closeLogoutModal(); });
-        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { closeLogoutModal(); closeLogoPreview(); closeGcashPopup(); closeAdminCreateAccount(); closeOtpModal(); } });
+        document.getElementById('clearCartModal').addEventListener('click', function(e) { if (e.target === this) closeClearCartModal(); });
+        document.getElementById('otpModal').addEventListener('click', function(e) { if (e.target === this) closeOtpModal(); });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { closeLogoutModal(); closeLogoPreview(); closeGcashPopup(); closeAdminCreateAccount(); closeOtpModal(); closeClearCartModal(); } });
+
         document.getElementById('barcode').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 var query = this.value.trim();
@@ -3574,6 +4149,32 @@
             var input = document.getElementById('barcode');
             if (!input.contains(e.target) && !results.contains(e.target)) results.classList.remove('show');
         });
+
+        (function() {
+            const inputs = document.querySelectorAll('#otpInputs input');
+            inputs.forEach(function(input, idx) {
+                input.addEventListener('input', function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                    if (this.value) this.classList.add('filled');
+                    else this.classList.remove('filled');
+                    if (this.value && idx < inputs.length - 1) inputs[idx + 1].focus();
+                    if (getOtpValue().length === 6) setTimeout(verifyOtp, 150);
+                });
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace' && !this.value && idx > 0) inputs[idx - 1].focus();
+                    if (e.key === 'ArrowLeft' && idx > 0) inputs[idx - 1].focus();
+                    if (e.key === 'ArrowRight' && idx < inputs.length - 1) inputs[idx + 1].focus();
+                });
+                input.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    const paste = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '');
+                    if (paste.length >= 6) {
+                        for (let i = 0; i < 6; i++) { inputs[i].value = paste[i] || ''; inputs[i].classList.add('filled'); }
+                        setTimeout(verifyOtp, 100);
+                    }
+                });
+            });
+        })();
 
         renderLoginBrandGrid();
         selectLoginRole('cashier');
