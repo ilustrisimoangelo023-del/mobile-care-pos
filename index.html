@@ -74,7 +74,7 @@
         .auth-options .remember-me { display: flex; align-items: center; gap: 8px; color: #2c3e50; font-weight: 500; cursor: pointer; }
         body.dark-mode .auth-options .remember-me { color: #c0d0e0; }
         .auth-options .remember-me input[type="checkbox"] { width: 18px; height: 18px; accent-color: #e74c3c; cursor: pointer; margin: 0; }
-        .auth-options .forgot-link { color: #e74c3c; font-weight: 600; text-decoration: none; font-size: 0.9rem; transition: 0.15s; cursor: pointer; }
+        .auth-options .forgot-link { color: #e74c3c; font-weight: 600; text-decoration: none; font-size: 0.9rem; transition: 0.15s; cursor: pointer; position: relative; z-index: 10; }
         .auth-options .forgot-link:hover { color: #c0392b; text-decoration: underline; }
         .auth-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #e74c3c, #c0392b); color: #fff !important; border: none; border-radius: 14px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.25s; box-shadow: 0 4px 20px rgba(231, 76, 60, 0.30); margin-top: 6px; display: flex; align-items: center; justify-content: center; gap: 10px; letter-spacing: 0.3px; }
         .auth-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(231, 76, 60, 0.40); }
@@ -1458,7 +1458,7 @@
     <div id="profileModal" class="modal" style="z-index: 6000;">
         <div class="logo-preview-box" style="padding: 20px;">
             <button class="logo-close" onclick="closeProfileModal()"><i class="fas fa-times"></i></button>
-            <img src="profileadmin.jpg" alt="Admin Profile" class="logo-preview-img" onerror="this.src='logo.png'">
+            <img src="profileadmin.jpg" alt="Profile" class="logo-preview-img" id="profileImage" onerror="this.src='logo.png'">
             <div class="logo-preview-label" id="profileName">Admin Name</div>
             <div style="color: rgba(0,0,0,0.4); font-size: 0.9rem;" id="profileRole">Administrator</div>
         </div>
@@ -2198,7 +2198,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            const landing = document.getElementById('landingOverlay');
             const menuBtn = document.getElementById('landingMenuBtn');
             function openLandingMenu() {
                 const overlay = document.getElementById('landingMenuOverlay');
@@ -2336,7 +2335,6 @@
                 const statusDot = c.status === 'online' ? '<span class="cashier-status-dot online"></span>' : '<span class="cashier-status-dot offline"></span>';
                 const loginTime = c.loginTime || '—';
                 const lastLogout = c.lastLogout || '—';
-                const lastActive = c.lastActive || '—';
                 const dateAdded = c.dateAdded ? new Date(c.dateAdded).toLocaleDateString() : '—';
                 return '<div class="list-item">' +
                     '<div class="item-left">' +
@@ -2505,7 +2503,7 @@
 
         var users = {
             'angelocc2002@gmail.com': { password: 'roselle123', role: 'admin', fullname: 'Angelo Ilustrisimo' },
-            'RolandMaru@gmail.com': { password: '0987654', role: 'cashier', fullname: 'Roland Maru' }
+            'escalicasrosellemae@gmail.com': { password: 'roselle123', role: 'cashier', fullname: 'Rosellemae Escalicas' }
         };
 
         var currentUser = '';
@@ -2519,6 +2517,10 @@
         var otpTimerInterval = null;
         var otpSecondsLeft = 300;
 
+        function getProfileImage(role) {
+            return role === 'cashier' ? 'cashierprofile.jpg' : 'profileadmin.jpg';
+        }
+
         function checkSession() {
             var activeUser = localStorage.getItem('activeUser');
             var activeRole = localStorage.getItem('activeRole');
@@ -2531,7 +2533,8 @@
                 document.getElementById('app').style.display = 'block';
                 var roleDisplay = currentUserRole === 'admin' ? 'Administrator' : 'Cashier';
                 document.getElementById('sidebarUserName').textContent = currentUserFullname;
-                document.getElementById('userAvatar').innerHTML = '<img src="profileadmin.jpg" onerror="this.style.display=\'none\';this.parentElement.textContent=\'' + currentUserFullname.charAt(0) + '\';" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">';
+                var profileImg = getProfileImage(currentUserRole);
+                document.getElementById('userAvatar').innerHTML = '<img src="' + profileImg + '" onerror="this.style.display=\'none\';this.parentElement.textContent=\'' + currentUserFullname.charAt(0) + '\';" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">';
                 document.getElementById('sidebarUserRole').textContent = roleDisplay;
                 var isAdmin = currentUserRole === 'admin';
                 document.querySelectorAll('.admin-only').forEach(function(el) {
@@ -2587,9 +2590,9 @@
                 repairCounter = repairs.length > 0 ? Math.max(...repairs.map(r => parseInt(r.id.replace('R-', '')))) + 1 : 1;
             } else {
                 repairs = [
-                    { id: 'R-001', customer: 'Juan Dela Cruz', contact: '0917-123-4567', device: 'iPhone 14 Pro', problem: 'Broken screen', technician: 'Roland Maru', fee: 2500, downPayment: 1000, balance: 1500, dateReceived: '2026-08-28', expectedDate: '2026-09-02', status: 'Pending' },
+                    { id: 'R-001', customer: 'Juan Dela Cruz', contact: '0917-123-4567', device: 'iPhone 14 Pro', problem: 'Broken screen', technician: 'Rosellemae Escalicas', fee: 2500, downPayment: 1000, balance: 1500, dateReceived: '2026-08-28', expectedDate: '2026-09-02', status: 'Pending' },
                     { id: 'R-002', customer: 'Maria Santos', contact: '0918-765-4321', device: 'Samsung S24 Ultra', problem: 'Battery not charging', technician: 'Angelo Ilustrisimo', fee: 1800, downPayment: 800, balance: 1000, dateReceived: '2026-08-27', expectedDate: '2026-09-01', status: 'Diagnosing' },
-                    { id: 'R-003', customer: 'Jose Reyes', contact: '0922-888-9999', device: 'Xiaomi 14', problem: 'Camera not working', technician: 'Roland Maru', fee: 3200, downPayment: 1500, balance: 1700, dateReceived: '2026-08-26', expectedDate: '2026-08-31', status: 'Repairing' }
+                    { id: 'R-003', customer: 'Jose Reyes', contact: '0922-888-9999', device: 'Xiaomi 14', problem: 'Camera not working', technician: 'Rosellemae Escalicas', fee: 3200, downPayment: 1500, balance: 1700, dateReceived: '2026-08-26', expectedDate: '2026-08-31', status: 'Repairing' }
                 ];
                 repairCounter = 4;
                 saveRepairs();
@@ -3074,7 +3077,8 @@
             const menuOverlay = document.getElementById('landingMenuOverlay');
             if (menuOverlay) menuOverlay.classList.remove('show');
             document.getElementById('sidebarUserName').textContent = fullname;
-            document.getElementById('userAvatar').innerHTML = '<img src="profileadmin.jpg" onerror="this.style.display=\'none\';this.parentElement.textContent=\'' + fullname.charAt(0) + '\';" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">';
+            var profileImg = getProfileImage(role);
+            document.getElementById('userAvatar').innerHTML = '<img src="' + profileImg + '" onerror="this.style.display=\'none\';this.parentElement.textContent=\'' + fullname.charAt(0) + '\';" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">';
             var roleDisplay = role === 'admin' ? 'Administrator' : 'Cashier';
             document.getElementById('sidebarUserRole').textContent = roleDisplay;
             var isAdmin = role === 'admin';
@@ -4277,7 +4281,11 @@
         }
 
         function openProfileModal() {
-            document.getElementById('profileName').textContent = currentUserFullname || 'Admin';
+            var profileImg = getProfileImage(currentUserRole);
+            var imgEl = document.getElementById('profileImage');
+            imgEl.src = profileImg;
+            imgEl.onerror = function() { this.src = 'logo.png'; };
+            document.getElementById('profileName').textContent = currentUserFullname || 'User';
             document.getElementById('profileRole').textContent = currentUserRole === 'admin' ? 'Administrator' : 'Cashier';
             document.getElementById('profileModal').classList.add('show');
         }
